@@ -4,6 +4,7 @@ import { z } from "zod";
 import { CASH_OFFER_CHAT_SYSTEM_PROMPT } from "@/lib/aiGuardrails";
 import { getBusinessSettingsContext, formatBusinessSettingsForPrompt, normalizeForSettingsMatch, type BusinessSettingsContext } from "@/lib/businessSettings";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { findDefaultFAQAnswer, formatDefaultFAQForPrompt } from "@/lib/defaultFaqKnowledge";
 
 
 const corsHeaders = {
@@ -84,13 +85,21 @@ function deterministicReply(message: string, settings: BusinessSettingsContext):
   const businessName = settings.business.business_name || "the team";
   const customAnswer = findCustomQA(message, settings);
 
+  if (customAnswer) {
+    return { intent: "question", showIntake: false, answer: customAnswer };
+  }
+
+  const defaultFAQ = findDefaultFAQAnswer(message);
+  if (defaultFAQ) {
+    return { intent: "question", showIntake: false, answer: defaultFAQ.answer };
+  }
+
   const handoff = includesAny(text, [
     "take a look",
     "look at it",
     "look at my house",
     "look at the property",
     "review my property",
-    "cash offer",
     "make an offer",
     "want an offer",
     "get an offer",
@@ -102,6 +111,9 @@ function deterministicReply(message: string, settings: BusinessSettingsContext):
     "ready to sell",
     "need to sell",
     "sell it",
+    "need a quote",
+    "get a quote",
+    "request a quote",
   ]);
 
   if (handoff) {
@@ -109,13 +121,8 @@ function deterministicReply(message: string, settings: BusinessSettingsContext):
       intent: "handoff",
       showIntake: true,
       answer:
-        customAnswer ||
         `Yes. ${businessName} can review the basic property details and follow up with you. The easiest next step is to complete the short intake form on this page. There is no obligation to accept an offer.`,
     };
-  }
-
-  if (customAnswer) {
-    return { intent: "question", showIntake: false, answer: customAnswer };
   }
 
   const cityMention = findCityMention(message, settings);
@@ -234,10 +241,11 @@ async function maybeEnhanceReply(userMessage: string, safeAnswer: string, settin
       messages: [
         { role: "system", content: CASH_OFFER_CHAT_SYSTEM_PROMPT },
         { role: "system", content: formatBusinessSettingsForPrompt(settings) },
+        { role: "system", content: `Default FAQ knowledge base. Use this only after business-specific custom Q&A and before generic fallback answers. Do not browse the web or add unsupported claims.\n\n${formatDefaultFAQForPrompt()}` },
         {
           role: "system",
           content:
-            "Rewrite the safe answer in a friendly, plain-English tone for a homeowner. Use the business settings. Do not extract form fields. Do not ask for name, phone, or email. Do not pressure the seller. Do not add legal, tax, financial, or foreclosure advice. Do not make promises about price, buying the home, or guaranteed outcomes. Do not reveal private referral contact details.",
+            "Rewrite the safe answer in a friendly, plain-English tone for a homeowner. Use business custom Q&A first, then the default FAQ knowledge base, then business settings. Do not browse the web. Do not extract form fields. Do not ask for name, phone, or email. Do not pressure the seller. Do not add legal, tax, financial, or foreclosure advice. Do not make promises about price, buying the home, or guaranteed outcomes. Do not reveal private referral contact details.",
         },
         { role: "user", content: `Seller message: ${userMessage}\nSafe answer: ${safeAnswer}` },
       ],

@@ -1,28 +1,43 @@
-# CashOfferChat Phase 2E Hotfix — Quote Intake Button
+# CashOfferChat
 
-This hotfix improves the embeddable widget so sellers always have a clear, direct path to enter house information for a quote/property review.
+AI seller intake assistant for cash home buyer websites.
 
-## Changes
+## Phase 2F update
 
-- Added a prominent always-visible button inside the widget: **Enter House Info for a Quote**.
-- Clicking that button opens the structured intake form immediately.
-- The **Get a review** quick action now opens the form instead of sending a chat message.
-- Fixed the intake CTA wording and removed typo-prone button behavior.
-- The intake form remains structured and submits to `/api/leads`.
-- Chat remains available for Q&A.
-- Source URL tracking is preserved.
+This package adds a controlled Default FAQ Knowledge Base for the widget/chat.
 
-## Files changed
+### What changed
 
-- `public/widget.js`
-- `README.md`
+- Added `src/lib/defaultFaqKnowledge.ts` with cash-buyer FAQ answers.
+- Updated `/api/chat` to answer in this order:
+  1. Business-specific Custom Q&A from `/admin/settings`
+  2. Default FAQ Knowledge Base
+  3. Business settings such as buying areas, referral areas, and buying criteria
+  4. Safe generic fallback answer
+- Updated the OpenAI prompt context so it references the default FAQ and does not browse the web or add unsupported claims.
+- Added a read-only Default FAQ Knowledge Base section to `/admin/settings` so the admin can see the built-in answers.
+- Custom Q&A remains the override mechanism. Add a custom answer to override a default FAQ answer for a specific business.
 
-## SQL / environment variables
+### SQL migrations
 
-No new Supabase SQL migration is required.
+No new Supabase SQL migration is required for Phase 2F.
+
+### Environment variables
 
 No new Vercel environment variables are required.
 
-## Testing
+### Test questions
 
-After deploy, open `/widget-demo`, open the widget, and click **Enter House Info for a Quote**. The structured intake form should appear immediately without sending a chat message.
+Try these in `/widget-demo` or the widget:
+
+- How is the cash offer determined?
+- Do you pay full market value?
+- Are there hidden fees or commissions?
+- Do I need to clean the house or make repairs?
+- What types of property situations do you buy?
+- How fast can you close?
+- Do I have to move out immediately?
+- Am I obligated to sell if I request an offer?
+- Can I sell if I already have an agent?
+
+The widget should answer from the built-in FAQ knowledge base unless a Custom Q&A item in admin settings provides a more specific answer.
