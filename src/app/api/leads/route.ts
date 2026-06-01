@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { sendLeadNotification } from "@/lib/emailNotifications";
 
 const leadSchema = z.object({
   conversationId: z.string().uuid().nullable().optional(),
@@ -48,12 +49,21 @@ export async function POST(request: Request) {
       source_url: lead.sourceUrl || null,
       status: "new",
     })
-    .select("id")
+    .select("id, created_at, name, phone, email, property_address, property_city, timeline, situation, property_condition, notes, source_url")
     .single();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ id: data.id, ok: true });
+  const notification = await sendLeadNotification(supabase, data);
+  await supabase
+    .from("seller_leads")
+    .update({
+      notification_sent_at: notification.sent ? new Date().toISOString() : null,
+      notification_error: notification.error,
+    })
+    .eq("id", data.id);
+
+  return NextResponse.json({ id: data.id, ok: true, notificationSent: notification.sent, notificationError: notification.error });
 }

@@ -37,6 +37,8 @@ type Lead = {
   admin_notes: string | null;
   last_contacted_at: string | null;
   source_url: string | null;
+  notification_sent_at: string | null;
+  notification_error: string | null;
 };
 
 type Message = {
@@ -73,7 +75,7 @@ export default async function LeadDetailPage({ params, searchParams }: { params:
 
   const { data: lead, error } = await supabase
     .from("seller_leads")
-    .select("id, conversation_id, created_at, updated_at, status, name, phone, email, property_address, property_city, timeline, situation, property_condition, notes, admin_notes, last_contacted_at, source_url")
+    .select("id, conversation_id, created_at, updated_at, status, name, phone, email, property_address, property_city, timeline, situation, property_condition, notes, admin_notes, last_contacted_at, source_url, notification_sent_at, notification_error")
     .eq("id", id)
     .single();
 
@@ -122,6 +124,8 @@ export default async function LeadDetailPage({ params, searchParams }: { params:
               <Field label="Situation" value={typedLead.situation} />
               <Field label="Property Condition" value={typedLead.property_condition} />
               <Field label="Source URL" value={typedLead.source_url} />
+              <Field label="Notification Sent" value={typedLead.notification_sent_at ? new Date(typedLead.notification_sent_at).toLocaleString() : "Not sent"} />
+              <Field label="Notification Error" value={typedLead.notification_error} />
             </div>
             <div className="mt-4">
               <Field label="Seller Notes" value={typedLead.notes} />

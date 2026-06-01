@@ -10,6 +10,8 @@ type RawBusinessSettings = {
   preferred_tone: string | null;
   custom_instructions: string | null;
   disclose_referral_contacts: boolean | null;
+  lead_notification_email?: string | null;
+  from_email?: string | null;
 };
 
 export type ServiceArea = { city: string; state: string | null; notes: string | null };
@@ -47,6 +49,8 @@ export const defaultBusinessSettings: BusinessSettingsContext = {
     custom_instructions:
       "Do not make offers over chat. Do not guarantee that the company will buy a property. Do not give legal, tax, financial, or foreclosure advice.",
     disclose_referral_contacts: false,
+    lead_notification_email: null,
+    from_email: null,
   },
   serviceAreas: [
     { city: "Austin", state: "TX", notes: null },
@@ -87,7 +91,7 @@ export async function getBusinessSettingsContext(supabase: SupabaseClient | null
 
   try {
     const [businessResult, serviceResult, referralResult, criteriaResult, qaResult] = await Promise.all([
-      supabase.from("business_settings").select("business_name, website, phone, email, primary_market, description, preferred_tone, custom_instructions, disclose_referral_contacts").eq("singleton_key", "default").maybeSingle(),
+      supabase.from("business_settings").select("business_name, website, phone, email, primary_market, description, preferred_tone, custom_instructions, disclose_referral_contacts, lead_notification_email, from_email").eq("singleton_key", "default").maybeSingle(),
       supabase.from("service_areas").select("city, state, notes").eq("is_active", true).order("city"),
       supabase.from("referral_areas").select("city, state, contact_name, contact_email, contact_phone, notes, auto_forward, public_disclosure").order("city"),
       supabase.from("buying_criteria").select("category, label, notes").order("category").order("label"),

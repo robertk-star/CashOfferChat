@@ -62,6 +62,8 @@ export async function POST(request: Request) {
     preferred_tone: get("preferred_tone") || "Friendly, plain-English, helpful, and no-pressure.",
     custom_instructions: get("custom_instructions") || null,
     disclose_referral_contacts: formData.get("disclose_referral_contacts") === "on",
+    lead_notification_email: get("lead_notification_email") || null,
+    from_email: get("from_email") || null,
     updated_at: new Date().toISOString(),
   };
 
