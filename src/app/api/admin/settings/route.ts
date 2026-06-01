@@ -1,0 +1,96 @@
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { splitLines } from "@/lib/businessSettings";
+
+function parseCriterionLines(value: string) {
+  return splitLines(value).map((line) => {
+    const [label, ...notesParts] = line.split("|").map((part) => part.trim());
+    return { label, notes: notesParts.join(" | ") || null };
+  }).filter((item) => item.label);
+}
+
+function parseAreaLines(value: string) {
+  return splitLines(value).map((line) => {
+    const [city, state, ...notesParts] = line.split("|").map((part) => part.trim());
+    return { city, state: state || null, notes: notesParts.join(" | ") || null };
+  }).filter((item) => item.city);
+}
+
+function parseReferralLines(value: string) {
+  return splitLines(value).map((line) => {
+    const [city, state, contactName, contactEmail, contactPhone, ...notesParts] = line.split("|").map((part) => part.trim());
+    return {
+      city,
+      state: state || null,
+      contact_name: contactName || null,
+      contact_email: contactEmail || null,
+      contact_phone: contactPhone || null,
+      notes: notesParts.join(" | ") || null,
+      auto_forward: Boolean(contactEmail || contactPhone),
+      public_disclosure: false,
+    };
+  }).filter((item) => item.city);
+}
+
+export async function POST(request: Request) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(adminCookieName())?.value;
+  if (!verifyAdminSessionToken(token)) {
+    return NextResponse.redirect(new URL("/admin/login", request.url), { status: 303 });
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return NextResponse.redirect(new URL("/admin/settings?error=supabase", request.url), { status: 303 });
+  }
+
+  const formData = await request.formData();
+  const get = (key: string) => String(formData.get(key) || "").trim();
+  const questionTriggers = formData.getAll("qa_trigger").map((value) => String(value || "").trim());
+  const questionAnswers = formData.getAll("qa_answer").map((value) => String(value || "").trim());
+
+  const settingsPayload = {
+    singleton_key: "default",
+    business_name: get("business_name") || "We Buy Austin Houses",
+    website: get("website") || null,
+    phone: get("phone") || null,
+    email: get("email") || null,
+    primary_market: get("primary_market") || null,
+    description: get("description") || null,
+    preferred_tone: get("preferred_tone") || "Friendly, plain-English, helpful, and no-pressure.",
+    custom_instructions: get("custom_instructions") || null,
+    disclose_referral_contacts: formData.get("disclose_referral_contacts") === "on",
+    updated_at: new Date().toISOString(),
+  };
+
+  const serviceAreas = parseAreaLines(get("service_areas"));
+  const referralAreas = parseReferralLines(get("referral_areas"));
+  const willBuy = parseCriterionLines(get("will_buy")).map((item) => ({ ...item, category: "will_buy" }));
+  const willNotBuy = parseCriterionLines(get("will_not_buy")).map((item) => ({ ...item, category: "will_not_buy" }));
+  const customQA = questionTriggers
+    .map((trigger, index) => ({ trigger_question: trigger, answer: questionAnswers[index] || "", is_active: true }))
+    .filter((item) => item.trigger_question && item.answer);
+
+  const { error: settingsError } = await supabase
+    .from("business_settings")
+    .upsert(settingsPayload, { onConflict: "singleton_key" });
+  if (settingsError) {
+    return NextResponse.redirect(new URL(`/admin/settings?error=${encodeURIComponent(settingsError.message)}`, request.url), { status: 303 });
+  }
+
+  await Promise.all([
+    supabase.from("service_areas").delete().neq("id", "00000000-0000-0000-0000-000000000000"),
+    supabase.from("referral_areas").delete().neq("id", "00000000-0000-0000-0000-000000000000"),
+    supabase.from("buying_criteria").delete().neq("id", "00000000-0000-0000-0000-000000000000"),
+    supabase.from("custom_qa_items").delete().neq("id", "00000000-0000-0000-0000-000000000000"),
+  ]);
+
+  if (serviceAreas.length) await supabase.from("service_areas").insert(serviceAreas);
+  if (referralAreas.length) await supabase.from("referral_areas").insert(referralAreas);
+  if (willBuy.length || willNotBuy.length) await supabase.from("buying_criteria").insert([...willBuy, ...willNotBuy]);
+  if (customQA.length) await supabase.from("custom_qa_items").insert(customQA);
+
+  return NextResponse.redirect(new URL("/admin/settings?saved=1", request.url), { status: 303 });
+}

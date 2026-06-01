@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
@@ -46,9 +47,9 @@ export default async function AdminPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div>
             <h1 className="text-2xl font-bold text-navy">CashOfferChat Admin</h1>
-            <p className="text-sm text-slate-500">Phase 1 seller leads dashboard</p>
+            <p className="text-sm text-slate-500">Seller leads dashboard</p>
           </div>
-          <form action="/api/admin/logout" method="post"><button className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy">Log Out</button></form>
+          <div className="flex gap-3"><Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/admin/settings">Settings</Link><form action="/api/admin/logout" method="post"><button className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy">Log Out</button></form></div>
         </div>
       </header>
 
