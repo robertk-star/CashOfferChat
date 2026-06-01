@@ -5,6 +5,21 @@ import { CASH_OFFER_CHAT_SYSTEM_PROMPT } from "@/lib/aiGuardrails";
 import { getBusinessSettingsContext, formatBusinessSettingsForPrompt, normalizeForSettingsMatch, type BusinessSettingsContext } from "@/lib/businessSettings";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
+function jsonWithCors(body: unknown, init?: ResponseInit) {
+  return NextResponse.json(body, { ...init, headers: { ...corsHeaders, ...(init?.headers || {}) } });
+}
+
 const requestSchema = z.object({
   conversationId: z.string().uuid().nullable().optional(),
   message: z.string().min(1).max(2000),
@@ -237,7 +252,7 @@ async function maybeEnhanceReply(userMessage: string, safeAnswer: string, settin
 export async function POST(request: Request) {
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid chat request" }, { status: 400 });
+    return jsonWithCors({ error: "Invalid chat request" }, { status: 400 });
   }
 
   const supabase = getSupabaseAdmin();
@@ -272,7 +287,7 @@ export async function POST(request: Request) {
     });
   }
 
-  return NextResponse.json({
+  return jsonWithCors({
     conversationId,
     reply,
     showIntake: deterministic.showIntake,

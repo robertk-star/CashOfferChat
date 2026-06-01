@@ -4,7 +4,7 @@ AI seller intake assistant for cash home buyer websites.
 
 ## Current build
 
-This package includes Phase 2D:
+This package includes Phase 2E:
 
 - Marketing homepage
 - We Buy Houses demo chat
@@ -15,6 +15,28 @@ This package includes Phase 2D:
 - Lead detail page with transcript, status, admin notes, and notification status
 - Business settings and AI knowledge base
 - Email notifications for new leads using Resend
+- Embeddable website widget at `/widget.js`
+- Widget preview page at `/widget-demo`
+- Embed code displayed in `/admin/settings`
+
+## Phase 2E — Embeddable Widget
+
+The widget can be installed on a cash home buyer website with:
+
+```html
+<script src="https://cashofferchat.com/widget.js" data-site-id="demo"></script>
+```
+
+The Phase 2E widget:
+
+- Loads as a bottom-right chat bubble
+- Answers seller questions through `/api/chat`
+- Opens a structured intake form when the seller requests a review or offer
+- Saves leads through `/api/leads`
+- Tracks the source page URL
+- Uses CORS headers on the chat and lead APIs so the widget can run on other websites
+
+Phase 2E still uses `data-site-id="demo"`. Multi-company site IDs and domain allowlists should be added later.
 
 ## Required Supabase migrations
 
@@ -27,7 +49,7 @@ sql/003_lead_management.sql
 sql/004_lead_notifications.sql
 ```
 
-Phase 2D adds `notification_sent_at` and `notification_error` to `seller_leads`, plus `lead_notification_email` and `from_email` to `business_settings`.
+No new SQL migration is required for Phase 2E.
 
 ## Required environment variables
 
@@ -48,6 +70,8 @@ LEAD_NOTIFICATION_EMAIL=
 FROM_EMAIL=
 ```
 
+`APP_URL` is used to display the correct widget embed code in the admin settings page.
+
 `OPENAI_API_KEY` may be omitted during early testing. The chat route will use safe scripted fallback replies.
 
 `RESEND_API_KEY` is required for lead notification emails. If it is missing, the lead will still be saved and the lead detail page will show the notification error.
@@ -63,9 +87,18 @@ npm install
 npm run dev
 ```
 
-## Phase 2D Hotfix — Required phone field
+## Testing Phase 2E
 
-This hotfix makes the structured intake form match the lead API requirements. The form now clearly asks for a required phone number, marks required fields, validates before submit, and displays specific validation/API errors. Email notification errors are non-blocking, so a lead can still save if Resend is not configured or sending fails.
+1. Deploy the package.
+2. Visit `/admin/settings` and copy the embed code.
+3. Visit `/widget-demo` and test the bottom-right widget.
+4. Ask questions such as:
+   - Do you buy as-is?
+   - How fast can I close?
+   - Do you buy houses with tenants?
+   - Can you take a look at it?
+5. Submit a test lead from the widget intake form.
+6. Confirm the lead appears in Supabase and `/admin`.
 
-No new SQL migration is required for this hotfix.
-No new Vercel environment variables are required for this hotfix.
+No new Supabase SQL migration is required for Phase 2E.
+No new Vercel environment variables are required beyond the existing `APP_URL` recommendation.

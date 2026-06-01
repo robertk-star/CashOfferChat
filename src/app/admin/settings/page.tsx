@@ -29,6 +29,8 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
   const supabase = getSupabaseAdmin();
   const settings = supabase ? await getBusinessSettingsContext(supabase) : defaultBusinessSettings;
   const business = settings.business;
+  const appUrl = (process.env.APP_URL || "https://cashofferchat.com").replace(/\/$/, "");
+  const embedCode = `<script src="${appUrl}/widget.js" data-site-id="demo"></script>`;
   const qaRows = [...settings.customQA];
   while (qaRows.length < 6) qaRows.push({ trigger_question: "", answer: "" });
 
@@ -42,6 +44,7 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
           </div>
           <div className="flex gap-3">
             <Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/admin">Leads</Link>
+            <Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/widget-demo">Widget Demo</Link>
             <form action="/api/admin/logout" method="post"><button className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy">Log Out</button></form>
           </div>
         </div>
@@ -51,6 +54,17 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
         {!supabase && <div className="mb-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800">Supabase is not configured. This page is showing default demo settings.</div>}
         {params.saved && <div className="mb-6 rounded-2xl bg-green/10 p-4 text-sm font-semibold text-navy">Settings saved. The demo chat will now reference these settings.</div>}
         {params.error && <div className="mb-6 rounded-2xl bg-red-50 p-4 text-sm text-red-700">Settings could not be saved: {params.error}</div>}
+
+
+        <section className="mb-6 rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
+          <h2 className="text-xl font-bold text-navy">Embed Code</h2>
+          <p className="mt-2 text-sm text-slate-600">Copy this script into a cash home buyer website to load the CashOfferChat widget. Phase 2E uses a demo site id until multi-company accounts are added.</p>
+          <pre className="mt-4 overflow-x-auto rounded-2xl bg-slate-950 p-4 text-sm text-white"><code>{embedCode}</code></pre>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link className="rounded-full bg-gold px-5 py-3 text-sm font-bold text-navy" href="/widget-demo">Preview Widget</Link>
+            <a className="rounded-full border border-slate-300 px-5 py-3 text-sm font-bold text-navy" href={`${appUrl}/widget.js`} target="_blank" rel="noreferrer">Open widget.js</a>
+          </div>
+        </section>
 
         <form action="/api/admin/settings" method="post" className="space-y-6">
           <section className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">

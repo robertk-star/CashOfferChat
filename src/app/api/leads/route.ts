@@ -3,6 +3,21 @@ import { z } from "zod";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendLeadNotification } from "@/lib/emailNotifications";
 
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
+
+function jsonWithCors(body: unknown, init?: ResponseInit) {
+  return NextResponse.json(body, { ...init, headers: { ...corsHeaders, ...(init?.headers || {}) } });
+}
+
 const leadSchema = z.object({
   conversationId: z.string().uuid().nullable().optional(),
   name: z.string().max(200).optional().default(""),
@@ -15,18 +30,19 @@ const leadSchema = z.object({
   propertyCondition: z.string().max(300).optional().default(""),
   notes: z.string().max(2000).optional().default(""),
   sourceUrl: z.string().url().optional(),
+  siteId: z.string().max(120).optional(),
 });
 
 export async function POST(request: Request) {
   const parsed = leadSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     const firstIssue = parsed.error.issues[0]?.message || "Invalid lead request";
-    return NextResponse.json({ error: firstIssue }, { status: 400 });
+    return jsonWithCors({ error: firstIssue }, { status: 400 });
   }
 
   const supabase = getSupabaseAdmin();
   if (!supabase) {
-    return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 });
+    return jsonWithCors({ error: "Supabase is not configured" }, { status: 500 });
   }
 
   const lead = parsed.data;
@@ -35,7 +51,7 @@ export async function POST(request: Request) {
   if (!lead.phone.trim()) missing.push("phone number");
   if (!lead.propertyAddress.trim() && !lead.propertyCity.trim()) missing.push("property city or property address");
   if (missing.length > 0) {
-    return NextResponse.json({ error: `Missing required field${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}` }, { status: 400 });
+    return jsonWithCors({ error: `Missing required field${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}` }, { status: 400 });
   }
 
   const { data, error } = await supabase
@@ -58,7 +74,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return jsonWithCors({ error: error.message }, { status: 500 });
   }
 
   let notification = { sent: false, error: null as string | null };
@@ -75,5 +91,5 @@ export async function POST(request: Request) {
     notification = { sent: false, error: error instanceof Error ? error.message : "Notification failed" };
   }
 
-  return NextResponse.json({ id: data.id, ok: true, notificationSent: notification.sent, notificationError: notification.error });
+  return jsonWithCors({ id: data.id, ok: true, notificationSent: notification.sent, notificationError: notification.error });
 }
