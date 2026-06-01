@@ -2,65 +2,41 @@
 
 import { FormEvent, useMemo, useState } from "react";
 
-type Message = { role: "user" | "assistant"; content: string };
-type Intake = {
-  name?: string;
-  phone?: string;
-  email?: string;
-  propertyAddress?: string;
-  propertyCity?: string;
-  timeline?: string;
-  situation?: string;
-  propertyCondition?: string;
-  notes?: string;
-};
-type LastAskedField =
-  | "propertyCity"
-  | "propertyAddress"
-  | "situation"
-  | "timeline"
-  | "propertyCondition"
-  | "followUpPermission"
-  | "name"
-  | "phone"
-  | "email"
-  | null;
-type ChatState = {
-  intake: Intake;
-  lastAskedField: LastAskedField;
-  conversationMode: "qa" | "intake" | "handoff";
-  leadReadiness: "low" | "medium" | "high" | "ready_for_contact";
-  followUpPermission: boolean | null;
-  leadCreated: boolean;
+type Message = { role: "user" | "assistant"; content: string; action?: "open_intake" };
+
+type LeadForm = {
+  name: string;
+  phone: string;
+  email: string;
+  propertyAddress: string;
+  propertyCity: string;
+  timeline: string;
+  situation: string;
+  propertyCondition: string;
+  notes: string;
 };
 
-const initialChatState: ChatState = {
-  intake: {},
-  lastAskedField: "propertyCity",
-  conversationMode: "intake",
-  leadReadiness: "low",
-  followUpPermission: null,
-  leadCreated: false,
+const emptyLeadForm: LeadForm = {
+  name: "",
+  phone: "",
+  email: "",
+  propertyAddress: "",
+  propertyCity: "",
+  timeline: "",
+  situation: "",
+  propertyCondition: "",
+  notes: "",
 };
 
 const starters = [
   "Do you buy as-is?",
   "How fast can I close?",
-  "My house needs repairs",
-  "I have tenants",
-  "I want a cash offer",
+  "Do you buy houses with tenants?",
+  "Are there any fees?",
+  "Can you take a look at it?",
 ];
 
-const fieldLabels: Array<[keyof Intake, string]> = [
-  ["propertyCity", "City"],
-  ["propertyAddress", "Address"],
-  ["situation", "Situation"],
-  ["timeline", "Timeline"],
-  ["propertyCondition", "Condition"],
-  ["name", "Name"],
-  ["phone", "Phone"],
-  ["email", "Email"],
-];
+const requiredFields: Array<keyof LeadForm> = ["propertyCity", "propertyAddress", "situation", "timeline", "propertyCondition", "name", "phone"];
 
 export function DemoChat() {
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -69,22 +45,24 @@ export function DemoChat() {
     {
       role: "assistant",
       content:
-        "Hi! I can answer questions about selling an Austin-area house as-is for cash and collect a few details if you want follow-up. What city is the property in?",
+        "Hi! I can answer questions about selling a house as-is for cash. When you are ready, I can open a short intake form so the team can review the property details. There is no obligation.",
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [chatState, setChatState] = useState<ChatState>(initialChatState);
-  const [leadId, setLeadId] = useState<string | null>(null);
+  const [showIntake, setShowIntake] = useState(false);
+  const [leadForm, setLeadForm] = useState<LeadForm>(emptyLeadForm);
   const [leadStatus, setLeadStatus] = useState<string | null>(null);
-  const [manualLead, setManualLead] = useState({ name: "", phone: "", email: "", propertyAddress: "", propertyCity: "", timeline: "", situation: "" });
+  const [leadId, setLeadId] = useState<string | null>(null);
 
-  const intake = chatState.intake;
-  const completionCount = useMemo(() => fieldLabels.filter(([key]) => Boolean(intake[key])).length, [intake]);
-  const canSubmitManualLead = useMemo(() => manualLead.name && manualLead.phone && (manualLead.propertyAddress || manualLead.propertyCity), [manualLead]);
+  const completionCount = useMemo(() => requiredFields.filter((key) => Boolean(leadForm[key].trim())).length, [leadForm]);
+  const canSaveLead = useMemo(() => {
+    return Boolean(leadForm.name.trim() && leadForm.phone.trim() && (leadForm.propertyAddress.trim() || leadForm.propertyCity.trim()));
+  }, [leadForm]);
 
   async function sendMessage(content: string) {
     const trimmed = content.trim();
     if (!trimmed || isLoading) return;
+
     setMessages((current) => [...current, { role: "user", content: trimmed }]);
     setInput("");
     setIsLoading(true);
@@ -94,45 +72,63 @@ export function DemoChat() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId, message: trimmed, sourceUrl: window.location.href, chatState }),
+        body: JSON.stringify({ conversationId, message: trimmed, sourceUrl: window.location.href }),
       });
       const data = await response.json();
       if (data.conversationId) setConversationId(data.conversationId);
-      if (data.chatState) {
-        setChatState(data.chatState);
-        setManualLead((current) => ({ ...current, ...data.chatState.intake }));
-      } else if (data.intake) {
-        setChatState((current) => ({ ...current, intake: { ...current.intake, ...data.intake } }));
-        setManualLead((current) => ({ ...current, ...data.intake }));
-      }
-      if (data.leadCreated && data.leadId) {
-        setLeadId(data.leadId);
-        setLeadStatus("Lead automatically saved from the chat intake.");
-      }
-      setMessages((current) => [...current, { role: "assistant", content: data.reply || data.nextQuestion || "Thanks. What city is the property in?" }]);
+      if (data.showIntake) setShowIntake(true);
+
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: data.reply || "I can answer questions, or open the short intake form when you are ready.",
+          action: data.showIntake ? "open_intake" : undefined,
+        },
+      ]);
     } catch {
-      setMessages((current) => [...current, { role: "assistant", content: "Thanks. I can help collect the property details for follow-up. What city is the property in?" }]);
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: "I can answer questions, or open the short intake form when you are ready.",
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function submitManualLead(event: FormEvent<HTMLFormElement>) {
+  async function submitLead(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLeadStatus("Saving lead...");
+
     try {
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...manualLead, conversationId, sourceUrl: window.location.href }),
+        body: JSON.stringify({ ...leadForm, conversationId, sourceUrl: window.location.href }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Lead save failed");
+
       setLeadId(data.id);
       setLeadStatus("Lead saved for follow-up.");
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content:
+            "Thanks. The details have been saved for follow-up. In a live setup, the home-buying team would review the property information and contact the seller.",
+        },
+      ]);
     } catch {
-      setLeadStatus("Lead could not be saved. Check Supabase environment variables and SQL migration.");
+      setLeadStatus("Lead could not be saved. Check Supabase environment variables and confirm the SQL migration has been run.");
     }
+  }
+
+  function updateField(key: keyof LeadForm, value: string) {
+    setLeadForm((current) => ({ ...current, [key]: value }));
   }
 
   return (
@@ -144,28 +140,42 @@ export function DemoChat() {
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:grid-cols-[1fr_420px]">
+      <section className="mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:grid-cols-[1fr_430px]">
         <div className="rounded-[2rem] bg-white p-5 shadow-soft ring-1 ring-slate-200">
           <div className="border-b border-slate-200 pb-4">
-            <h1 className="text-2xl font-bold text-navy">We Buy Houses Seller Intake Demo</h1>
-            <p className="mt-2 text-sm text-slate-600">Phase 2A answers seller questions first, then gently collects one detail at a time without repeating questions.</p>
+            <h1 className="text-2xl font-bold text-navy">We Buy Houses Seller Chat Demo</h1>
+            <p className="mt-2 text-sm text-slate-600">
+              Phase 2A-R separates AI Q&amp;A from lead capture. The chat answers questions; the structured intake form saves reliable lead data.
+            </p>
           </div>
 
           <div className="h-[520px] space-y-4 overflow-y-auto py-6">
             {messages.map((message, index) => (
-              <div key={`${message.role}-${index}`} className={message.role === "user" ? "chat-bubble-user" : "chat-bubble-assistant"}>{message.content}</div>
+              <div key={`${message.role}-${index}`} className={message.role === "user" ? "chat-bubble-user" : "chat-bubble-assistant"}>
+                <p>{message.content}</p>
+                {message.action === "open_intake" && (
+                  <button onClick={() => setShowIntake(true)} className="mt-3 rounded-full bg-gold px-4 py-2 text-sm font-bold text-navy">
+                    Open Short Intake Form
+                  </button>
+                )}
+              </div>
             ))}
             {isLoading && <div className="chat-bubble-assistant">Typing...</div>}
           </div>
 
           <div className="mb-4 flex flex-wrap gap-2">
             {starters.map((starter) => (
-              <button key={starter} onClick={() => sendMessage(starter)} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">{starter}</button>
+              <button key={starter} onClick={() => sendMessage(starter)} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                {starter}
+              </button>
             ))}
+            <button onClick={() => setShowIntake(true)} className="rounded-full border border-gold bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
+              Open intake form
+            </button>
           </div>
 
           <form onSubmit={(event) => { event.preventDefault(); sendMessage(input); }} className="flex gap-3">
-            <input value={input} onChange={(event) => setInput(event.target.value)} className="flex-1 rounded-full border border-slate-300 px-5 py-3 outline-none focus:border-gold" placeholder="Answer the question or ask about selling..." />
+            <input value={input} onChange={(event) => setInput(event.target.value)} className="flex-1 rounded-full border border-slate-300 px-5 py-3 outline-none focus:border-gold" placeholder="Ask a question about selling..." />
             <button className="rounded-full bg-navy px-6 py-3 font-bold text-white" type="submit">Send</button>
           </form>
         </div>
@@ -174,49 +184,93 @@ export function DemoChat() {
           <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-navy">Captured Intake</h2>
-                <p className="mt-2 text-sm text-slate-600">Fields update from answers to specific intake questions.</p>
+                <h2 className="text-xl font-bold text-navy">Structured Intake</h2>
+                <p className="mt-2 text-sm text-slate-600">
+                  Reliable lead details are captured here instead of being guessed from free-form chat messages.
+                </p>
               </div>
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{completionCount}/8</span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{completionCount}/7</span>
             </div>
-            <div className="mt-5 space-y-3">
-              {fieldLabels.map(([key, label]) => (
-                <div key={key} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs font-bold uppercase tracking-wide text-slate-400">{label}</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-700">{intake[key] || "Not captured yet"}</p>
+
+            {!showIntake ? (
+              <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
+                <p>The intake form opens when the seller asks for a property review, requests an offer, or clicks the button.</p>
+                <button onClick={() => setShowIntake(true)} className="mt-4 rounded-full bg-gold px-5 py-3 font-bold text-navy">
+                  Open Intake Form
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={submitLead} className="mt-5 space-y-4">
+                <label className="block text-sm font-semibold text-slate-700">
+                  Property city
+                  <input value={leadForm.propertyCity} onChange={(event) => updateField("propertyCity", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Austin" />
+                </label>
+                <label className="block text-sm font-semibold text-slate-700">
+                  Property address
+                  <input value={leadForm.propertyAddress} onChange={(event) => updateField("propertyAddress", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Street address" />
+                </label>
+                <label className="block text-sm font-semibold text-slate-700">
+                  Situation
+                  <select value={leadForm.situation} onChange={(event) => updateField("situation", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold">
+                    <option value="">Select one</option>
+                    <option>Just want to sell fast</option>
+                    <option>Needs repairs</option>
+                    <option>Inherited property</option>
+                    <option>Tenant occupied</option>
+                    <option>Vacant property</option>
+                    <option>Behind on payments</option>
+                    <option>Relocating</option>
+                    <option>Other</option>
+                  </select>
+                </label>
+                <label className="block text-sm font-semibold text-slate-700">
+                  Timeline
+                  <select value={leadForm.timeline} onChange={(event) => updateField("timeline", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold">
+                    <option value="">Select one</option>
+                    <option>ASAP</option>
+                    <option>Within 30 days</option>
+                    <option>1–3 months</option>
+                    <option>Just exploring</option>
+                  </select>
+                </label>
+                <label className="block text-sm font-semibold text-slate-700">
+                  Property condition
+                  <textarea value={leadForm.propertyCondition} onChange={(event) => updateField("propertyCondition", event.target.value)} className="mt-1 min-h-20 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Move-in ready, outdated, roof issues, major repairs, etc." />
+                </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="block text-sm font-semibold text-slate-700">
+                    Name
+                    <input value={leadForm.name} onChange={(event) => updateField("name", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" />
+                  </label>
+                  <label className="block text-sm font-semibold text-slate-700">
+                    Phone
+                    <input value={leadForm.phone} onChange={(event) => updateField("phone", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" />
+                  </label>
                 </div>
-              ))}
-            </div>
-            <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-500">
-              <div><strong>Mode:</strong> {chatState.conversationMode}</div>
-              <div><strong>Readiness:</strong> {chatState.leadReadiness}</div>
-              <div><strong>Last asked:</strong> {chatState.lastAskedField || "none"}</div>
-              <div><strong>Follow-up permission:</strong> {chatState.followUpPermission === null ? "not asked" : chatState.followUpPermission ? "yes" : "no"}</div>
-            </div>
+                <label className="block text-sm font-semibold text-slate-700">
+                  Email <span className="font-normal text-slate-400">optional</span>
+                  <input value={leadForm.email} onChange={(event) => updateField("email", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" />
+                </label>
+                <label className="block text-sm font-semibold text-slate-700">
+                  Notes <span className="font-normal text-slate-400">optional</span>
+                  <textarea value={leadForm.notes} onChange={(event) => updateField("notes", event.target.value)} className="mt-1 min-h-20 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Anything else the team should know?" />
+                </label>
+                <p className="rounded-xl bg-slate-50 p-3 text-xs text-slate-500">
+                  This form is for follow-up only. Requesting a review does not create an obligation to sell.
+                </p>
+                <button disabled={!canSaveLead} className="w-full rounded-full bg-gold px-5 py-3 font-bold text-navy disabled:cursor-not-allowed disabled:opacity-50" type="submit">
+                  Save Lead for Follow-Up
+                </button>
+              </form>
+            )}
+
             {leadStatus && <p className="mt-4 rounded-xl bg-green/10 p-3 text-sm font-semibold text-navy">{leadStatus}</p>}
             {leadId && <p className="mt-2 text-xs text-slate-500">Lead ID: {leadId}</p>}
           </div>
 
-          <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
-            <h2 className="text-lg font-bold text-navy">Manual Save Fallback</h2>
-            <p className="mt-2 text-sm text-slate-600">Use this only if the chat does not capture enough information automatically.</p>
-            <form onSubmit={submitManualLead} className="mt-5 space-y-3">
-              {[
-                ["name", "Name"],
-                ["phone", "Phone"],
-                ["email", "Email"],
-                ["propertyAddress", "Property address"],
-                ["propertyCity", "City"],
-                ["timeline", "Timeline"],
-                ["situation", "Situation"],
-              ].map(([key, label]) => (
-                <label key={key} className="block text-sm font-semibold text-slate-700">
-                  {label}
-                  <input value={manualLead[key as keyof typeof manualLead]} onChange={(event) => setManualLead((current) => ({ ...current, [key]: event.target.value }))} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" />
-                </label>
-              ))}
-              <button disabled={!canSubmitManualLead} className="w-full rounded-full bg-gold px-5 py-3 font-bold text-navy disabled:cursor-not-allowed disabled:opacity-50" type="submit">Save Lead Manually</button>
-            </form>
+          <div className="rounded-[2rem] bg-white p-6 text-sm text-slate-600 shadow-soft ring-1 ring-slate-200">
+            <h2 className="text-lg font-bold text-navy">Why this is more reliable</h2>
+            <p className="mt-2">The AI no longer tries to guess form fields from ambiguous chat messages. It answers questions and opens a controlled intake form when the seller is ready.</p>
           </div>
         </aside>
       </section>
