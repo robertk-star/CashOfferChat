@@ -62,3 +62,10 @@ FROM_EMAIL=
 npm install
 npm run dev
 ```
+
+## Phase 2D Hotfix — Required phone field
+
+This hotfix makes the structured intake form match the lead API requirements. The form now clearly asks for a required phone number, marks required fields, validates before submit, and displays specific validation/API errors. Email notification errors are non-blocking, so a lead can still save if Resend is not configured or sending fails.
+
+No new SQL migration is required for this hotfix.
+No new Vercel environment variables are required for this hotfix.

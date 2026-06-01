@@ -52,12 +52,21 @@ export function DemoChat() {
   const [showIntake, setShowIntake] = useState(false);
   const [leadForm, setLeadForm] = useState<LeadForm>(emptyLeadForm);
   const [leadStatus, setLeadStatus] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [leadId, setLeadId] = useState<string | null>(null);
 
   const completionCount = useMemo(() => requiredFields.filter((key) => Boolean(leadForm[key].trim())).length, [leadForm]);
   const canSaveLead = useMemo(() => {
     return Boolean(leadForm.name.trim() && leadForm.phone.trim() && (leadForm.propertyAddress.trim() || leadForm.propertyCity.trim()));
   }, [leadForm]);
+
+  function validateLeadForm() {
+    const errors: string[] = [];
+    if (!leadForm.name.trim()) errors.push("Name is required.");
+    if (!leadForm.phone.trim()) errors.push("Phone number is required so the team can follow up quickly.");
+    if (!leadForm.propertyAddress.trim() && !leadForm.propertyCity.trim()) errors.push("Property city or property address is required.");
+    return errors;
+  }
 
   async function sendMessage(content: string) {
     const trimmed = content.trim();
@@ -67,6 +76,7 @@ export function DemoChat() {
     setInput("");
     setIsLoading(true);
     setLeadStatus(null);
+    setValidationErrors([]);
 
     try {
       const response = await fetch("/api/chat", {
@@ -101,6 +111,12 @@ export function DemoChat() {
 
   async function submitLead(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const errors = validateLeadForm();
+    setValidationErrors(errors);
+    if (errors.length > 0) {
+      setLeadStatus(null);
+      return;
+    }
     setLeadStatus("Saving lead...");
 
     try {
@@ -122,13 +138,14 @@ export function DemoChat() {
             "Thanks. The details have been saved for follow-up. In a live setup, the home-buying team would review the property information and contact the seller.",
         },
       ]);
-    } catch {
-      setLeadStatus("Lead could not be saved. Check Supabase environment variables and confirm the SQL migration has been run.");
+    } catch (error) {
+      setLeadStatus(error instanceof Error ? error.message : "Lead could not be saved. Check Supabase environment variables and confirm the SQL migration has been run.");
     }
   }
 
   function updateField(key: keyof LeadForm, value: string) {
     setLeadForm((current) => ({ ...current, [key]: value }));
+    setValidationErrors([]);
   }
 
   return (
@@ -202,11 +219,11 @@ export function DemoChat() {
             ) : (
               <form onSubmit={submitLead} className="mt-5 space-y-4">
                 <label className="block text-sm font-semibold text-slate-700">
-                  Property city
+                  Property city <span className="text-red-600">*</span>
                   <input value={leadForm.propertyCity} onChange={(event) => updateField("propertyCity", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Austin" />
                 </label>
                 <label className="block text-sm font-semibold text-slate-700">
-                  Property address
+                  Property address <span className="text-red-600">*</span>
                   <input value={leadForm.propertyAddress} onChange={(event) => updateField("propertyAddress", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Street address" />
                 </label>
                 <label className="block text-sm font-semibold text-slate-700">
@@ -239,12 +256,12 @@ export function DemoChat() {
                 </label>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="block text-sm font-semibold text-slate-700">
-                    Name
-                    <input value={leadForm.name} onChange={(event) => updateField("name", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" />
+                    Name <span className="text-red-600">*</span>
+                    <input required value={leadForm.name} onChange={(event) => updateField("name", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Seller name" />
                   </label>
                   <label className="block text-sm font-semibold text-slate-700">
-                    Phone
-                    <input value={leadForm.phone} onChange={(event) => updateField("phone", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" />
+                    Phone number <span className="text-red-600">*</span>
+                    <input required type="tel" value={leadForm.phone} onChange={(event) => updateField("phone", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Best number to call or text" />
                   </label>
                 </div>
                 <label className="block text-sm font-semibold text-slate-700">
@@ -256,8 +273,16 @@ export function DemoChat() {
                   <textarea value={leadForm.notes} onChange={(event) => updateField("notes", event.target.value)} className="mt-1 min-h-20 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Anything else the team should know?" />
                 </label>
                 <p className="rounded-xl bg-slate-50 p-3 text-xs text-slate-500">
-                  This form is for follow-up only. Requesting a review does not create an obligation to sell.
+                  Required fields: name, phone number, and either property city or property address. This form is for follow-up only. Requesting a review does not create an obligation to sell.
                 </p>
+                {validationErrors.length > 0 && (
+                  <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+                    <p className="font-bold">Please fix the following:</p>
+                    <ul className="mt-2 list-disc space-y-1 pl-5">
+                      {validationErrors.map((error) => <li key={error}>{error}</li>)}
+                    </ul>
+                  </div>
+                )}
                 <button disabled={!canSaveLead} className="w-full rounded-full bg-gold px-5 py-3 font-bold text-navy disabled:cursor-not-allowed disabled:opacity-50" type="submit">
                   Save Lead for Follow-Up
                 </button>

@@ -20,7 +20,8 @@ const leadSchema = z.object({
 export async function POST(request: Request) {
   const parsed = leadSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid lead request" }, { status: 400 });
+    const firstIssue = parsed.error.issues[0]?.message || "Invalid lead request";
+    return NextResponse.json({ error: firstIssue }, { status: 400 });
   }
 
   const supabase = getSupabaseAdmin();
@@ -29,8 +30,12 @@ export async function POST(request: Request) {
   }
 
   const lead = parsed.data;
-  if (!lead.name || !lead.phone || (!lead.propertyAddress && !lead.propertyCity)) {
-    return NextResponse.json({ error: "Name, phone, and property location are required" }, { status: 400 });
+  const missing: string[] = [];
+  if (!lead.name.trim()) missing.push("name");
+  if (!lead.phone.trim()) missing.push("phone number");
+  if (!lead.propertyAddress.trim() && !lead.propertyCity.trim()) missing.push("property city or property address");
+  if (missing.length > 0) {
+    return NextResponse.json({ error: `Missing required field${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}` }, { status: 400 });
   }
 
   const { data, error } = await supabase
@@ -56,14 +61,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const notification = await sendLeadNotification(supabase, data);
-  await supabase
-    .from("seller_leads")
-    .update({
-      notification_sent_at: notification.sent ? new Date().toISOString() : null,
-      notification_error: notification.error,
-    })
-    .eq("id", data.id);
+  let notification = { sent: false, error: null as string | null };
+  try {
+    notification = await sendLeadNotification(supabase, data);
+    await supabase
+      .from("seller_leads")
+      .update({
+        notification_sent_at: notification.sent ? new Date().toISOString() : null,
+        notification_error: notification.error,
+      })
+      .eq("id", data.id);
+  } catch (error) {
+    notification = { sent: false, error: error instanceof Error ? error.message : "Notification failed" };
+  }
 
   return NextResponse.json({ id: data.id, ok: true, notificationSent: notification.sent, notificationError: notification.error });
 }
