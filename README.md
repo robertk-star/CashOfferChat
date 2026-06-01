@@ -38,3 +38,7 @@ Run `sql/001_initial_schema.sql` in the Supabase SQL editor before testing lead 
 npm install
 npm run dev
 ```
+
+## Phase 2A.1 fix
+
+This package preserves client-side intake state when Supabase conversation persistence is unavailable, preventing the chat from asking the same intake question twice during demo/testing.

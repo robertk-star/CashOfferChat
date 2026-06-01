@@ -64,12 +64,12 @@ export function DemoChat() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId, message: trimmed, sourceUrl: window.location.href }),
+        body: JSON.stringify({ conversationId, message: trimmed, sourceUrl: window.location.href, intake }),
       });
       const data = await response.json();
       if (data.conversationId) setConversationId(data.conversationId);
       if (data.intake) {
-        setIntake(data.intake);
+        setIntake((current) => ({ ...current, ...data.intake }));
         setManualLead((current) => ({ ...current, ...data.intake }));
       }
       if (data.leadCreated && data.leadId) {

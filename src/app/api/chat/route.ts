@@ -7,16 +7,30 @@ import {
   canCreateLead,
   capturedFieldLabels,
   extractIntakeFromMessages,
+  extractIntakeFromText,
   fallbackGuidedReply,
   getMissingIntakeField,
   questionForField,
   type IntakeState,
 } from "@/lib/intake";
 
+const intakeSchema = z.object({
+  name: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
+  propertyAddress: z.string().optional(),
+  propertyCity: z.string().optional(),
+  timeline: z.string().optional(),
+  situation: z.string().optional(),
+  propertyCondition: z.string().optional(),
+  notes: z.string().optional(),
+}).partial();
+
 const requestSchema = z.object({
   conversationId: z.string().uuid().nullable().optional(),
   message: z.string().min(1).max(2000),
   sourceUrl: z.string().url().optional(),
+  intake: intakeSchema.optional(),
 });
 
 type StoredMessage = { role: string; content: string };
@@ -130,8 +144,15 @@ export async function POST(request: Request) {
     });
   }
 
-  const storedMessages = conversationId ? await getConversationMessages(supabase, conversationId) : [{ role: "user", content: parsed.data.message }];
-  const intake = extractIntakeFromMessages(storedMessages.length ? storedMessages : [{ role: "user", content: parsed.data.message }]);
+  const clientIntake = parsed.data.intake || {};
+  const storedMessages = conversationId ? await getConversationMessages(supabase, conversationId) : [];
+
+  // If Supabase is configured and message history is available, rebuild from history.
+  // If Supabase is not configured, unavailable, or a user is only testing the demo,
+  // preserve the client-side intake state so the assistant does not ask for the same field twice.
+  const intake = storedMessages.length
+    ? { ...clientIntake, ...extractIntakeFromMessages(storedMessages) }
+    : extractIntakeFromText(parsed.data.message, clientIntake);
   const leadId = canCreateLead(intake)
     ? await createLeadFromIntake({ supabase, conversationId, intake, sourceUrl: parsed.data.sourceUrl })
     : await existingLeadForConversation(supabase, conversationId);
