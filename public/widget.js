@@ -29,6 +29,9 @@
     .coc-title { font-weight: 800; font-size: 16px; margin: 0; }
     .coc-status { margin: 3px 0 0; font-size: 12px; opacity: .72; }
     .coc-close { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.1); color:#fff; border-radius: 999px; width: 34px; height: 34px; cursor:pointer; font-size: 20px; line-height: 30px; }
+    .coc-top-cta { padding: 12px 14px; background:#fff; border-bottom:1px solid #e2e8f0; }
+    .coc-open-quote { width:100%; border:0; background:${accentColor}; color:#0f2440; border-radius:999px; padding:12px 14px; font-weight:900; cursor:pointer; font-size:14px; }
+    .coc-top-cta p { margin:7px 4px 0; color:#64748b; font-size:12px; line-height:1.35; }
     .coc-messages { flex: 1; overflow-y: auto; padding: 16px; background: #f8fafc; }
     .coc-msg { max-width: 86%; padding: 12px 14px; border-radius: 18px; margin: 0 0 10px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; }
     .coc-assistant { background: #fff; color: #334155; border: 1px solid #e2e8f0; border-bottom-left-radius: 6px; }
@@ -40,7 +43,7 @@
     .coc-input { flex:1; border:1px solid #cbd5e1; border-radius:999px; padding: 12px 14px; outline:0; font-size:14px; }
     .coc-send { border:0; border-radius:999px; background:${primaryColor}; color:#fff; padding: 0 15px; font-weight:800; cursor:pointer; }
     .coc-form-wrap { display:none; flex:1; overflow-y:auto; padding:16px; background:#fff; }
-    .coc-panel.coc-form-mode .coc-messages, .coc-panel.coc-form-mode .coc-actions, .coc-panel.coc-form-mode .coc-composer { display:none; }
+    .coc-panel.coc-form-mode .coc-top-cta, .coc-panel.coc-form-mode .coc-messages, .coc-panel.coc-form-mode .coc-actions, .coc-panel.coc-form-mode .coc-composer { display:none; }
     .coc-panel.coc-form-mode .coc-form-wrap { display:block; }
     .coc-form-title { font-size:20px; font-weight:900; color:#0f2440; margin:0; }
     .coc-form-help { color:#64748b; font-size:13px; line-height:1.5; margin:8px 0 16px; }
@@ -70,20 +73,21 @@
         <div><p class="coc-title">${escapeHtml(title)}</p><p class="coc-status">Answers questions and collects property basics</p></div>
         <button class="coc-close" type="button" aria-label="Close">×</button>
       </header>
+      <div class="coc-top-cta"><button class="coc-open-quote" type="button">Enter House Info for a Quote</button><p>Ask a question below, or enter your property details when you’re ready.</p></div>
       <div class="coc-messages"></div>
       <div class="coc-actions">
         <button class="coc-chip" type="button" data-msg="Do you buy as-is?">Do you buy as-is?</button>
         <button class="coc-chip" type="button" data-msg="How fast can I close?">How fast can I close?</button>
         <button class="coc-chip" type="button" data-msg="Do you buy houses with tenants?">Tenants?</button>
-        <button class="coc-chip" type="button" data-msg="Can you take a look at it?">Get a review</button>
+        <button class="coc-chip" type="button" data-action="open-form">Get a review</button>
       </div>
       <form class="coc-composer">
         <input class="coc-input" name="message" placeholder="Ask a question..." autocomplete="off" />
         <button class="coc-send" type="submit">Send</button>
       </form>
       <div class="coc-form-wrap">
-        <p class="coc-form-title">Request a property review</p>
-        <p class="coc-form-help">Share the basics so the team can follow up. There is no obligation.</p>
+        <p class="coc-form-title">Enter house information for a quote</p>
+        <p class="coc-form-help">Share the property basics so the team can review it and follow up. There is no obligation.</p>
         <div class="coc-form-status"></div>
         <form class="coc-lead-form">
           <label class="coc-label">Property city *<input class="coc-field" name="propertyCity" placeholder="Austin" /></label>
@@ -95,7 +99,7 @@
           <label class="coc-label">Phone number *<input class="coc-field" name="phone" placeholder="Best phone number" /></label>
           <label class="coc-label">Email<input class="coc-field" name="email" type="email" placeholder="Optional backup email" /></label>
           <label class="coc-label">Anything else?<textarea class="coc-textarea" name="notes" placeholder="Anything else the team should know?"></textarea></label>
-          <button class="coc-submit" type="submit">Send Property Details</button>
+          <button class="coc-submit" type="submit">Submit My House Info</button>
           <button class="coc-back" type="button">Back to Chat</button>
         </form>
       </div>
@@ -126,7 +130,7 @@
       const btn = document.createElement('button');
       btn.className = 'coc-intake-btn';
       btn.type = 'button';
-      btn.textContent = 'Open Short Intake Form';
+      btn.textContent = 'Enter House Info for a Quote';
       btn.addEventListener('click', openForm);
       div.appendChild(document.createElement('br'));
       div.appendChild(btn);
@@ -143,9 +147,13 @@
   bubble.addEventListener('click', openPanel);
   close.addEventListener('click', closePanel);
   back.addEventListener('click', closeForm);
-  root.querySelectorAll('.coc-chip').forEach((btn) => btn.addEventListener('click', () => sendMessage(btn.getAttribute('data-msg'))));
+  root.querySelectorAll('.coc-chip').forEach((btn) => btn.addEventListener('click', () => {
+    if (btn.getAttribute('data-action') === 'open-form') { openForm(); return; }
+    sendMessage(btn.getAttribute('data-msg'));
+  }));
+  root.querySelector('.coc-open-quote').addEventListener('click', openForm);
 
-  addMessage('assistant', 'Hi! I can answer questions about selling a house as-is for cash. When you are ready, I can open a short intake form so the team can review the property details. There is no obligation.');
+  addMessage('assistant', 'Hi! I can answer questions about selling a house as-is for cash. To request a review, click “Enter House Info for a Quote” above. There is no obligation.');
 
   async function sendMessage(content) {
     const text = String(content || '').trim();
