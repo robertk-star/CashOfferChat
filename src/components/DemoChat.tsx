@@ -12,6 +12,35 @@ type Intake = {
   timeline?: string;
   situation?: string;
   propertyCondition?: string;
+  notes?: string;
+};
+type LastAskedField =
+  | "propertyCity"
+  | "propertyAddress"
+  | "situation"
+  | "timeline"
+  | "propertyCondition"
+  | "followUpPermission"
+  | "name"
+  | "phone"
+  | "email"
+  | null;
+type ChatState = {
+  intake: Intake;
+  lastAskedField: LastAskedField;
+  conversationMode: "qa" | "intake" | "handoff";
+  leadReadiness: "low" | "medium" | "high" | "ready_for_contact";
+  followUpPermission: boolean | null;
+  leadCreated: boolean;
+};
+
+const initialChatState: ChatState = {
+  intake: {},
+  lastAskedField: "propertyCity",
+  conversationMode: "intake",
+  leadReadiness: "low",
+  followUpPermission: null,
+  leadCreated: false,
 };
 
 const starters = [
@@ -40,15 +69,16 @@ export function DemoChat() {
     {
       role: "assistant",
       content:
-        "Hi! I can answer questions about selling an Austin-area house as-is for cash and collect a few details for follow-up. What city is the property in?",
+        "Hi! I can answer questions about selling an Austin-area house as-is for cash and collect a few details if you want follow-up. What city is the property in?",
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [intake, setIntake] = useState<Intake>({});
+  const [chatState, setChatState] = useState<ChatState>(initialChatState);
   const [leadId, setLeadId] = useState<string | null>(null);
   const [leadStatus, setLeadStatus] = useState<string | null>(null);
   const [manualLead, setManualLead] = useState({ name: "", phone: "", email: "", propertyAddress: "", propertyCity: "", timeline: "", situation: "" });
 
+  const intake = chatState.intake;
   const completionCount = useMemo(() => fieldLabels.filter(([key]) => Boolean(intake[key])).length, [intake]);
   const canSubmitManualLead = useMemo(() => manualLead.name && manualLead.phone && (manualLead.propertyAddress || manualLead.propertyCity), [manualLead]);
 
@@ -64,12 +94,15 @@ export function DemoChat() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId, message: trimmed, sourceUrl: window.location.href, intake }),
+        body: JSON.stringify({ conversationId, message: trimmed, sourceUrl: window.location.href, chatState }),
       });
       const data = await response.json();
       if (data.conversationId) setConversationId(data.conversationId);
-      if (data.intake) {
-        setIntake((current) => ({ ...current, ...data.intake }));
+      if (data.chatState) {
+        setChatState(data.chatState);
+        setManualLead((current) => ({ ...current, ...data.chatState.intake }));
+      } else if (data.intake) {
+        setChatState((current) => ({ ...current, intake: { ...current.intake, ...data.intake } }));
         setManualLead((current) => ({ ...current, ...data.intake }));
       }
       if (data.leadCreated && data.leadId) {
@@ -115,7 +148,7 @@ export function DemoChat() {
         <div className="rounded-[2rem] bg-white p-5 shadow-soft ring-1 ring-slate-200">
           <div className="border-b border-slate-200 pb-4">
             <h1 className="text-2xl font-bold text-navy">We Buy Houses Seller Intake Demo</h1>
-            <p className="mt-2 text-sm text-slate-600">Phase 2A guides the conversation, captures seller details, and automatically saves a lead when enough information is collected.</p>
+            <p className="mt-2 text-sm text-slate-600">Phase 2A answers seller questions first, then gently collects one detail at a time without repeating questions.</p>
           </div>
 
           <div className="h-[520px] space-y-4 overflow-y-auto py-6">
@@ -142,7 +175,7 @@ export function DemoChat() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold text-navy">Captured Intake</h2>
-                <p className="mt-2 text-sm text-slate-600">Fields update automatically from the chat conversation.</p>
+                <p className="mt-2 text-sm text-slate-600">Fields update from answers to specific intake questions.</p>
               </div>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{completionCount}/8</span>
             </div>
@@ -153,6 +186,12 @@ export function DemoChat() {
                   <p className="mt-1 text-sm font-semibold text-slate-700">{intake[key] || "Not captured yet"}</p>
                 </div>
               ))}
+            </div>
+            <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-500">
+              <div><strong>Mode:</strong> {chatState.conversationMode}</div>
+              <div><strong>Readiness:</strong> {chatState.leadReadiness}</div>
+              <div><strong>Last asked:</strong> {chatState.lastAskedField || "none"}</div>
+              <div><strong>Follow-up permission:</strong> {chatState.followUpPermission === null ? "not asked" : chatState.followUpPermission ? "yes" : "no"}</div>
             </div>
             {leadStatus && <p className="mt-4 rounded-xl bg-green/10 p-3 text-sm font-semibold text-navy">{leadStatus}</p>}
             {leadId && <p className="mt-2 text-xs text-slate-500">Lead ID: {leadId}</p>}

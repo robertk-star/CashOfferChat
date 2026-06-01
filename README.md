@@ -42,3 +42,27 @@ npm run dev
 ## Phase 2A.1 fix
 
 This package preserves client-side intake state when Supabase conversation persistence is unavailable, preventing the chat from asking the same intake question twice during demo/testing.
+
+## Phase 2A state-machine update
+
+This update changes the demo chat from loose extraction to a Q&A + guided intake state machine.
+
+Key behavior:
+
+- The assistant answers seller questions first.
+- It asks only one intake question at a time.
+- It tracks `lastAskedField` so answers like `Front st` are saved as the address when the previous assistant prompt asked for address.
+- It does not infer seller details from general questions such as `Do you buy as-is?`.
+- It asks for contact information only after property basics are collected and the seller gives permission for follow-up.
+- No new SQL migration is required.
+- No new Vercel environment variables are required.
+
+Recommended test flow:
+
+1. `Do you buy as-is?`
+2. `Austin`
+3. `Front st`
+4. `Needs repairs`
+5. `ASAP`
+6. `Needs roof work`
+7. The assistant should ask permission for follow-up before asking for name, phone, or email.

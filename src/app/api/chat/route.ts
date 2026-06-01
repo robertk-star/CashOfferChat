@@ -6,11 +6,13 @@ import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   canCreateLead,
   capturedFieldLabels,
-  extractIntakeFromMessages,
-  extractIntakeFromText,
   fallbackGuidedReply,
-  getMissingIntakeField,
+  initialChatState,
+  processUserTurn,
   questionForField,
+  sellerQuestionAnswer,
+  type ChatState,
+  type IntakeField,
   type IntakeState,
 } from "@/lib/intake";
 
@@ -26,25 +28,33 @@ const intakeSchema = z.object({
   notes: z.string().optional(),
 }).partial();
 
+const chatStateSchema = z.object({
+  intake: intakeSchema.optional(),
+  lastAskedField: z.enum([
+    "propertyCity",
+    "propertyAddress",
+    "situation",
+    "timeline",
+    "propertyCondition",
+    "followUpPermission",
+    "name",
+    "phone",
+    "email",
+  ]).nullable().optional(),
+  conversationMode: z.enum(["qa", "intake", "handoff"]).optional(),
+  leadReadiness: z.enum(["low", "medium", "high", "ready_for_contact"]).optional(),
+  followUpPermission: z.boolean().nullable().optional(),
+  leadCreated: z.boolean().optional(),
+}).partial();
+
 const requestSchema = z.object({
   conversationId: z.string().uuid().nullable().optional(),
   message: z.string().min(1).max(2000),
   sourceUrl: z.string().url().optional(),
+  // Backward compatible: older demo builds sent only intake.
   intake: intakeSchema.optional(),
+  chatState: chatStateSchema.optional(),
 });
-
-type StoredMessage = { role: string; content: string };
-
-async function getConversationMessages(supabase: ReturnType<typeof getSupabaseAdmin>, conversationId: string) {
-  if (!supabase) return [];
-  const { data } = await supabase
-    .from("conversation_messages")
-    .select("role, content")
-    .eq("conversation_id", conversationId)
-    .order("created_at", { ascending: true })
-    .limit(80);
-  return (data || []) as StoredMessage[];
-}
 
 async function existingLeadForConversation(supabase: ReturnType<typeof getSupabaseAdmin>, conversationId: string | null) {
   if (!supabase || !conversationId) return null;
@@ -90,31 +100,40 @@ async function createLeadFromIntake({
   return data?.id || null;
 }
 
-async function buildAssistantReply(userMessage: string, intake: IntakeState, leadCreated: boolean) {
-  const missingField = getMissingIntakeField(intake);
-  const requiredQuestion = questionForField(missingField);
-  const fallback = fallbackGuidedReply(userMessage, intake, leadCreated);
+function normalizeIncomingState(input?: Partial<ChatState>, intake?: IntakeState): ChatState {
+  return initialChatState({
+    intake: { ...(intake || {}), ...(input?.intake || {}) },
+    lastAskedField: (input?.lastAskedField as IntakeField | null | undefined) ?? "propertyCity",
+    conversationMode: input?.conversationMode || "intake",
+    leadReadiness: input?.leadReadiness || "low",
+    followUpPermission: input?.followUpPermission ?? null,
+    leadCreated: input?.leadCreated || false,
+  });
+}
 
-  if (!process.env.OPENAI_API_KEY) return fallback;
+async function maybeEnhanceQuestionAnswer(userMessage: string, deterministicAnswer?: string) {
+  if (!process.env.OPENAI_API_KEY) return deterministicAnswer;
+  if (!deterministicAnswer) return undefined;
 
   try {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const completion = await openai.chat.completions.create({
       model: process.env.OPENAI_MODEL || "gpt-4o-mini",
-      temperature: 0.25,
-      max_tokens: 220,
+      temperature: 0.2,
+      max_tokens: 130,
       messages: [
         { role: "system", content: CASH_OFFER_CHAT_SYSTEM_PROMPT },
         {
           role: "system",
-          content: `Current captured seller intake JSON: ${JSON.stringify(intake)}\nLead created: ${leadCreated ? "yes" : "no"}. Answer the user's question briefly, keep it positive but not misleading, and end with this exact next intake question unless it would duplicate the answer: ${requiredQuestion}`,
+          content:
+            "Rewrite the provided answer in plain English for a homeowner. Keep it brief, helpful, positive, and safe. Do not ask for contact information. Do not add promises, prices, legal advice, tax advice, financial advice, or foreclosure guarantees.",
         },
-        { role: "user", content: userMessage },
+        { role: "user", content: `Seller question: ${userMessage}\nSafe answer to preserve: ${deterministicAnswer}` },
       ],
     });
-    return completion.choices[0]?.message?.content || fallback;
+    return completion.choices[0]?.message?.content || deterministicAnswer;
   } catch {
-    return fallback;
+    return deterministicAnswer;
   }
 }
 
@@ -144,20 +163,20 @@ export async function POST(request: Request) {
     });
   }
 
-  const clientIntake = parsed.data.intake || {};
-  const storedMessages = conversationId ? await getConversationMessages(supabase, conversationId) : [];
+  const incomingState = normalizeIncomingState(parsed.data.chatState as Partial<ChatState> | undefined, parsed.data.intake as IntakeState | undefined);
+  const deterministicTurn = processUserTurn(parsed.data.message, incomingState);
+  const enhancedAnswer = await maybeEnhanceQuestionAnswer(parsed.data.message, deterministicTurn.questionAnswer || sellerQuestionAnswer(parsed.data.message));
+  const chatState = deterministicTurn.state;
 
-  // If Supabase is configured and message history is available, rebuild from history.
-  // If Supabase is not configured, unavailable, or a user is only testing the demo,
-  // preserve the client-side intake state so the assistant does not ask for the same field twice.
-  const intake = storedMessages.length
-    ? { ...clientIntake, ...extractIntakeFromMessages(storedMessages) }
-    : extractIntakeFromText(parsed.data.message, clientIntake);
-  const leadId = canCreateLead(intake)
-    ? await createLeadFromIntake({ supabase, conversationId, intake, sourceUrl: parsed.data.sourceUrl })
-    : await existingLeadForConversation(supabase, conversationId);
+  const existingLeadId = await existingLeadForConversation(supabase, conversationId);
+  const shouldCreateLead = !existingLeadId && canCreateLead(chatState.intake);
+  const leadId = shouldCreateLead
+    ? await createLeadFromIntake({ supabase, conversationId, intake: chatState.intake, sourceUrl: parsed.data.sourceUrl })
+    : existingLeadId;
+
   const leadCreated = Boolean(leadId);
-  const reply = await buildAssistantReply(parsed.data.message, intake, leadCreated);
+  const finalState: ChatState = { ...chatState, leadCreated };
+  const reply = fallbackGuidedReply(parsed.data.message, finalState, enhancedAnswer);
 
   if (supabase && conversationId) {
     await supabase.from("conversation_messages").insert({
@@ -170,9 +189,10 @@ export async function POST(request: Request) {
   return NextResponse.json({
     conversationId,
     reply,
-    intake: capturedFieldLabels(intake),
-    missingField: getMissingIntakeField(intake),
-    nextQuestion: questionForField(getMissingIntakeField(intake)),
+    intake: capturedFieldLabels(finalState.intake),
+    chatState: finalState,
+    missingField: finalState.lastAskedField,
+    nextQuestion: questionForField(finalState.lastAskedField),
     leadCreated,
     leadId,
   });
