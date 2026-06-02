@@ -1,17 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 const adminLinks = [
   { href: "/admin", label: "Admin Dashboard" },
+  { href: "/admin/system", label: "System Dashboard" },
   { href: "/admin/businesses", label: "Businesses" },
   { href: "/admin/onboarding", label: "Onboarding" },
   { href: "/admin/sites", label: "Widget Sites" },
   { href: "/admin/clients", label: "Client Users" },
   { href: "/admin/settings", label: "Settings" },
   { href: "/admin/analytics", label: "Analytics" },
-  { href: "/admin/system", label: "System" },
 ];
 
 const clientLinks = [
@@ -26,17 +27,45 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function clarifyLegacyBackLinks(pathname: string) {
+  if (typeof document === "undefined") return;
+
+  const anchors = Array.from(document.querySelectorAll("a"));
+  for (const anchor of anchors) {
+    const text = (anchor.textContent || "").trim();
+    const href = anchor.getAttribute("href") || "";
+
+    if (pathname.startsWith("/admin") && href === "/admin" && text === "Back to Admin") {
+      anchor.textContent = "Back to Admin Dashboard";
+    }
+
+    if (pathname.startsWith("/admin") && href === "/admin/system" && text === "System") {
+      anchor.textContent = "System Dashboard";
+    }
+
+    if (pathname.startsWith("/client") && href === "/client" && text === "Back to Client") {
+      anchor.textContent = "Back to Client Dashboard";
+    }
+  }
+}
+
 export function PortalRouteNav() {
   const pathname = usePathname() || "";
 
   const isAdminRoute = pathname.startsWith("/admin") && pathname !== "/admin/login";
   const isClientRoute = pathname.startsWith("/client") && pathname !== "/client/login";
 
+  useEffect(() => {
+    clarifyLegacyBackLinks(pathname);
+  }, [pathname]);
+
   if (!isAdminRoute && !isClientRoute) return null;
 
   const links = isAdminRoute ? adminLinks : clientLinks;
   const logoutAction = isAdminRoute ? "/api/admin/logout" : "/api/client/logout";
   const label = isAdminRoute ? "CashOfferChat Admin" : "CashOfferChat Client Portal";
+  const homeHref = isAdminRoute ? "/admin" : "/client";
+  const homeLabel = isAdminRoute ? "Back to Admin Dashboard" : "Back to Client Dashboard";
 
   return (
     <div className="border-b border-slate-200 bg-white/95 backdrop-blur">
@@ -44,7 +73,17 @@ export function PortalRouteNav() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="text-sm font-bold uppercase tracking-wide text-slate-500">{label}</div>
-            <div className="text-xs text-slate-400">Current route: {pathname}</div>
+            <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+              <Link href={homeHref} className="font-bold text-slate-600 underline">
+                {homeLabel}
+              </Link>
+              {isAdminRoute && (
+                <Link href="/admin/system" className="font-bold text-slate-600 underline">
+                  System Dashboard
+                </Link>
+              )}
+              <span>Current route: {pathname}</span>
+            </div>
           </div>
 
           <form action={logoutAction} method="post">

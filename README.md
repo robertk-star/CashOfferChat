@@ -1,70 +1,24 @@
-# CashOfferChat Phase 3G Hotfix — Global Portal Navigation
+# CashOfferChat Phase 3G Hotfix — Navigation Label Cleanup
 
-This hotfix adds a consistent navigation bar across all admin and client portal pages.
+This hotfix clarifies portal navigation labels.
 
-## What this adds
+## What changed
 
-- Global portal navigation component:
-  - `src/components/PortalRouteNav.tsx`
+- Global admin nav now clearly separates:
+  - Admin Dashboard
+  - System Dashboard
+- Global client nav clearly shows:
+  - Client Dashboard
+- Existing page-level links that say `Back to Admin` are clarified in the browser to:
+  - `Back to Admin Dashboard`
+- Existing page-level links that say `Back to Client Dashboard` remain clear.
+- System Dashboard remains visible from every admin route through the global nav.
 
-- Updated root layout:
-  - `src/app/layout.tsx`
-
-## Behavior
-
-The navigation automatically appears on admin routes:
-
-```text
-/admin
-/admin/businesses
-/admin/onboarding
-/admin/sites
-/admin/clients
-/admin/settings
-/admin/analytics
-/admin/system
-/admin/leads/[id]
-```
-
-It does not appear on:
+## File changed
 
 ```text
-/admin/login
+src/components/PortalRouteNav.tsx
 ```
-
-The navigation automatically appears on client routes:
-
-```text
-/client
-/client/settings
-/client/account
-/client/leads/[id]
-```
-
-It does not appear on:
-
-```text
-/client/login
-```
-
-## Admin links shown
-
-- Admin Dashboard
-- Businesses
-- Onboarding
-- Widget Sites
-- Client Users
-- Settings
-- Analytics
-- System
-- Log Out
-
-## Client links shown
-
-- Client Dashboard
-- Settings
-- Account
-- Log Out
 
 ## SQL migration
 
