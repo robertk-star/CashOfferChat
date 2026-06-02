@@ -33,14 +33,17 @@ function signPayload(body: string, secret: string) {
   return createHmac("sha256", secret).update(body).digest("hex");
 }
 
-function validWebhookUrl(url?: string | null) {
-  if (!url) return false;
+function normalizeWebhookUrl(url?: string | null) {
+  const trimmed = String(url || "").trim();
+
+  if (!trimmed) return null;
 
   try {
-    const parsed = new URL(url);
-    return parsed.protocol === "https:" || parsed.protocol === "http:";
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+    return parsed.toString();
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -59,7 +62,10 @@ export async function getBusinessWebhookSettings(businessId?: string | null): Pr
   return data || null;
 }
 
-export function buildLeadWebhookPayload(lead: any, event: LeadWebhookPayload["event"] = "seller_lead.created"): LeadWebhookPayload {
+export function buildLeadWebhookPayload(
+  lead: any,
+  event: LeadWebhookPayload["event"] = "seller_lead.created"
+): LeadWebhookPayload {
   return {
     event,
     sentAt: new Date().toISOString(),
@@ -96,8 +102,15 @@ export async function sendLeadWebhookForBusiness({
     return { skipped: true, sent: false, error: null, reason: "Webhook disabled" };
   }
 
-  if (!validWebhookUrl(settings.webhook_url)) {
-    return { skipped: true, sent: false, error: "Webhook URL is missing or invalid", reason: "Invalid URL" };
+  const webhookUrl = normalizeWebhookUrl(settings.webhook_url);
+
+  if (!webhookUrl) {
+    return {
+      skipped: true,
+      sent: false,
+      error: "Webhook URL is missing or invalid",
+      reason: "Invalid URL",
+    };
   }
 
   const body = JSON.stringify(payload);
@@ -111,7 +124,7 @@ export async function sendLeadWebhookForBusiness({
   }
 
   try {
-    const response = await fetch(settings.webhook_url, {
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers,
       body,
@@ -138,7 +151,10 @@ export async function sendLeadWebhookForBusiness({
   }
 }
 
-export async function recordLeadWebhookResult(leadId: string, result: { sent: boolean; error: string | null }) {
+export async function recordLeadWebhookResult(
+  leadId: string,
+  result: { sent: boolean; error: string | null }
+) {
   const supabase = getSupabaseAdmin();
   if (!supabase) return;
 
