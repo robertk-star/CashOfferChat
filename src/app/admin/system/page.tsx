@@ -19,9 +19,21 @@ function StatusBadge({ status }: { status: HealthItem["status"] }) {
 }
 
 function HealthSection({ title, items }: { title: string; items: HealthItem[] }) {
+  const errorCount = items.filter((item) => item.status === "error").length;
+  const warningCount = items.filter((item) => item.status === "warning").length;
+  const okCount = items.filter((item) => item.status === "ok").length;
+
   return (
     <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
-      <h2 className="text-xl font-bold text-navy">{title}</h2>
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <h2 className="text-xl font-bold text-navy">{title}</h2>
+        <div className="flex flex-wrap gap-2 text-xs font-bold">
+          <span className="rounded-full bg-green-50 px-3 py-1 text-green-700">OK: {okCount}</span>
+          <span className="rounded-full bg-amber-50 px-3 py-1 text-amber-800">Warnings: {warningCount}</span>
+          <span className="rounded-full bg-red-50 px-3 py-1 text-red-700">Errors: {errorCount}</span>
+        </div>
+      </div>
+
       <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-100 text-left text-xs uppercase tracking-wide text-slate-500">
@@ -29,6 +41,7 @@ function HealthSection({ title, items }: { title: string; items: HealthItem[] })
               <th className="px-4 py-3">Item</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Message</th>
+              <th className="px-4 py-3">Detail</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -37,6 +50,7 @@ function HealthSection({ title, items }: { title: string; items: HealthItem[] })
                 <td className="px-4 py-3 font-semibold text-navy">{item.name}</td>
                 <td className="px-4 py-3"><StatusBadge status={item.status} /></td>
                 <td className="px-4 py-3 text-slate-600">{item.message}</td>
+                <td className="px-4 py-3 text-xs text-slate-500">{item.detail || "—"}</td>
               </tr>
             ))}
           </tbody>
@@ -55,7 +69,7 @@ export default async function AdminSystemPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <AdminNav title="System Health" subtitle="Check configuration, database tables, and route files." />
+      <AdminNav title="System Health" subtitle="Check configuration, database tables, route files, API route files, and manual QA items." />
       <section className="mx-auto max-w-7xl space-y-8 px-6 py-8">
         <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -65,14 +79,34 @@ export default async function AdminSystemPage() {
             </div>
             <StatusBadge status={health.overallStatus} />
           </div>
-          <div className="mt-4 text-sm text-slate-600">
-            API JSON: <code className="rounded bg-slate-100 px-2 py-1">/api/admin/system/health</code>
+
+          <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+            <div className="font-bold text-navy">How to use this page</div>
+            <p className="mt-1">Fix red items first. Yellow items are usually optional services or manual checks. Green items are ready.</p>
+            <p className="mt-2">API JSON: <code className="rounded bg-white px-2 py-1">/api/admin/system/health</code></p>
           </div>
         </div>
 
         <HealthSection title="Environment Variables" items={health.env} />
         <HealthSection title="Supabase Tables" items={health.tables} />
-        <HealthSection title="Route Files" items={health.routes} />
+        <HealthSection title="Page Route Files" items={health.routes} />
+        <HealthSection title="API Route Files" items={health.apiRoutes} />
+        <HealthSection title="Manual QA Checklist" items={health.qaChecklist} />
+
+        <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
+          <h2 className="text-xl font-bold text-navy">Recommended End-to-End Test Flow</h2>
+          <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-slate-600">
+            <li>Open <strong>/admin/onboarding</strong> and create a test business with a unique Site ID.</li>
+            <li>Open <strong>/admin/sites</strong> and confirm the widget site exists.</li>
+            <li>Open <strong>/admin/clients</strong> and create or confirm a client user.</li>
+            <li>Log in at <strong>/client/login</strong>.</li>
+            <li>Open <strong>/client/sites</strong> and copy the embed code.</li>
+            <li>Open <strong>/widget-demo</strong> or your external demo site and submit a test lead.</li>
+            <li>Confirm the lead appears in both <strong>/admin</strong> and <strong>/client</strong>.</li>
+            <li>Open the lead detail page and update status/notes.</li>
+            <li>Test CSV export and webhook test if configured.</li>
+          </ol>
+        </div>
       </section>
     </main>
   );
