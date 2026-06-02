@@ -37,7 +37,7 @@ function onboardingErrorMessage(code?: string, detail?: string) {
 export default async function AdminOnboardingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ saved?: string; error?: string; detail?: string; siteId?: string }>;
+  searchParams: Promise<{ saved?: string; recovered?: string; error?: string; detail?: string; siteId?: string }>;
 }) {
   const params = await searchParams;
   const cookieStore = await cookies();
@@ -76,6 +76,24 @@ export default async function AdminOnboardingPage({
             )}
           </div>
         )}
+
+        {params.recovered && (
+          <div className="mb-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800">
+            That Site ID already exists, so onboarding was recovered instead of creating a duplicate. Use the existing widget site below or open Widget Sites to edit it.
+            {embedCode && (
+              <div className="mt-4">
+                <div className="font-bold">Existing embed code:</div>
+                <pre className="mt-2 overflow-x-auto rounded-xl bg-white p-4 text-xs text-slate-700 ring-1 ring-amber-200">{embedCode}</pre>
+              </div>
+            )}
+            <div className="mt-4">
+              <Link className="rounded-full bg-navy px-5 py-2 text-sm font-bold text-white" href="/admin/sites">
+                Open Widget Sites
+              </Link>
+            </div>
+          </div>
+        )}
+
         {params.error && (
           <div className="mb-6 rounded-2xl bg-red-50 p-4 text-sm text-red-700">
             {onboardingErrorMessage(params.error, params.detail)}

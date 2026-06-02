@@ -1,38 +1,24 @@
-# CashOfferChat Phase 3E Stabilization — Onboarding Schema Repair
+# CashOfferChat Phase 3E Hotfix — Onboarding Duplicate Recovery
 
-This package is meant to stop the repeated onboarding failures caused by mismatches between the app code and your current Supabase tables.
+This hotfix improves onboarding when a business/site was partly created and the same Site ID is submitted again.
 
-## What this fixes
+## What changed
 
-The error you just received was:
+- If the Site ID already exists, onboarding now redirects to a recovery/success state instead of a hard error.
+- The page shows the embed code for the existing Site ID.
+- The page includes a link to `/admin/sites`.
+- The onboarding route avoids creating a duplicate business when the site already exists.
+- The duplicate-site message is now helpful instead of making the user start over.
 
-```text
-Could not find the 'business_description' column of 'business_settings'
-```
-
-This package adds a stronger repair migration that ensures the main tables used by onboarding have the columns the app expects.
-
-## Run this SQL first
-
-Run this in Supabase SQL Editor:
+## Files changed
 
 ```text
-sql/013_stabilize_onboarding_schema.sql
-```
-
-## Then upload/deploy the code files
-
-Files included:
-
-```text
-src/app/api/admin/onboarding/route.ts
 src/app/admin/onboarding/page.tsx
+src/app/api/admin/onboarding/route.ts
 ```
 
-## No new Vercel environment variables required.
+## Requirements
 
-## Important
+No new Supabase SQL migration is required.
 
-After running the SQL and deploying this package, try onboarding again.
-
-If another database mismatch appears, the error message should now be specific enough to fix directly.
+No new Vercel environment variables are required.

@@ -21,8 +21,15 @@ function fail(request: Request, code: string, error?: unknown) {
   return NextResponse.redirect(new URL(`/admin/onboarding?error=${encodeURIComponent(code)}${suffix}`, request.url), { status: 303 });
 }
 
+function recoverExistingSite(request: Request, siteId: string) {
+  return NextResponse.redirect(
+    new URL(`/admin/onboarding?recovered=1&siteId=${encodeURIComponent(siteId)}`, request.url),
+    { status: 303 }
+  );
+}
+
 async function insertNamedRows(supabase: any, table: string, businessId: string, lines: string[]) {
-  if (lines.length === 0) return;
+  if (lines.length === 0) return null;
   const { error } = await supabase.from(table).insert(lines.map((name) => ({ business_id: businessId, name })));
   return error;
 }
@@ -50,8 +57,15 @@ export async function POST(request: Request) {
 
   if (!businessName || !siteId) return fail(request, "missing_required");
 
-  const existingSite = await supabase.from("widget_sites").select("id").eq("site_id", siteId).maybeSingle();
-  if (existingSite.data?.id) return fail(request, "duplicate_site_id");
+  const existingSite = await supabase
+    .from("widget_sites")
+    .select("id, site_id")
+    .eq("site_id", siteId)
+    .maybeSingle();
+
+  if (existingSite.data?.id) {
+    return recoverExistingSite(request, siteId);
+  }
 
   const rawWebsite = value(formData, "website");
   const website = normalizeWebsite(rawWebsite);
@@ -138,6 +152,7 @@ export async function POST(request: Request) {
 
   const willBuy = parseLines(value(formData, "will_buy")).map((label) => ({ business_id: businessId, type: "will_buy", label }));
   const willNotBuy = parseLines(value(formData, "will_not_buy")).map((label) => ({ business_id: businessId, type: "will_not_buy", label }));
+
   if (willBuy.length || willNotBuy.length) {
     const { error: criteriaError } = await supabase.from("property_buying_criteria").insert([...willBuy, ...willNotBuy]);
     if (criteriaError) return fail(request, "criteria_create_failed", criteriaError);
