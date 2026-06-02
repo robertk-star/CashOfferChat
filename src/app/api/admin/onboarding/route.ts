@@ -3,10 +3,14 @@ import { cookies } from "next/headers";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 import { hashClientPassword } from "@/lib/clientAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import { normalizeDomainInput, parseLines, slugifySiteId } from "@/lib/siteId";
+import { normalizeDomain, normalizeDomainInput, normalizeWebsite, parseLines, slugifySiteId } from "@/lib/siteId";
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) || "").trim();
+}
+
+function fail(request: Request, code: string) {
+  return NextResponse.redirect(new URL(`/admin/onboarding?error=${encodeURIComponent(code)}`, request.url), { status: 303 });
 }
 
 async function insertNamedRows(supabase: any, table: string, businessId: string, lines: string[]) {
@@ -22,25 +26,30 @@ export async function POST(request: Request) {
   }
 
   const supabase = getSupabaseAdmin();
-  if (!supabase) {
-    return NextResponse.redirect(new URL("/admin/onboarding?error=1", request.url), { status: 303 });
-  }
+  if (!supabase) return fail(request, "supabase_not_configured");
 
   const formData = await request.formData();
   const businessName = value(formData, "business_name");
   const siteId = slugifySiteId(value(formData, "site_id"));
   const now = new Date().toISOString();
 
-  if (!businessName || !siteId) {
-    return NextResponse.redirect(new URL("/admin/onboarding?error=1", request.url), { status: 303 });
-  }
+  if (!businessName || !siteId) return fail(request, "missing_required");
 
-  const website = value(formData, "website");
+  const existingSite = await supabase.from("widget_sites").select("id").eq("site_id", siteId).maybeSingle();
+  if (existingSite.data?.id) return fail(request, "duplicate_site_id");
+
+  const rawWebsite = value(formData, "website");
+  const website = normalizeWebsite(rawWebsite);
   const phone = value(formData, "phone");
   const email = value(formData, "email");
   const primaryMarket = value(formData, "primary_market");
   const description = value(formData, "description");
-  const allowedDomains = normalizeDomainInput(value(formData, "allowed_domains"));
+
+  let domain = normalizeDomain(value(formData, "domain"));
+  if (!domain && rawWebsite) domain = normalizeDomain(rawWebsite);
+
+  let allowedDomains = normalizeDomainInput(value(formData, "allowed_domains"));
+  if (!allowedDomains && domain) allowedDomains = domain;
 
   const { data: business, error: businessError } = await supabase
     .from("businesses")
@@ -57,9 +66,7 @@ export async function POST(request: Request) {
     .select("id")
     .single();
 
-  if (businessError || !business?.id) {
-    return NextResponse.redirect(new URL("/admin/onboarding?error=1", request.url), { status: 303 });
-  }
+  if (businessError || !business?.id) return fail(request, "business_create_failed");
 
   const businessId = business.id;
 
@@ -67,17 +74,15 @@ export async function POST(request: Request) {
     business_id: businessId,
     site_id: siteId,
     site_name: value(formData, "site_name") || `${businessName} Widget`,
-    domain: value(formData, "domain"),
+    domain,
     allowed_domains: allowedDomains,
     is_active: true,
     updated_at: now,
   });
 
-  if (siteError) {
-    return NextResponse.redirect(new URL("/admin/onboarding?error=1", request.url), { status: 303 });
-  }
+  if (siteError) return fail(request, "site_create_failed");
 
-  await supabase.from("business_settings").insert({
+  const { error: settingsError } = await supabase.from("business_settings").insert({
     business_id: businessId,
     business_name: businessName,
     website,
@@ -101,6 +106,8 @@ export async function POST(request: Request) {
     widget_allowed_domains: allowedDomains,
     updated_at: now,
   });
+
+  if (settingsError) return fail(request, "settings_create_failed");
 
   await insertNamedRows(supabase, "service_areas", businessId, parseLines(value(formData, "service_areas")));
   await insertNamedRows(supabase, "referral_areas", businessId, parseLines(value(formData, "referral_areas")));

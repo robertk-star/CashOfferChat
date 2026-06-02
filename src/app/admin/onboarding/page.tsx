@@ -6,6 +6,25 @@ import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Onboard Business | CashOfferChat" };
 
+function onboardingErrorMessage(code?: string) {
+  switch (code) {
+    case "missing_required":
+      return "Business name and Site ID are required.";
+    case "duplicate_site_id":
+      return "That Site ID already exists. Please choose a unique Site ID.";
+    case "business_create_failed":
+      return "The business record could not be created.";
+    case "site_create_failed":
+      return "The widget site could not be created. Check the Site ID and domain fields.";
+    case "settings_create_failed":
+      return "The business settings record could not be created.";
+    case "supabase_not_configured":
+      return "Supabase is not configured. Check the Vercel Supabase environment variables.";
+    default:
+      return "Business could not be onboarded. Make sure required fields are filled and the Site ID is unique.";
+  }
+}
+
 export default async function AdminOnboardingPage({
   searchParams,
 }: {
@@ -50,7 +69,7 @@ export default async function AdminOnboardingPage({
         )}
         {params.error && (
           <div className="mb-6 rounded-2xl bg-red-50 p-4 text-sm text-red-700">
-            Business could not be onboarded. Make sure required fields are filled and the site ID is unique.
+            {onboardingErrorMessage(params.error)}
           </div>
         )}
 
@@ -59,7 +78,7 @@ export default async function AdminOnboardingPage({
             <h2 className="text-xl font-bold text-navy">Business Profile</h2>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <label className="block text-sm font-semibold text-slate-700">Business Name *<input name="business_name" required placeholder="Sell My House Today Anywhere" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
-              <label className="block text-sm font-semibold text-slate-700">Website<input name="website" placeholder="https://example.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Website<input name="website" placeholder="sellmyhousetodayanywhere.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /><span className="mt-1 block text-xs text-slate-500">You can enter the domain with or without https://.</span></label>
               <label className="block text-sm font-semibold text-slate-700">Phone<input name="phone" placeholder="972-555-0100" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
               <label className="block text-sm font-semibold text-slate-700">Business Email<input name="email" type="email" placeholder="owner@example.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
               <label className="block text-sm font-semibold text-slate-700">Primary Market<input name="primary_market" placeholder="Plano, Texas and nearby North Texas areas" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
@@ -72,7 +91,7 @@ export default async function AdminOnboardingPage({
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <label className="block text-sm font-semibold text-slate-700">Site ID *<input name="site_id" required placeholder="plano-demo" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /><span className="mt-1 block text-xs text-slate-500">Use lowercase letters, numbers, and hyphens. This becomes the widget data-site-id.</span></label>
               <label className="block text-sm font-semibold text-slate-700">Site Name<input name="site_name" placeholder="Plano Demo Site" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
-              <label className="block text-sm font-semibold text-slate-700">Primary Domain<input name="domain" placeholder="sellmyhousetodayanywhere.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Primary Domain<input name="domain" placeholder="sellmyhousetodayanywhere.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /><span className="mt-1 block text-xs text-slate-500">Do not include https:// here.</span></label>
               <label className="block text-sm font-semibold text-slate-700 md:col-span-2">Allowed Domains<textarea name="allowed_domains" placeholder={"sellmyhousetodayanywhere.com\nwww.sellmyhousetodayanywhere.com"} className="mt-1 min-h-28 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
             </div>
           </div>

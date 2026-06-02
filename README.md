@@ -1,54 +1,27 @@
-# CashOfferChat Phase 3E — Business Onboarding Wizard
+# CashOfferChat Phase 3E Hotfix — Onboarding Reliability + Website URL Normalization
 
-This phase adds a master-admin onboarding flow so a new customer can be created quickly.
+This hotfix improves the onboarding flow.
 
-## What this adds
+## What changed
 
-- Admin onboarding page: `/admin/onboarding`
-- Admin onboarding submit route: `/api/admin/onboarding`
-- Creates in one flow:
-  - business record
-  - business settings
-  - widget site
-  - service areas
-  - referral areas
-  - buying criteria
-  - optional client user login
-- Shows final embed code after onboarding.
+- Website no longer needs to be entered with `https://`.
+- Website/domain inputs are normalized server-side.
+- If the primary domain is blank, the route tries to infer it from the website.
+- If allowed domains are blank, the route uses the primary domain.
+- Duplicate Site IDs are checked before creating records.
+- Onboarding errors now show a more specific message in the UI.
+- The onboarding page preserves the embed-code success flow.
 
-## SQL migration
-
-No new SQL migration is required if prior migrations are installed through Phase 3B.
-
-This phase uses existing tables:
+## Files changed
 
 ```text
-businesses
-business_settings
-widget_sites
-service_areas
-referral_areas
-property_buying_criteria
-business_users
+src/lib/siteId.ts
+src/app/admin/onboarding/page.tsx
+src/app/api/admin/onboarding/route.ts
 ```
 
-## Environment variables
+## Requirements
 
-No new Vercel environment variables are required if these already exist:
+No new Supabase SQL migration is required.
 
-```text
-ADMIN_DASHBOARD_PASSWORD
-ADMIN_SESSION_SECRET
-CLIENT_SESSION_SECRET
-APP_URL
-```
-
-## Testing checklist
-
-1. Log in at `/admin/login`.
-2. Go to `/admin/onboarding`.
-3. Create a test business with a unique site ID, such as `test-plano`.
-4. Optionally create a client user with a temporary password.
-5. Copy the embed code shown after saving.
-6. Log in as the client at `/client/login`.
-7. Confirm the client sees only its business data.
+No new Vercel environment variables are required.

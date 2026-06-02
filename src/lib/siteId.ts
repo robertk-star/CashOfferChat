@@ -9,10 +9,26 @@ export function slugifySiteId(input: string) {
     .slice(0, 48);
 }
 
+export function normalizeDomain(value: string) {
+  return value
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/\/.*$/, "")
+    .toLowerCase();
+}
+
+export function normalizeWebsite(value: string) {
+  const cleaned = value.trim();
+  if (!cleaned) return "";
+  if (/^https?:\/\//i.test(cleaned)) return cleaned;
+  return `https://${cleaned}`;
+}
+
 export function normalizeDomainInput(input: string) {
   return input
     .split(/\r?\n|,/)
-    .map((item) => item.trim().replace(/^https?:\/\//, "").replace(/\/.*$/, ""))
+    .map((item) => normalizeDomain(item))
     .filter(Boolean)
     .join("\n");
 }
