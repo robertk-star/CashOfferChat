@@ -7,6 +7,19 @@ import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Client Account | CashOfferChat" };
 
+type BusinessJoin = { name?: string } | { name?: string }[] | null | undefined;
+
+function getJoinedBusinessName(value: BusinessJoin, fallback = "Your Business") {
+  if (!value) return fallback;
+  if (Array.isArray(value)) return value[0]?.name || fallback;
+  return value.name || fallback;
+}
+
+type ClientAccountRow = {
+  name: string | null;
+  businesses: BusinessJoin;
+};
+
 export default async function ClientAccountPage({ searchParams }: { searchParams: Promise<{ error?: string; saved?: string }> }) {
   const params = await searchParams;
   const cookieStore = await cookies();
@@ -20,20 +33,16 @@ export default async function ClientAccountPage({ searchParams }: { searchParams
   let errorMessage = params.error ? "Password could not be updated. Check your current password and new password length." : null;
 
   if (supabase) {
-    const { data: user } = await supabase
+    const { data } = await supabase
       .from("business_users")
       .select("name, businesses(name)")
       .eq("id", session.userId)
       .eq("business_id", session.businessId)
       .maybeSingle();
 
+    const user = data as unknown as ClientAccountRow | null;
     clientName = user?.name || "";
-    const relatedBusiness = user?.businesses;
-    if (Array.isArray(relatedBusiness)) {
-      businessName = relatedBusiness[0]?.name || businessName;
-    } else if (relatedBusiness?.name) {
-      businessName = relatedBusiness.name;
-    }
+    businessName = getJoinedBusinessName(user?.businesses, businessName);
   } else {
     errorMessage = "Supabase is not configured.";
   }
