@@ -1,4 +1,50 @@
-import { getDefaultFaqItems } from "@/lib/defaultFaqKnowledge";
+const CLIENT_SETTINGS_FALLBACK_FAQS = [
+  {
+    question: "How is the cash offer price determined for my house?",
+    answer:
+      "Cash offers are generally based on the property location, size, layout, condition, comparable nearby sales, estimated repair costs, holding costs, resale risk, and the buyer's expected margin. A direct cash offer is usually designed for speed and convenience rather than a full retail listing price.",
+  },
+  {
+    question: "Do cash buyers pay full market value?",
+    answer:
+      "A direct cash offer is usually not the same as a full retail market listing. Cash buyers often offer below full retail value because they take on repair costs, resale risk, holding costs, and the convenience of a faster as-is sale. Exact offers depend on the property and local market.",
+  },
+  {
+    question: "Are there hidden fees, service charges, or commissions?",
+    answer:
+      "Many traditional direct cash buyers do not charge realtor commissions or service fees, but exact terms should always be confirmed before signing. Some iBuyer-style platforms may charge service fees or third-party closing costs.",
+  },
+  {
+    question: "Do I need to clean the house or make repairs before selling?",
+    answer:
+      "Usually no. Many as-is cash buyers can review properties without requiring the seller to clean, repair, paint, or remove unwanted items first. The exact details depend on the property.",
+  },
+  {
+    question: "What types of property situations do cash buyers handle?",
+    answer:
+      "Cash buyers often review single-family homes, townhomes, duplexes, condos, inherited properties, vacant houses, rental properties, properties needing repairs, and homes with tenants. Exact buying criteria depend on the business.",
+  },
+  {
+    question: "How fast can the process move from start to finish?",
+    answer:
+      "Some cash buyers can provide an initial estimate or offer quickly, often within a day or two after reviewing the property details. Closing timing depends on the property, title status, and seller timeline.",
+  },
+  {
+    question: "Do I have to move out immediately after accepting an offer?",
+    answer:
+      "Not necessarily. Many buyers can work with the seller on a closing and move-out timeline. The exact timing should be discussed with the team before signing an agreement.",
+  },
+  {
+    question: "Am I obligated to sell if I request a cash offer?",
+    answer:
+      "No. Requesting information or an offer is generally non-binding. A seller is not obligated unless they choose to sign a formal purchase agreement.",
+  },
+  {
+    question: "Can I sell to a cash buyer if I am already working with a real estate agent?",
+    answer:
+      "It may be possible, but if you have an active listing agreement or exclusivity contract, you may still have obligations to your agent. Review your agreement or speak with your agent or a qualified professional.",
+  },
+];
 
 export type ClientSettingsData = {
   business: {
@@ -91,7 +137,7 @@ export async function loadClientSettingsData(supabase: any, businessId: string):
   if (faqRows && faqRows.length > 0) {
     managedFaqs = faqRows;
   } else {
-    managedFaqs = getDefaultFaqItems().map((item, index) => ({
+    managedFaqs = CLIENT_SETTINGS_FALLBACK_FAQS.map((item, index) => ({
       question: item.question,
       answer: item.answer,
       is_enabled: true,
