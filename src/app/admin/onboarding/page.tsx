@@ -1,0 +1,118 @@
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
+export const metadata = { title: "Onboard Business | CashOfferChat" };
+
+export default async function AdminOnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string; error?: string; siteId?: string }>;
+}) {
+  const params = await searchParams;
+  const cookieStore = await cookies();
+  const token = cookieStore.get(adminCookieName())?.value;
+  if (!verifyAdminSessionToken(token)) redirect("/admin/login");
+
+  const appUrl = process.env.APP_URL || "https://cashofferchat.com";
+  const embedCode = params.siteId
+    ? `<script src="${appUrl}/widget.js" data-site-id="${params.siteId}"></script>`
+    : "";
+
+  return (
+    <main className="min-h-screen bg-slate-50">
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          <div>
+            <Link href="/admin" className="text-sm font-bold text-slate-500 underline">Back to Admin</Link>
+            <h1 className="mt-2 text-2xl font-bold text-navy">Onboard New Business</h1>
+            <p className="text-sm text-slate-500">Create the business, widget site, settings, and optional client login in one flow.</p>
+          </div>
+          <form action="/api/admin/logout" method="post">
+            <button className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy">Log Out</button>
+          </form>
+        </div>
+      </header>
+
+      <section className="mx-auto max-w-7xl px-6 py-8">
+        {params.saved && (
+          <div className="mb-6 rounded-2xl bg-green-50 p-4 text-sm text-green-800">
+            Business onboarded successfully.
+            {embedCode && (
+              <div className="mt-4">
+                <div className="font-bold">Embed code:</div>
+                <pre className="mt-2 overflow-x-auto rounded-xl bg-white p-4 text-xs text-slate-700 ring-1 ring-green-200">{embedCode}</pre>
+              </div>
+            )}
+          </div>
+        )}
+        {params.error && (
+          <div className="mb-6 rounded-2xl bg-red-50 p-4 text-sm text-red-700">
+            Business could not be onboarded. Make sure required fields are filled and the site ID is unique.
+          </div>
+        )}
+
+        <form action="/api/admin/onboarding" method="post" className="space-y-8">
+          <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
+            <h2 className="text-xl font-bold text-navy">Business Profile</h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <label className="block text-sm font-semibold text-slate-700">Business Name *<input name="business_name" required placeholder="Sell My House Today Anywhere" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Website<input name="website" placeholder="https://example.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Phone<input name="phone" placeholder="972-555-0100" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Business Email<input name="email" type="email" placeholder="owner@example.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Primary Market<input name="primary_market" placeholder="Plano, Texas and nearby North Texas areas" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700 md:col-span-2">Business Description<textarea name="description" placeholder="Local cash home buyer that reviews houses as-is." className="mt-1 min-h-24 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
+            <h2 className="text-xl font-bold text-navy">Widget Site</h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <label className="block text-sm font-semibold text-slate-700">Site ID *<input name="site_id" required placeholder="plano-demo" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /><span className="mt-1 block text-xs text-slate-500">Use lowercase letters, numbers, and hyphens. This becomes the widget data-site-id.</span></label>
+              <label className="block text-sm font-semibold text-slate-700">Site Name<input name="site_name" placeholder="Plano Demo Site" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Primary Domain<input name="domain" placeholder="sellmyhousetodayanywhere.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700 md:col-span-2">Allowed Domains<textarea name="allowed_domains" placeholder={"sellmyhousetodayanywhere.com\nwww.sellmyhousetodayanywhere.com"} className="mt-1 min-h-28 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
+            <h2 className="text-xl font-bold text-navy">Business Rules</h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <label className="block text-sm font-semibold text-slate-700">Cities / Areas They Buy In<textarea name="service_areas" placeholder={"Plano\nFrisco\nMcKinney\nAllen"} className="mt-1 min-h-32 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Referral Areas<textarea name="referral_areas" placeholder={"Dallas\nFort Worth"} className="mt-1 min-h-32 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">What They Buy<textarea name="will_buy" placeholder={"Single-family homes\nInherited houses\nTenant-occupied houses\nHouses needing repairs"} className="mt-1 min-h-32 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">What They Do Not Buy<textarea name="will_not_buy" placeholder={"Raw land\nLarge commercial buildings"} className="mt-1 min-h-32 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
+            <h2 className="text-xl font-bold text-navy">Widget Branding</h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <label className="block text-sm font-semibold text-slate-700">Widget Title<input name="widget_title" defaultValue="Seller Intake Assistant" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Widget Subtitle<input name="widget_subtitle" defaultValue="Answers questions and collects property basics" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Quote Button Text<input name="widget_quote_button_text" defaultValue="Enter House Info for a Quote" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Lead Notification Email<input name="lead_notification_email" type="email" placeholder="leads@example.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
+            <h2 className="text-xl font-bold text-navy">Optional Client Login</h2>
+            <p className="mt-2 text-sm text-slate-600">Create a client portal login for this business owner now.</p>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <label className="block text-sm font-semibold text-slate-700">Client Name<input name="client_name" placeholder="Business Owner" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Client Email<input name="client_email" type="email" placeholder="owner@example.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Temporary Password<input name="client_password" type="password" minLength={8} placeholder="At least 8 characters" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="flex items-center gap-3 text-sm font-semibold text-slate-700"><input name="create_client_user" type="checkbox" /> Create client login</label>
+            </div>
+          </div>
+
+          <div className="sticky bottom-4 rounded-[2rem] bg-white p-4 shadow-soft ring-1 ring-slate-200">
+            <button className="w-full rounded-full bg-gold px-7 py-4 font-bold text-navy" type="submit">Create Business + Widget Site</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  );
+}
