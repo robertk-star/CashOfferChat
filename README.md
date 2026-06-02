@@ -1,62 +1,50 @@
-# CashOfferChat Phase 3I — Widget Site Management
+# CashOfferChat Phase 3J — Client Analytics Dashboard
 
-This phase improves master-admin management of widget sites.
+This phase adds business-scoped analytics to the client portal.
 
 ## What this adds
 
-- Widget site detail/edit page:
+- Client analytics page:
 
 ```text
-/admin/sites/[id]
+/client/analytics
 ```
 
-- Widget site update route:
+- Updated global portal navigation:
 
 ```text
-/api/admin/sites/[id]
+src/components/PortalRouteNav.tsx
 ```
 
-- Updated widget sites list page:
+## Clients can now see
 
-```text
-/admin/sites
-```
+- Widget events in the last 7 days
+- Leads in the last 7 days
+- Lead conversion rate based on widget events
+- Events by type
+- Events by domain
+- Events by site ID
+- Recent widget events
+- Recent leads
+- Links to client lead detail pages
 
-## Master admin can now
+## Security
 
-- Open a widget site from the list
-- Edit:
-  - site display name
-  - site ID
-  - business assignment
-  - primary domain
-  - allowed domains
-  - active/inactive status
-- See the exact embed code
-- See recent leads from that site
-- See recent widget events from that site
-- Copy installation guidance from the page
+The analytics page is scoped by the `business_id` from the signed client session cookie.
+
+Clients only see events and leads for their own business.
 
 ## SQL migration
 
-No new SQL migration is required if previous migrations are installed.
+No new SQL migration is required.
 
-This phase expects:
-
-```text
-widget_sites.name
-widget_sites.site_name
-widget_sites.site_id
-widget_sites.domain
-widget_sites.allowed_domains
-widget_sites.is_active
-widget_sites.business_id
-```
-
-If your `widget_sites` schema is still inconsistent, rerun the stabilization SQL from Phase 3E:
+This phase uses existing tables:
 
 ```text
-sql/013_stabilize_onboarding_schema.sql
+widget_events
+seller_leads
+widget_sites
+businesses
 ```
 
 ## Environment variables
