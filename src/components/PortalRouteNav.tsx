@@ -51,6 +51,28 @@ function clarifyLegacyBackLinks(pathname: string) {
   }
 }
 
+function hideDuplicateLogoutForms(isAdminRoute: boolean, isClientRoute: boolean) {
+  if (typeof document === "undefined") return;
+
+  const logoutAction = isAdminRoute ? "/api/admin/logout" : isClientRoute ? "/api/client/logout" : "";
+  if (!logoutAction) return;
+
+  const forms = Array.from(document.querySelectorAll(`form[action="${logoutAction}"]`));
+
+  forms.forEach((form, index) => {
+    const element = form as HTMLElement;
+
+    if (index === 0) {
+      element.style.display = "";
+      element.setAttribute("data-coc-primary-logout", "true");
+      return;
+    }
+
+    element.style.display = "none";
+    element.setAttribute("data-coc-hidden-duplicate-logout", "true");
+  });
+}
+
 export function PortalRouteNav() {
   const pathname = usePathname() || "";
 
@@ -59,7 +81,8 @@ export function PortalRouteNav() {
 
   useEffect(() => {
     clarifyLegacyBackLinks(pathname);
-  }, [pathname]);
+    hideDuplicateLogoutForms(isAdminRoute, isClientRoute);
+  }, [pathname, isAdminRoute, isClientRoute]);
 
   if (!isAdminRoute && !isClientRoute) return null;
 
