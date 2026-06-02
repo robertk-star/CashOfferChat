@@ -1,32 +1,55 @@
-# CashOfferChat Admin Sites Repair
+# CashOfferChat Missing Routes Repair
 
-This package restores the missing `/admin/sites` page and site-save API route.
+I inspected the current GitHub zip and confirmed these routes were missing:
 
-## What this fixes
+- `/admin/settings`
+- `/admin/clients`
+- `/admin/analytics`
+- `/client/login`
+- `/client`
+- `/client/settings`
+- `/client/account`
 
-- `/admin/sites` was returning 404 because the current GitHub files do not include:
-  - `src/app/admin/sites/page.tsx`
-  - `src/app/api/admin/sites/route.ts`
+This package restores the missing pages and supporting API routes.
 
 ## Files included
 
 ```text
-src/app/admin/sites/page.tsx
-src/app/api/admin/sites/route.ts
-README.md
+src/app/admin/settings/page.tsx
+src/app/api/admin/settings/route.ts
+src/app/admin/clients/page.tsx
+src/app/api/admin/clients/route.ts
+src/app/admin/analytics/page.tsx
+src/app/client/login/page.tsx
+src/app/api/client/login/route.ts
+src/app/api/client/logout/route.ts
+src/app/client/page.tsx
+src/app/client/settings/page.tsx
+src/app/api/client/settings/route.ts
+src/app/client/account/page.tsx
+src/app/api/client/account/password/route.ts
 ```
 
-## SQL migration
+## SQL
 
-No new SQL migration is required if you already ran the onboarding schema stabilization migration.
+No new SQL migration is included.
 
-The page expects these existing tables:
+This repair assumes the prior SQL migrations have already created the relevant tables:
 
-```text
-businesses
-widget_sites
-```
+- `businesses`
+- `business_settings`
+- `business_users`
+- `widget_sites`
+- `seller_leads`
+- `widget_events`
 
-## Vercel environment variables
+## Environment variables
 
-No new Vercel environment variables are required.
+No new Vercel environment variables are required beyond the ones already used:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_DASHBOARD_PASSWORD`
+- `ADMIN_SESSION_SECRET`
+- `CLIENT_SESSION_SECRET`
+- `APP_URL`
