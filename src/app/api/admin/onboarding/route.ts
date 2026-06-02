@@ -116,31 +116,37 @@ export async function POST(request: Request) {
 
   if (siteError) return fail(request, "site_create_failed", siteError);
 
-  const { error: settingsError } = await supabase.from("business_settings").insert({
-    business_id: businessId,
-    business_name: businessName,
-    website,
-    phone,
-    email,
-    primary_market: primaryMarket,
-    business_description: description,
-    description,
-    custom_ai_instructions:
-      "Do not make offers over chat. Answer questions helpfully, do not provide legal/tax/financial advice, and invite the seller to enter house information for review when appropriate.",
-    lead_notification_email: value(formData, "lead_notification_email"),
-    widget_title: value(formData, "widget_title") || "Seller Intake Assistant",
-    widget_subtitle: value(formData, "widget_subtitle") || "Answers questions and collects property basics",
-    widget_bubble_text: "Questions? Chat with us",
-    widget_quote_button_text: value(formData, "widget_quote_button_text") || "Enter House Info for a Quote",
-    widget_success_message:
-      "Thanks. Your information was received. Someone from the team can review the details and follow up.",
-    widget_header_color: "#0f172a",
-    widget_button_color: "#f5b51b",
-    widget_show_call_button: true,
-    widget_call_button_text: "Call Now",
-    widget_allowed_domains: allowedDomains,
-    updated_at: now,
-  });
+  const { error: settingsError } = await supabase
+    .from("business_settings")
+    .upsert(
+      {
+        business_id: businessId,
+        singleton_key: businessId,
+        business_name: businessName,
+        website,
+        phone,
+        email,
+        primary_market: primaryMarket,
+        business_description: description,
+        description,
+        custom_ai_instructions:
+          "Do not make offers over chat. Answer questions helpfully, do not provide legal/tax/financial advice, and invite the seller to enter house information for review when appropriate.",
+        lead_notification_email: value(formData, "lead_notification_email"),
+        widget_title: value(formData, "widget_title") || "Seller Intake Assistant",
+        widget_subtitle: value(formData, "widget_subtitle") || "Answers questions and collects property basics",
+        widget_bubble_text: "Questions? Chat with us",
+        widget_quote_button_text: value(formData, "widget_quote_button_text") || "Enter House Info for a Quote",
+        widget_success_message:
+          "Thanks. Your information was received. Someone from the team can review the details and follow up.",
+        widget_header_color: "#0f172a",
+        widget_button_color: "#f5b51b",
+        widget_show_call_button: true,
+        widget_call_button_text: "Call Now",
+        widget_allowed_domains: allowedDomains,
+        updated_at: now,
+      },
+      { onConflict: "business_id" }
+    );
 
   if (settingsError) return fail(request, "settings_create_failed", settingsError);
 

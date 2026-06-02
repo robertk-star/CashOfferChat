@@ -1,31 +1,45 @@
-# CashOfferChat Phase 3N Hotfix — Production-Safe Route Checks
+# CashOfferChat Hotfix — Multi-Business Settings
 
-This hotfix fixes false errors on `/admin/system`.
-
-## Problem
-
-The previous system health checker used source-file checks like:
+This fixes the onboarding error:
 
 ```text
-existsSync("src/app/page.tsx")
+duplicate key value violates unique constraint "business_settings_singleton_key_key"
+Key (singleton_key)=(default) already exists.
 ```
 
-That can work locally, but in Vercel production the deployed app does not expose source files in the same way. This caused every route to show as missing even when the pages worked.
+## What happened
 
-## What changed
+`business_settings` was originally created for a single-business/demo setup. It has an old unique constraint on `singleton_key`, which only allows one settings row.
 
-- Route checks are now production-safe.
-- In production, page/API route checks show as warnings/manual checks instead of false errors.
-- Local filesystem checks are still used in local development.
-- Table checks and environment variable checks still run normally.
-- `/admin/system` now explains the difference between real errors and manual route checks.
+Now CashOfferChat is multi-business, so each business needs its own settings row.
 
-## Files changed
+## SQL migration required
+
+Run this in Supabase SQL Editor:
 
 ```text
-src/lib/systemHealth.ts
-src/app/admin/system/page.tsx
+sql/017_multibusiness_settings_fix.sql
+```
+
+This migration:
+
+- Adds `business_id` if missing
+- Drops the old singleton unique constraint
+- Creates a unique index on `business_id`
+- Keeps `singleton_key` if it exists, but makes it harmless by setting it uniquely per business/settings row
+
+## Code changes
+
+Updates onboarding so business settings are saved with `upsert(... onConflict: "business_id")` instead of a plain insert.
+
+## Files included
+
+```text
+sql/017_multibusiness_settings_fix.sql
+src/app/api/admin/onboarding/route.ts
 README.md
 ```
 
-No SQL migration is required. No new Vercel environment variables are required.
+## Vercel environment variables
+
+No new Vercel environment variables are required.
