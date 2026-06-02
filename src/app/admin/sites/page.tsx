@@ -73,8 +73,7 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
             <label className="block text-sm font-semibold text-slate-700">Site Name<input name="name" placeholder="Plano demo site" required className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
             <label className="block text-sm font-semibold text-slate-700">Business Name<input name="business_name" placeholder="Sell My House Today Anywhere" required className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
             <label className="block text-sm font-semibold text-slate-700">Primary Domain<input name="domain" placeholder="sellmyhousetodayanywhere.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
-            <label className="block text-sm font-semibold text-slate-700 md:col-span-2">Allowed Domains<textarea name="allowed_domains" placeholder={"sellmyhousetodayanywhere.com
-www.sellmyhousetodayanywhere.com"} className="mt-1 min-h-28 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+            <label className="block text-sm font-semibold text-slate-700 md:col-span-2">Allowed Domains<textarea name="allowed_domains" placeholder={"sellmyhousetodayanywhere.com\nwww.sellmyhousetodayanywhere.com"} className="mt-1 min-h-28 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
             <label className="flex items-center gap-3 text-sm font-semibold text-slate-700"><input name="is_active" type="checkbox" defaultChecked /> Active</label>
             <div className="md:col-span-2"><button className="rounded-full bg-gold px-7 py-3 font-bold text-navy" type="submit">Save Widget Site</button></div>
           </form>
