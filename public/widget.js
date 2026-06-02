@@ -90,7 +90,7 @@
         <p class="coc-form-help">Share the property basics so the team can review it and follow up. There is no obligation.</p>
         <div class="coc-form-status"></div>
         <form class="coc-lead-form">
-          <label class="coc-label">Property city *<input class="coc-field" name="propertyCity" placeholder="Austin" /></label>
+          <label class="coc-label">Property city *<input class="coc-field" name="propertyCity" placeholder="Plano" /></label>
           <label class="coc-label">Property address *<input class="coc-field" name="propertyAddress" placeholder="Street address" /></label>
           <label class="coc-label">What best describes the situation?<select class="coc-select" name="situation"><option value="">Select one</option><option>Needs repairs</option><option>Inherited property</option><option>Tenant occupied</option><option>Vacant property</option><option>Behind on payments</option><option>Just want to sell fast</option><option>Other</option></select></label>
           <label class="coc-label">Timeline<select class="coc-select" name="timeline"><option value="">Select one</option><option>ASAP</option><option>Within 30 days</option><option>1–3 months</option><option>Just exploring</option></select></label>

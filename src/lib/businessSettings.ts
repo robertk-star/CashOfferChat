@@ -40,12 +40,12 @@ export type BusinessSettingsContext = {
 
 export const defaultBusinessSettings: BusinessSettingsContext = {
   business: {
-    business_name: "We Buy Austin Houses",
-    website: "https://www.webuyaustinhouses.com/",
-    phone: "512-598-9341",
+    business_name: "Sell My House Today Anywhere",
+    website: "https://sellmyhousetodayanywhere.com/",
+    phone: "972-555-0100",
     email: null,
-    primary_market: "Austin, Texas and nearby areas",
-    description: "Local Austin-area cash home buyer that reviews houses as-is for possible cash offers.",
+    primary_market: "Plano, Texas and nearby North Texas areas",
+    description: "Plano-area cash home buyer demo that reviews houses as-is for possible cash offers.",
     preferred_tone: "Friendly, plain-English, helpful, local, and no-pressure.",
     custom_instructions:
       "Do not make offers over chat. Do not guarantee that the company will buy a property. Do not give legal, tax, financial, or foreclosure advice.",
@@ -55,13 +55,13 @@ export const defaultBusinessSettings: BusinessSettingsContext = {
     use_custom_faq_knowledge_base: false,
   },
   serviceAreas: [
-    { city: "Austin", state: "TX", notes: null },
-    { city: "Round Rock", state: "TX", notes: null },
-    { city: "Cedar Park", state: "TX", notes: null },
-    { city: "Pflugerville", state: "TX", notes: null },
-    { city: "Georgetown", state: "TX", notes: null },
-    { city: "Buda", state: "TX", notes: null },
-    { city: "Kyle", state: "TX", notes: null },
+    { city: "Plano", state: "TX", notes: null },
+    { city: "Frisco", state: "TX", notes: null },
+    { city: "McKinney", state: "TX", notes: null },
+    { city: "Allen", state: "TX", notes: null },
+    { city: "Richardson", state: "TX", notes: null },
+    { city: "Carrollton", state: "TX", notes: null },
+    { city: "Garland", state: "TX", notes: null },
   ],
   referralAreas: [],
   willBuy: [

@@ -8,7 +8,7 @@ create table if not exists public.business_settings (
   singleton_key text not null unique default 'default',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  business_name text not null default 'We Buy Austin Houses',
+  business_name text not null default 'Sell My House Today Anywhere',
   website text,
   phone text,
   email text,
@@ -84,12 +84,12 @@ insert into public.business_settings (
 )
 values (
   'default',
-  'We Buy Austin Houses',
-  'https://www.webuyaustinhouses.com/',
-  '512-598-9341',
+  'Sell My House Today Anywhere',
+  'https://sellmyhousetodayanywhere.com/',
+  '972-555-0100',
   null,
-  'Austin, Texas and nearby areas',
-  'Local Austin-area cash home buyer that reviews houses as-is for possible cash offers.',
+  'Plano, Texas and nearby North Texas areas',
+  'Plano-area cash home buyer demo that reviews houses as-is for possible cash offers.',
   'Friendly, plain-English, helpful, local, and no-pressure.',
   'Do not make offers over chat. Do not guarantee that the company will buy a property. Do not give legal, tax, financial, or foreclosure advice. Encourage a short intake form when the seller wants a property review.'
 )

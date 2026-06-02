@@ -279,7 +279,7 @@ export function sellerQuestionAnswer(userMessage: string) {
     return "A specific offer requires a property review. I can collect the basics so the team can follow up with next steps, and there is no obligation to accept an offer.";
   }
   if (/area|where|service/.test(lowered)) {
-    return "This demo is focused on Austin-area properties and nearby communities. The team would confirm whether a specific property is in their buying area.";
+    return "This demo is focused on Plano-area properties and nearby communities. The team would confirm whether a specific property is in their buying area.";
   }
   return undefined;
 }

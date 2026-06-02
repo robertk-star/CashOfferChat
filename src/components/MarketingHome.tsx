@@ -59,7 +59,7 @@ export function MarketingHome() {
               <div className="max-w-[85%] rounded-2xl bg-white px-4 py-3 text-sm text-slate-700">
                 Hi! I can answer questions about selling your house as-is for cash. What city is the property in?
               </div>
-              <div className="ml-auto max-w-[75%] rounded-2xl bg-gold px-4 py-3 text-sm font-medium text-navy">Austin</div>
+              <div className="ml-auto max-w-[75%] rounded-2xl bg-gold px-4 py-3 text-sm font-medium text-navy">Plano</div>
               <div className="max-w-[85%] rounded-2xl bg-white px-4 py-3 text-sm text-slate-700">
                 Great. What best describes your timeline: ASAP, within 30 days, 1–3 months, or just exploring?
               </div>

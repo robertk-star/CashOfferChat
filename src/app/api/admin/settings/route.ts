@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
   const settingsPayload = {
     singleton_key: "default",
-    business_name: get("business_name") || "We Buy Austin Houses",
+    business_name: get("business_name") || "Sell My House Today Anywhere",
     website: get("website") || null,
     phone: get("phone") || null,
     email: get("email") || null,

@@ -1,51 +1,55 @@
-# CashOfferChat Phase 2F Hotfix — Managed FAQ Knowledge Base
+# CashOfferChat
 
-This update changes the FAQ admin experience so the FAQ Knowledge Base is the managed answer list.
+AI seller intake assistant for cash home buyer websites.
 
-## What changed
+## Current demo focus
 
-- Replaced the separate Custom FAQ editor and read-only Default FAQ section with one managed FAQ Knowledge Base.
-- Added a single "Add a new FAQ" box.
-- Once a FAQ is added, it moves into the managed FAQ list.
-- Every FAQ in the managed list has Edit and Remove controls.
-- The original built-in default FAQs are loaded into the managed list until the business saves its own FAQ list.
-- After saving, the widget uses the managed FAQ list from Supabase and does not fall back to default FAQ answers that were removed.
+This package updates the demo/business defaults from the Austin area to the Plano/North Texas area and references the demo site `sellmyhousetodayanywhere.com`.
 
-## Files changed
+Default demo values:
 
-- `src/app/admin/settings/page.tsx`
-- `src/app/api/admin/settings/route.ts`
-- `src/app/api/chat/route.ts`
-- `src/lib/businessSettings.ts`
-- `src/components/ManagedFAQEditor.tsx`
-- `sql/005_managed_faq_settings.sql`
+- Business name: Sell My House Today Anywhere
+- Website: https://sellmyhousetodayanywhere.com/
+- Demo phone placeholder: 972-555-0100
+- Primary market: Plano, Texas and nearby North Texas areas
+- Default service areas: Plano, Frisco, McKinney, Allen, Richardson, Carrollton, Garland, Lewisville, Dallas
 
-## SQL migration required
+Replace the placeholder phone number in `/admin/settings` when you have the real business phone number.
 
-Run this in Supabase SQL Editor after the prior migrations:
+## Supabase migrations
 
-```sql
-sql/005_managed_faq_settings.sql
+Run migrations in order:
+
+1. `sql/001_initial_schema.sql`
+2. `sql/002_business_settings.sql`
+3. `sql/003_lead_management.sql`
+4. `sql/004_lead_notifications.sql`
+5. `sql/005_managed_faq_settings.sql`
+6. `sql/006_plano_demo_defaults.sql` — only needed if the project was previously seeded with Austin demo settings or you want to reset defaults to Plano.
+
+## Widget demo site
+
+For `sellmyhousetodayanywhere.com`, install the widget with:
+
+```html
+<script src="https://cashofferchat.com/widget.js" data-site-id="demo"></script>
 ```
 
-This adds:
+Keep `APP_URL=https://cashofferchat.com` in the CashOfferChat Vercel project so the admin embed code references the production widget domain.
 
-```sql
-business_settings.use_custom_faq_knowledge_base
+## Required environment variables
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+OPENAI_API_KEY=
+ADMIN_DASHBOARD_PASSWORD=
+ADMIN_SESSION_SECRET=
+LEAD_NOTIFICATION_EMAIL=
+APP_URL=https://cashofferchat.com
+RESEND_API_KEY=
+FROM_EMAIL=
 ```
 
-## Environment variables
-
-No new Vercel environment variables are required.
-
-## Testing
-
-1. Go to `/admin/settings`.
-2. Scroll to FAQ Knowledge Base.
-3. Add a new FAQ using the single add box.
-4. Confirm the FAQ appears in the managed list.
-5. Edit an existing FAQ.
-6. Remove an FAQ.
-7. Save Business Settings.
-8. Ask the widget a question that matches the edited FAQ.
-9. Confirm the widget uses the saved answer.
+`OPENAI_API_KEY` and `RESEND_API_KEY` may be omitted during early testing, but email notifications require Resend configuration.

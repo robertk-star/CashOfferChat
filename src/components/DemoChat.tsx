@@ -153,7 +153,7 @@ export function DemoChat() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <a className="font-bold text-xl text-navy" href="/">CashOfferChat</a>
-          <a className="rounded-full bg-gold px-5 py-2 text-sm font-bold text-navy" href="tel:5125989341">Demo Call CTA</a>
+          <a className="rounded-full bg-gold px-5 py-2 text-sm font-bold text-navy" href="tel:9725550100">Demo Call CTA</a>
         </div>
       </header>
 
@@ -220,7 +220,7 @@ export function DemoChat() {
               <form onSubmit={submitLead} className="mt-5 space-y-4">
                 <label className="block text-sm font-semibold text-slate-700">
                   Property city <span className="text-red-600">*</span>
-                  <input value={leadForm.propertyCity} onChange={(event) => updateField("propertyCity", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Austin" />
+                  <input value={leadForm.propertyCity} onChange={(event) => updateField("propertyCity", event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Plano" />
                 </label>
                 <label className="block text-sm font-semibold text-slate-700">
                   Property address <span className="text-red-600">*</span>

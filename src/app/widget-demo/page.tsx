@@ -17,7 +17,7 @@ export default function WidgetDemoPage() {
             <a href="#reviews">Reviews</a>
             <a href="#faq">FAQ</a>
           </nav>
-          <a className="rounded-full bg-gold px-5 py-2 text-sm font-bold text-navy" href="tel:5125989341">Call Now</a>
+          <a className="rounded-full bg-gold px-5 py-2 text-sm font-bold text-navy" href="tel:9725550100">Call Now</a>
         </div>
       </header>
 
@@ -30,7 +30,7 @@ export default function WidgetDemoPage() {
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a className="rounded-full bg-gold px-7 py-4 text-center font-bold text-navy shadow-soft" href="#offer">Request Cash Offer</a>
-            <a className="rounded-full border border-slate-300 bg-white px-7 py-4 text-center font-bold text-navy" href="tel:5125989341">Call 512-598-9341</a>
+            <a className="rounded-full border border-slate-300 bg-white px-7 py-4 text-center font-bold text-navy" href="tel:9725550100">Call 972-555-0100</a>
           </div>
         </div>
         <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
