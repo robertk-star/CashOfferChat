@@ -30,6 +30,7 @@ type Lead = {
   situation: string | null;
   status: string | null;
   last_contacted_at: string | null;
+  site_id: string | null;
 };
 
 function statusLabel(value?: string | null) {
@@ -52,7 +53,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   } else {
     let query = supabase
       .from("seller_leads")
-      .select("id, created_at, name, phone, email, property_address, property_city, timeline, situation, status, last_contacted_at")
+      .select("id, created_at, name, phone, email, property_address, property_city, timeline, situation, status, last_contacted_at, site_id")
       .order("created_at", { ascending: false })
       .limit(100);
 
@@ -74,6 +75,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <div className="flex gap-3">
             <Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/admin/analytics">Analytics</Link>
             <Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/admin/settings">Settings</Link>
+            <Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/admin/sites">Sites</Link>
             <form action="/api/admin/logout" method="post"><button className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy">Log Out</button></form>
           </div>
         </div>
@@ -104,12 +106,13 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 <th className="px-5 py-4">Timeline</th>
                 <th className="px-5 py-4">Situation</th>
                 <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4">Site</th>
                 <th className="px-5 py-4">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {leads.length === 0 && (
-                <tr><td className="px-5 py-8 text-center text-slate-500" colSpan={8}>No leads yet.</td></tr>
+                <tr><td className="px-5 py-8 text-center text-slate-500" colSpan={9}>No leads yet.</td></tr>
               )}
               {leads.map((lead) => (
                 <tr key={lead.id} className="align-top hover:bg-slate-50">
@@ -120,6 +123,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                   <td className="px-5 py-4 text-slate-600">{lead.timeline || "—"}</td>
                   <td className="px-5 py-4 text-slate-600">{lead.situation || "—"}</td>
                   <td className="px-5 py-4"><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold capitalize text-slate-600">{statusLabel(lead.status)}</span></td>
+                  <td className="px-5 py-4 text-xs font-semibold text-slate-500">{lead.site_id || "demo"}</td>
                   <td className="px-5 py-4"><Link className="rounded-full bg-gold px-4 py-2 text-xs font-bold text-navy" href={`/admin/leads/${lead.id}`}>View</Link></td>
                 </tr>
               ))}

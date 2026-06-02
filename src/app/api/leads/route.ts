@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendLeadNotification } from "@/lib/emailNotifications";
+import { getSiteContext } from "@/lib/siteContext";
 
 
 const corsHeaders = {
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
   }
 
   const lead = parsed.data;
+  const site = await getSiteContext(supabase, lead.siteId);
   const missing: string[] = [];
   if (!lead.name.trim()) missing.push("name");
   if (!lead.phone.trim()) missing.push("phone number");
@@ -68,9 +70,11 @@ export async function POST(request: Request) {
       property_condition: lead.propertyCondition || null,
       notes: lead.notes || null,
       source_url: lead.sourceUrl || null,
+      site_id: site.siteId,
+      business_id: site.businessId,
       status: "new",
     })
-    .select("id, created_at, name, phone, email, property_address, property_city, timeline, situation, property_condition, notes, source_url")
+    .select("id, created_at, name, phone, email, property_address, property_city, timeline, situation, property_condition, notes, source_url, site_id, business_id")
     .single();
 
   if (error) {
@@ -93,7 +97,8 @@ export async function POST(request: Request) {
 
   try {
     await supabase.from("widget_events").insert({
-      site_id: lead.siteId || "demo",
+      site_id: site.siteId,
+      business_id: site.businessId,
       event_name: "lead_submitted",
       source_url: lead.sourceUrl || null,
       page_domain: lead.sourceUrl ? new URL(lead.sourceUrl).hostname.replace(/^www\./, "") : null,

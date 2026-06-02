@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { getSiteContext } from "@/lib/siteContext";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,8 +47,10 @@ export async function POST(request: Request) {
   }
 
   const event = parsed.data;
+  const site = await getSiteContext(supabase, event.siteId);
   const { error } = await supabase.from("widget_events").insert({
-    site_id: event.siteId || "demo",
+    site_id: site.siteId,
+    business_id: site.businessId,
     event_name: event.eventName,
     source_url: event.sourceUrl || null,
     page_domain: pageDomainFromUrl(event.sourceUrl),

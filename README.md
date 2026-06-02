@@ -119,3 +119,33 @@ sql/008_widget_analytics.sql
 ```
 
 No new Vercel environment variables are required.
+
+
+## Phase 3A — Multi-company foundation
+
+This phase adds the first SaaS foundation layer for multiple businesses and widget installs.
+
+Run this SQL after the prior migrations:
+
+```bash
+sql/009_multi_company_foundation.sql
+```
+
+What it adds:
+
+- `businesses` table
+- `widget_sites` table
+- `site_id` and `business_id` tracking on conversations and seller leads
+- `business_id` tracking on widget events
+- `/admin/sites` page for creating/updating widget sites
+- site-aware `/api/widget/settings`, `/api/chat`, `/api/leads`, and `/api/widget/events`
+
+The embed code remains:
+
+```html
+<script src="https://cashofferchat.com/widget.js" data-site-id="demo"></script>
+```
+
+For a second demo or customer site, create a new Site ID in `/admin/sites`, then use that Site ID in the embed code.
+
+No new Vercel environment variables are required.

@@ -115,6 +115,7 @@ export default async function AnalyticsPage() {
           <div className="flex gap-3">
             <Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/admin">Leads</Link>
             <Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/admin/settings">Settings</Link>
+            <Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/admin/sites">Sites</Link>
           </div>
         </div>
       </header>

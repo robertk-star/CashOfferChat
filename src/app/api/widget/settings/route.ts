@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getBusinessSettingsContext } from "@/lib/businessSettings";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { getSiteContext, allowedDomainList, normalizeDomain } from "@/lib/siteContext";
 
 function corsHeaders() {
   return {
@@ -10,15 +11,6 @@ function corsHeaders() {
   };
 }
 
-function normalizeDomain(value: string) {
-  return value
-    .replace(/^https?:\/\//i, "")
-    .replace(/^www\./i, "")
-    .split("/")[0]
-    .trim()
-    .toLowerCase();
-}
-
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: corsHeaders() });
 }
@@ -26,13 +18,13 @@ export async function OPTIONS() {
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const sourceUrl = url.searchParams.get("sourceUrl") || "";
-  const settings = await getBusinessSettingsContext(getSupabaseAdmin());
+  const siteId = url.searchParams.get("siteId") || "demo";
+  const supabase = getSupabaseAdmin();
+  const settings = await getBusinessSettingsContext(supabase);
+  const site = await getSiteContext(supabase, siteId);
   const business = settings.business;
 
-  const allowedDomains = String(business.widget_allowed_domains || "")
-    .split(/\r?\n|,/)
-    .map((item) => normalizeDomain(item))
-    .filter(Boolean);
+  const allowedDomains = allowedDomainList(site.allowedDomains || business.widget_allowed_domains || "");
 
   let sourceDomain = "";
   try {
@@ -45,6 +37,11 @@ export async function GET(request: Request) {
 
   return NextResponse.json(
     {
+      siteId: site.siteId,
+      siteName: site.siteName,
+      businessId: site.businessId,
+      businessName: site.businessName || business.business_name || "Sell My House Today Anywhere",
+      isActive: site.isActive,
       title: business.widget_title || "Seller Intake Assistant",
       subtitle: business.widget_subtitle || "Answers questions and collects property basics",
       bubbleText: business.widget_bubble_text || "Questions? Chat with us",

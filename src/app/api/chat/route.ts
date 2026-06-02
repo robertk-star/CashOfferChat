@@ -4,6 +4,7 @@ import { z } from "zod";
 import { CASH_OFFER_CHAT_SYSTEM_PROMPT } from "@/lib/aiGuardrails";
 import { getBusinessSettingsContext, formatBusinessSettingsForPrompt, normalizeForSettingsMatch, type BusinessSettingsContext } from "@/lib/businessSettings";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { getSiteContext } from "@/lib/siteContext";
 import { findDefaultFAQAnswer, formatDefaultFAQForPrompt } from "@/lib/defaultFaqKnowledge";
 
 
@@ -25,6 +26,7 @@ const requestSchema = z.object({
   conversationId: z.string().uuid().nullable().optional(),
   message: z.string().min(1).max(2000),
   sourceUrl: z.string().url().optional(),
+  siteId: z.string().max(120).optional(),
 });
 
 type DeterministicReply = {
@@ -267,12 +269,13 @@ export async function POST(request: Request) {
 
   const supabase = getSupabaseAdmin();
   const settings = await getBusinessSettingsContext(supabase);
+  const site = await getSiteContext(supabase, parsed.data.siteId);
   let conversationId = parsed.data.conversationId || null;
 
   if (supabase && !conversationId) {
     const { data, error } = await supabase
       .from("conversations")
-      .insert({ source_url: parsed.data.sourceUrl || null, status: "active" })
+      .insert({ source_url: parsed.data.sourceUrl || null, status: "active", site_id: site.siteId, business_id: site.businessId })
       .select("id")
       .single();
     if (!error && data?.id) conversationId = data.id;
@@ -302,5 +305,6 @@ export async function POST(request: Request) {
     reply,
     showIntake: deterministic.showIntake,
     intent: deterministic.intent,
+    siteId: site.siteId,
   });
 }
