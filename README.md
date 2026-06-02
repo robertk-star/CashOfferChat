@@ -1,28 +1,38 @@
-# CashOfferChat Phase 3E Hotfix — Widget Site Name Column
+# CashOfferChat Phase 3E Stabilization — Onboarding Schema Repair
 
-This hotfix fixes the onboarding error:
+This package is meant to stop the repeated onboarding failures caused by mismatches between the app code and your current Supabase tables.
 
-```text
-null value in column "name" of relation "widget_sites" violates not-null constraint
-```
+## What this fixes
 
-## What changed
-
-The onboarding route now sends both fields when creating a widget site:
+The error you just received was:
 
 ```text
-name
-site_name
+Could not find the 'business_description' column of 'business_settings'
 ```
 
-Both use the same site display name.
+This package adds a stronger repair migration that ensures the main tables used by onboarding have the columns the app expects.
 
-## File changed
+## Run this SQL first
+
+Run this in Supabase SQL Editor:
+
+```text
+sql/013_stabilize_onboarding_schema.sql
+```
+
+## Then upload/deploy the code files
+
+Files included:
 
 ```text
 src/app/api/admin/onboarding/route.ts
+src/app/admin/onboarding/page.tsx
 ```
 
-No new Supabase SQL migration is required.
+## No new Vercel environment variables required.
 
-No new Vercel environment variables are required.
+## Important
+
+After running the SQL and deploying this package, try onboarding again.
+
+If another database mismatch appears, the error message should now be specific enough to fix directly.

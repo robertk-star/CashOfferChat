@@ -19,6 +19,14 @@ function onboardingErrorMessage(code?: string, detail?: string) {
       return `The widget site could not be created. Check the Site ID and domain fields.${details}`;
     case "settings_create_failed":
       return `The business settings record could not be created.${details}`;
+    case "client_login_missing_required":
+      return "Client Email and Temporary Password are required when Create client login is checked.";
+    case "client_user_create_failed":
+      return `The client login could not be created.${details}`;
+    case "service_areas_create_failed":
+    case "referral_areas_create_failed":
+    case "criteria_create_failed":
+      return `The business was partly created, but one of the business rules could not be saved.${details}`;
     case "supabase_not_configured":
       return "Supabase is not configured. Check the Vercel Supabase environment variables.";
     default:

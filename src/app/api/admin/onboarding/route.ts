@@ -23,7 +23,8 @@ function fail(request: Request, code: string, error?: unknown) {
 
 async function insertNamedRows(supabase: any, table: string, businessId: string, lines: string[]) {
   if (lines.length === 0) return;
-  await supabase.from(table).insert(lines.map((name) => ({ business_id: businessId, name })));
+  const { error } = await supabase.from(table).insert(lines.map((name) => ({ business_id: businessId, name })));
+  return error;
 }
 
 async function makeUniqueBusinessSlug(supabase: any, baseSlug: string) {
@@ -109,6 +110,7 @@ export async function POST(request: Request) {
     email,
     primary_market: primaryMarket,
     business_description: description,
+    description,
     custom_ai_instructions:
       "Do not make offers over chat. Answer questions helpfully, do not provide legal/tax/financial advice, and invite the seller to enter house information for review when appropriate.",
     lead_notification_email: value(formData, "lead_notification_email"),
@@ -128,30 +130,41 @@ export async function POST(request: Request) {
 
   if (settingsError) return fail(request, "settings_create_failed", settingsError);
 
-  await insertNamedRows(supabase, "service_areas", businessId, parseLines(value(formData, "service_areas")));
-  await insertNamedRows(supabase, "referral_areas", businessId, parseLines(value(formData, "referral_areas")));
+  const serviceAreaError = await insertNamedRows(supabase, "service_areas", businessId, parseLines(value(formData, "service_areas")));
+  if (serviceAreaError) return fail(request, "service_areas_create_failed", serviceAreaError);
+
+  const referralAreaError = await insertNamedRows(supabase, "referral_areas", businessId, parseLines(value(formData, "referral_areas")));
+  if (referralAreaError) return fail(request, "referral_areas_create_failed", referralAreaError);
 
   const willBuy = parseLines(value(formData, "will_buy")).map((label) => ({ business_id: businessId, type: "will_buy", label }));
   const willNotBuy = parseLines(value(formData, "will_not_buy")).map((label) => ({ business_id: businessId, type: "will_not_buy", label }));
-  if (willBuy.length || willNotBuy.length) await supabase.from("property_buying_criteria").insert([...willBuy, ...willNotBuy]);
+  if (willBuy.length || willNotBuy.length) {
+    const { error: criteriaError } = await supabase.from("property_buying_criteria").insert([...willBuy, ...willNotBuy]);
+    if (criteriaError) return fail(request, "criteria_create_failed", criteriaError);
+  }
 
   if (formData.get("create_client_user") === "on") {
     const clientEmail = value(formData, "client_email").toLowerCase();
     const clientPassword = value(formData, "client_password");
-    if (clientEmail && clientPassword.length >= 8) {
-      await supabase.from("business_users").upsert(
-        {
-          business_id: businessId,
-          email: clientEmail,
-          name: value(formData, "client_name") || null,
-          role: "owner",
-          password_hash: hashClientPassword(clientPassword),
-          is_active: true,
-          updated_at: now,
-        },
-        { onConflict: "email" }
-      );
+
+    if (!clientEmail || clientPassword.length < 8) {
+      return fail(request, "client_login_missing_required");
     }
+
+    const { error: clientError } = await supabase.from("business_users").upsert(
+      {
+        business_id: businessId,
+        email: clientEmail,
+        name: value(formData, "client_name") || null,
+        role: "owner",
+        password_hash: hashClientPassword(clientPassword),
+        is_active: true,
+        updated_at: now,
+      },
+      { onConflict: "email" }
+    );
+
+    if (clientError) return fail(request, "client_user_create_failed", clientError);
   }
 
   return NextResponse.redirect(new URL(`/admin/onboarding?saved=1&siteId=${encodeURIComponent(siteId)}`, request.url), { status: 303 });
