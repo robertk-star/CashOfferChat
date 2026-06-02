@@ -101,7 +101,7 @@ export default async function AdminClientsPage({ searchParams }: { searchParams:
 
             <label className="block text-sm font-semibold text-slate-700">
               Temporary Password
-              <input name="password" type="password" required className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
+              <input name="password" type="password" required minLength={8} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
             </label>
 
             <label className="flex items-center gap-3 text-sm font-semibold text-slate-700">
@@ -125,11 +125,12 @@ export default async function AdminClientsPage({ searchParams }: { searchParams:
                 <th className="px-5 py-4">Role</th>
                 <th className="px-5 py-4">Active</th>
                 <th className="px-5 py-4">Last Login</th>
+                <th className="px-5 py-4">Edit</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {users.length === 0 && (
-                <tr><td className="px-5 py-8 text-center text-slate-500" colSpan={5}>No client users yet.</td></tr>
+                <tr><td className="px-5 py-8 text-center text-slate-500" colSpan={6}>No client users yet.</td></tr>
               )}
               {users.map((user) => (
                 <tr key={user.id}>
@@ -138,6 +139,7 @@ export default async function AdminClientsPage({ searchParams }: { searchParams:
                   <td className="px-5 py-4 text-slate-600">{user.role}</td>
                   <td className="px-5 py-4 text-slate-600">{user.is_active ? "Yes" : "No"}</td>
                   <td className="px-5 py-4 text-slate-600">{user.last_login_at ? new Date(user.last_login_at).toLocaleString() : "—"}</td>
+                  <td className="px-5 py-4"><Link className="font-bold text-navy underline" href={`/admin/clients/${user.id}`}>Open</Link></td>
                 </tr>
               ))}
             </tbody>
