@@ -1,151 +1,50 @@
-# CashOfferChat
+# CashOfferChat Phase 3B — Client Accounts + Scoped Dashboard
 
-AI seller intake assistant for cash home buyer websites.
+This phase moves CashOfferChat closer to a true multi-company SaaS by adding client login accounts and a business-scoped dashboard.
 
-## Current demo focus
+## What this adds
 
-This package updates the demo/business defaults from the Austin area to the Plano/North Texas area and references the demo site `sellmyhousetodayanywhere.com`.
+- Client login page: `/client/login`
+- Client dashboard: `/client`
+- Client lead detail page: `/client/leads/[id]`
+- Client logout route: `/api/client/logout`
+- Admin client-user management page: `/admin/clients`
+- Admin route to create/deactivate client users
+- Business-scoped lead visibility
+- Business-scoped site visibility
+- Password hashing for client users
+- Signed HTTP-only client session cookie
 
-Default demo values:
+## Important SQL migration
 
-- Business name: Sell My House Today Anywhere
-- Website: https://sellmyhousetodayanywhere.com/
-- Demo phone placeholder: 972-555-0100
-- Primary market: Plano, Texas and nearby North Texas areas
-- Default service areas: Plano, Frisco, McKinney, Allen, Richardson, Carrollton, Garland, Lewisville, Dallas
-
-Replace the placeholder phone number in `/admin/settings` when you have the real business phone number.
-
-## Supabase migrations
-
-Run migrations in order:
-
-1. `sql/001_initial_schema.sql`
-2. `sql/002_business_settings.sql`
-3. `sql/003_lead_management.sql`
-4. `sql/004_lead_notifications.sql`
-5. `sql/005_managed_faq_settings.sql`
-6. `sql/006_plano_demo_defaults.sql` — only needed if the project was previously seeded with Austin demo settings or you want to reset defaults to Plano.
-
-## Widget demo site
-
-For `sellmyhousetodayanywhere.com`, install the widget with:
-
-```html
-<script src="https://cashofferchat.com/widget.js" data-site-id="demo"></script>
-```
-
-Keep `APP_URL=https://cashofferchat.com` in the CashOfferChat Vercel project so the admin embed code references the production widget domain.
-
-## Required environment variables
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-OPENAI_API_KEY=
-ADMIN_DASHBOARD_PASSWORD=
-ADMIN_SESSION_SECRET=
-LEAD_NOTIFICATION_EMAIL=
-APP_URL=https://cashofferchat.com
-RESEND_API_KEY=
-FROM_EMAIL=
-```
-
-`OPENAI_API_KEY` and `RESEND_API_KEY` may be omitted during early testing, but email notifications require Resend configuration.
-
-
-## Phase 2H Widget Branding + Demo Site Settings
-
-Run the new migration after the previous migrations:
-
-7. `sql/007_widget_branding_settings.sql`
-
-This adds admin-controlled widget settings:
-
-- widget title and subtitle
-- bubble text
-- quote/intake button text
-- success message
-- header color
-- button color
-- call button visibility/text
-- allowed domains for demo/customer installs
-
-The widget now loads these settings from `/api/widget/settings`, so the embed code can stay simple:
-
-```html
-<script src="https://cashofferchat.com/widget.js" data-site-id="demo"></script>
-```
-
-The allowed-domain check is currently a soft warning for demo testing; it does not block the widget yet.
-
-## Phase 2I - Widget Analytics
-
-This update adds basic widget event tracking and an admin analytics page.
-
-New route:
+Run this after the prior migrations:
 
 ```text
-/admin/analytics
+sql/010_client_accounts.sql
 ```
 
-New public API endpoint:
+## New environment variable
+
+Add this in Vercel:
 
 ```text
-/api/widget/events
+CLIENT_SESSION_SECRET
 ```
 
-Tracked events include:
+Use a long random value. Do not reuse the admin password.
 
-```text
-widget_loaded
-widget_opened
-widget_closed
-chat_message_sent
-chat_response_received
-quote_form_opened
-quote_form_closed
-lead_form_submitted
-lead_saved
-lead_save_failed
-lead_submitted
-```
+## Testing checklist
 
-Run the new Supabase migration after all previous migrations:
+1. Run `sql/010_client_accounts.sql` in Supabase.
+2. Add `CLIENT_SESSION_SECRET` in Vercel.
+3. Redeploy.
+4. Log in as admin.
+5. Go to `/admin/clients`.
+6. Create a client user tied to an existing business.
+7. Log out or open a private browser window.
+8. Go to `/client/login`.
+9. Confirm the client can see only leads and sites for their business.
 
-```text
-sql/008_widget_analytics.sql
-```
+## Notes
 
-No new Vercel environment variables are required.
-
-
-## Phase 3A — Multi-company foundation
-
-This phase adds the first SaaS foundation layer for multiple businesses and widget installs.
-
-Run this SQL after the prior migrations:
-
-```bash
-sql/009_multi_company_foundation.sql
-```
-
-What it adds:
-
-- `businesses` table
-- `widget_sites` table
-- `site_id` and `business_id` tracking on conversations and seller leads
-- `business_id` tracking on widget events
-- `/admin/sites` page for creating/updating widget sites
-- site-aware `/api/widget/settings`, `/api/chat`, `/api/leads`, and `/api/widget/events`
-
-The embed code remains:
-
-```html
-<script src="https://cashofferchat.com/widget.js" data-site-id="demo"></script>
-```
-
-For a second demo or customer site, create a new Site ID in `/admin/sites`, then use that Site ID in the embed code.
-
-No new Vercel environment variables are required.
+This is not Stripe billing yet. It is the login/scoping foundation needed before paid subscriptions.
