@@ -1,93 +1,115 @@
-# CashOfferChat Phase 3L — Lead Export + CSV Downloads
+# CashOfferChat Phase 3M — Webhook / CRM Integration Foundation
 
-This phase adds CSV lead export tools for both master admin and clients.
+This phase adds a webhook integration foundation for delivering new seller leads to external systems such as Zapier, Make, GoHighLevel, HubSpot, Google Sheets, or a custom CRM.
 
 ## What this adds
 
-### Admin exports
+### Client integrations page
 
 ```text
-/api/admin/leads/export
+/client/integrations
 ```
 
-Master admin can export all leads, optionally filtered by:
+Clients can manage:
+
+- Webhook enabled / disabled
+- Webhook URL
+- Optional webhook secret
+- Test webhook button
+
+### Client integration save route
 
 ```text
-businessId
-siteId
-status
+/api/client/integrations
 ```
 
-Example:
+### Client test webhook route
 
 ```text
-/admin/leads/export?status=new
-/api/admin/leads/export?businessId=<business-id>
-/api/admin/leads/export?siteId=demo
+/api/client/integrations/test
 ```
 
-### Client exports
+### Lead webhook delivery helper
 
 ```text
-/api/client/leads/export
+src/lib/leadWebhook.ts
 ```
 
-Clients can export only leads tied to their own business.
-
-Optional filter:
+### Updated lead submit route
 
 ```text
-status
-siteId
+src/app/api/leads/route.ts
 ```
 
-Example:
+When a lead is saved, the route attempts webhook delivery if the business has webhook delivery enabled.
+
+Webhook failure does **not** block lead creation.
+
+## SQL migration required
+
+Run this in Supabase SQL Editor:
 
 ```text
-/api/client/leads/export?status=new
-/api/client/leads/export?siteId=demo
+sql/016_webhook_integrations.sql
 ```
 
-### Export buttons
-
-This package also adds reusable export button components:
+This adds:
 
 ```text
-src/components/AdminLeadExportButton.tsx
-src/components/ClientLeadExportButton.tsx
+business_settings.webhook_enabled
+business_settings.webhook_url
+business_settings.webhook_secret
+seller_leads.webhook_sent_at
+seller_leads.webhook_error
 ```
-
-These can be placed on dashboard pages.
-
-## CSV fields
-
-The CSV includes:
-
-- Created At
-- Status
-- Seller Name
-- Phone
-- Email
-- Property Address
-- Property City
-- Situation
-- Timeline
-- Property Condition
-- Seller Notes
-- Admin/Internal Notes
-- Source URL
-- Site ID
-- Business ID
-
-## Security
-
-- Admin export requires admin cookie.
-- Client export requires client cookie and is scoped by session `businessId`.
-
-## SQL migration
-
-No SQL migration is required.
 
 ## Vercel environment variables
 
 No new Vercel environment variables are required.
+
+## Webhook payload
+
+The payload includes:
+
+```json
+{
+  "event": "seller_lead.created",
+  "sentAt": "...",
+  "businessId": "...",
+  "siteId": "...",
+  "lead": {
+    "id": "...",
+    "createdAt": "...",
+    "status": "new",
+    "name": "...",
+    "phone": "...",
+    "email": "...",
+    "propertyAddress": "...",
+    "propertyCity": "...",
+    "situation": "...",
+    "timeline": "...",
+    "propertyCondition": "...",
+    "notes": "...",
+    "sourceUrl": "..."
+  }
+}
+```
+
+If a webhook secret is set, the request includes:
+
+```text
+X-CashOfferChat-Signature
+```
+
+This is an HMAC-SHA256 signature of the JSON payload.
+
+## Testing
+
+1. Run SQL migration.
+2. Deploy package.
+3. Log in as a client.
+4. Go to `/client/integrations`.
+5. Add a webhook URL from Zapier/Make/webhook.site.
+6. Click **Send Test Webhook**.
+7. Submit a test lead from the widget.
+8. Confirm the webhook receives the lead.
