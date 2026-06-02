@@ -1,51 +1,58 @@
-# CashOfferChat Phase 3J — Client Analytics Dashboard
+# CashOfferChat Phase 3K — Client Widget Sites + Install Center
 
-This phase adds business-scoped analytics to the client portal.
+This phase gives clients a self-service place to manage their widget install details.
 
 ## What this adds
 
-- Client analytics page:
+- Client widget sites list:
 
 ```text
-/client/analytics
+/client/sites
 ```
 
-- Updated global portal navigation:
+- Client widget site detail/edit page:
+
+```text
+/client/sites/[id]
+```
+
+- Client widget site update route:
+
+```text
+/api/client/sites/[id]
+```
+
+- Updated global client navigation:
 
 ```text
 src/components/PortalRouteNav.tsx
 ```
 
-## Clients can now see
+## Clients can now
 
-- Widget events in the last 7 days
-- Leads in the last 7 days
-- Lead conversion rate based on widget events
-- Events by type
-- Events by domain
-- Events by site ID
-- Recent widget events
-- Recent leads
-- Links to client lead detail pages
+- See their own widget sites
+- Copy the embed code for each site
+- See install instructions
+- See allowed domains
+- Edit:
+  - site display name
+  - primary domain
+  - allowed domains
+  - active/inactive status
+- See recent leads for that site
+- See recent widget events for that site
 
 ## Security
 
-The analytics page is scoped by the `business_id` from the signed client session cookie.
+Client site pages are scoped by `business_id` from the signed client session cookie.
 
-Clients only see events and leads for their own business.
+A client can only see/update widget sites tied to their own business.
 
 ## SQL migration
 
 No new SQL migration is required.
 
-This phase uses existing tables:
-
-```text
-widget_events
-seller_leads
-widget_sites
-businesses
-```
+This phase uses the existing `widget_sites`, `seller_leads`, and `widget_events` tables.
 
 ## Environment variables
 

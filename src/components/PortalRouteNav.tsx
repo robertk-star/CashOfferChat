@@ -17,6 +17,7 @@ const adminLinks = [
 
 const clientLinks = [
   { href: "/client", label: "Client Dashboard" },
+  { href: "/client/sites", label: "Widget Sites" },
   { href: "/client/analytics", label: "Analytics" },
   { href: "/client/settings", label: "Settings" },
   { href: "/client/account", label: "Account" },
