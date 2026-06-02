@@ -16,9 +16,7 @@ export const defaultSiteContext: SiteContext = {
   businessId: null,
   businessName: "Sell My House Today Anywhere",
   domain: "sellmyhousetodayanywhere.com",
-  allowedDomains: "sellmyhousetodayanywhere.com
-www.sellmyhousetodayanywhere.com
-cashofferchat.com",
+  allowedDomains: "sellmyhousetodayanywhere.com\nwww.sellmyhousetodayanywhere.com\ncashofferchat.com",
   isActive: true,
 };
 
@@ -41,8 +39,7 @@ export function normalizeDomain(value: string) {
 
 export function allowedDomainList(value?: string | null) {
   return String(value || "")
-    .split(/?
-|,/)
+    .split(/\r?\n|,/)
     .map((item) => normalizeDomain(item))
     .filter(Boolean);
 }
