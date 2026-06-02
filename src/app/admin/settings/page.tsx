@@ -5,7 +5,7 @@ import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 import { defaultBusinessSettings, getBusinessSettingsContext } from "@/lib/businessSettings";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { defaultCashBuyerFAQ } from "@/lib/defaultFaqKnowledge";
-import { CustomFAQEditor } from "@/components/CustomFAQEditor";
+import { ManagedFAQEditor } from "@/components/ManagedFAQEditor";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Business Settings | CashOfferChat" };
@@ -22,6 +22,29 @@ function criteriaLines(criteria: Array<{ label: string; notes: string | null }>)
   return criteria.map((item) => [item.label, item.notes].filter(Boolean).join(" | ")).join("\n");
 }
 
+function managedFaqRows(settings: Awaited<ReturnType<typeof getBusinessSettingsContext>>) {
+  const customRows = settings.customQA.map((item) => ({
+    trigger_question: item.trigger_question,
+    answer: item.answer,
+  }));
+
+  if (settings.business.use_custom_faq_knowledge_base) {
+    return customRows;
+  }
+
+  const rowsByQuestion = new Map<string, { trigger_question: string; answer: string }>();
+  for (const item of defaultCashBuyerFAQ) {
+    rowsByQuestion.set(item.triggerQuestion.toLowerCase(), {
+      trigger_question: item.triggerQuestion,
+      answer: item.answer,
+    });
+  }
+  for (const row of customRows) {
+    rowsByQuestion.set(row.trigger_question.toLowerCase(), row);
+  }
+  return Array.from(rowsByQuestion.values());
+}
+
 export default async function AdminSettingsPage({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string }> }) {
   const cookieStore = await cookies();
   const token = cookieStore.get(adminCookieName())?.value;
@@ -33,6 +56,7 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
   const business = settings.business;
   const appUrl = (process.env.APP_URL || "https://cashofferchat.com").replace(/\/$/, "");
   const embedCode = `<script src="${appUrl}/widget.js" data-site-id="demo"></script>`;
+  const faqRows = managedFaqRows(settings);
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
@@ -110,26 +134,11 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
           </section>
 
           <section className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
-            <h2 className="text-xl font-bold text-navy">Custom FAQ / Q&amp;A Knowledge Base</h2>
+            <h2 className="text-xl font-bold text-navy">FAQ Knowledge Base</h2>
             <p className="mt-2 text-sm text-slate-600">
-              Add as many business-specific FAQs as needed. These answers are used before the built-in default FAQ knowledge base.
+              Add new FAQs in the single box below. Once added, they move into the managed FAQ list where every item can be edited or removed.
             </p>
-            <CustomFAQEditor initialRows={settings.customQA} />
-          </section>
-
-
-          <section className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
-            <h2 className="text-xl font-bold text-navy">Default FAQ Knowledge Base</h2>
-            <p className="mt-2 text-sm text-slate-600">These built-in FAQs are used after your Custom Q&A answers and before generic fallback answers. Add a Custom Q&A item above if you want to override any default answer for this business.</p>
-            <div className="mt-5 space-y-4">
-              {defaultCashBuyerFAQ.map((item) => (
-                <details key={item.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <summary className="cursor-pointer font-bold text-navy">{item.triggerQuestion}</summary>
-                  <p className="mt-3 text-sm leading-6 text-slate-700">{item.answer}</p>
-                  <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">{item.category}</p>
-                </details>
-              ))}
-            </div>
+            <ManagedFAQEditor initialRows={faqRows} />
           </section>
 
           <section className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">

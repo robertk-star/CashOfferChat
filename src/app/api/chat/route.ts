@@ -89,9 +89,11 @@ function deterministicReply(message: string, settings: BusinessSettingsContext):
     return { intent: "question", showIntake: false, answer: customAnswer };
   }
 
-  const defaultFAQ = findDefaultFAQAnswer(message);
-  if (defaultFAQ) {
-    return { intent: "question", showIntake: false, answer: defaultFAQ.answer };
+  if (!settings.business.use_custom_faq_knowledge_base) {
+    const defaultFAQ = findDefaultFAQAnswer(message);
+    if (defaultFAQ) {
+      return { intent: "question", showIntake: false, answer: defaultFAQ.answer };
+    }
   }
 
   const handoff = includesAny(text, [
@@ -241,7 +243,7 @@ async function maybeEnhanceReply(userMessage: string, safeAnswer: string, settin
       messages: [
         { role: "system", content: CASH_OFFER_CHAT_SYSTEM_PROMPT },
         { role: "system", content: formatBusinessSettingsForPrompt(settings) },
-        { role: "system", content: `Default FAQ knowledge base. Use this only after business-specific custom Q&A and before generic fallback answers. Do not browse the web or add unsupported claims.\n\n${formatDefaultFAQForPrompt()}` },
+        { role: "system", content: settings.business.use_custom_faq_knowledge_base ? "The business is using a managed FAQ knowledge base from Custom Q&A. Do not use built-in default FAQ answers that were removed from settings." : `Default FAQ knowledge base. Use this only after business-specific custom Q&A and before generic fallback answers. Do not browse the web or add unsupported claims.\n\n${formatDefaultFAQForPrompt()}` },
         {
           role: "system",
           content:

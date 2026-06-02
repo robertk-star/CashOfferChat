@@ -64,6 +64,7 @@ export async function POST(request: Request) {
     disclose_referral_contacts: formData.get("disclose_referral_contacts") === "on",
     lead_notification_email: get("lead_notification_email") || null,
     from_email: get("from_email") || null,
+    use_custom_faq_knowledge_base: formData.get("use_managed_faqs") === "1",
     updated_at: new Date().toISOString(),
   };
 
