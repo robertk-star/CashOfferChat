@@ -12,15 +12,21 @@ type Business = {
   name: string;
 };
 
-type ClientUser = {
+type ClientUserRow = {
   id: string;
   email: string;
   name: string | null;
   role: string;
   is_active: boolean;
   last_login_at: string | null;
-  businesses: { name: string } | null;
+  businesses: { name: string } | { name: string }[] | null;
 };
+
+function getBusinessName(value: ClientUserRow["businesses"]) {
+  if (!value) return "—";
+  if (Array.isArray(value)) return value[0]?.name || "—";
+  return value.name || "—";
+}
 
 export default async function AdminClientsPage({ searchParams }: { searchParams: Promise<{ error?: string; saved?: string }> }) {
   const params = await searchParams;
@@ -30,7 +36,7 @@ export default async function AdminClientsPage({ searchParams }: { searchParams:
 
   const supabase = getSupabaseAdmin();
   let businesses: Business[] = [];
-  let users: ClientUser[] = [];
+  let users: ClientUserRow[] = [];
   let errorMessage = params.error ? "Unable to save client user. Check all required fields." : null;
 
   if (supabase) {
@@ -44,7 +50,7 @@ export default async function AdminClientsPage({ searchParams }: { searchParams:
       .from("business_users")
       .select("id, email, name, role, is_active, last_login_at, businesses(name)")
       .order("created_at", { ascending: false });
-    users = (usersResult.data || []) as ClientUser[];
+    users = (usersResult.data || []) as unknown as ClientUserRow[];
   } else {
     errorMessage = "Supabase is not configured.";
   }
@@ -128,7 +134,7 @@ export default async function AdminClientsPage({ searchParams }: { searchParams:
               {users.map((user) => (
                 <tr key={user.id}>
                   <td className="px-5 py-4"><div className="font-bold text-navy">{user.name || "—"}</div><div className="text-slate-500">{user.email}</div></td>
-                  <td className="px-5 py-4 text-slate-600">{user.businesses?.name || "—"}</td>
+                  <td className="px-5 py-4 text-slate-600">{getBusinessName(user.businesses)}</td>
                   <td className="px-5 py-4 text-slate-600">{user.role}</td>
                   <td className="px-5 py-4 text-slate-600">{user.is_active ? "Yes" : "No"}</td>
                   <td className="px-5 py-4 text-slate-600">{user.last_login_at ? new Date(user.last_login_at).toLocaleString() : "—"}</td>
