@@ -1,69 +1,62 @@
-# CashOfferChat Phase 3H — Client Lead Detail + Lead Management
+# CashOfferChat Phase 3I — Widget Site Management
 
-This phase improves the client portal so business clients can actually work their leads.
+This phase improves master-admin management of widget sites.
 
 ## What this adds
 
-- Client lead detail page:
+- Widget site detail/edit page:
 
 ```text
-/client/leads/[id]
+/admin/sites/[id]
 ```
 
-- Client lead update route:
+- Widget site update route:
 
 ```text
-/api/client/leads/[id]
+/api/admin/sites/[id]
 ```
 
-- Updated client dashboard:
+- Updated widget sites list page:
 
 ```text
-/client
+/admin/sites
 ```
 
-## Client can now
+## Master admin can now
 
-- Open each lead from the client dashboard
-- View full seller/property details
-- View conversation transcript when available
-- Update lead status
-- Add internal notes
-- Set last-contacted timestamp
-
-## Status options
-
-- New
-- Contacted
-- Appointment Set
-- Offer Made
-- Under Contract
-- Closed
-- Not Interested
-- Bad Lead
-- Referral
-
-## Security
-
-Client lead detail pages are scoped by `business_id` from the signed client session cookie.
-
-A client can only view/update leads belonging to their own business.
+- Open a widget site from the list
+- Edit:
+  - site display name
+  - site ID
+  - business assignment
+  - primary domain
+  - allowed domains
+  - active/inactive status
+- See the exact embed code
+- See recent leads from that site
+- See recent widget events from that site
+- Copy installation guidance from the page
 
 ## SQL migration
 
-No new SQL migration is required if previous migrations were already run.
+No new SQL migration is required if previous migrations are installed.
 
-This phase uses existing columns from earlier migrations:
+This phase expects:
 
 ```text
-seller_leads.admin_notes
-seller_leads.last_contacted_at
+widget_sites.name
+widget_sites.site_name
+widget_sites.site_id
+widget_sites.domain
+widget_sites.allowed_domains
+widget_sites.is_active
+widget_sites.business_id
 ```
 
-If those columns are missing, rerun:
+If your `widget_sites` schema is still inconsistent, rerun the stabilization SQL from Phase 3E:
 
 ```text
-sql/003_lead_management.sql
+sql/013_stabilize_onboarding_schema.sql
 ```
 
 ## Environment variables

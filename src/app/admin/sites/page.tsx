@@ -43,6 +43,7 @@ export default async function AdminSitesPage({
   const supabase = getSupabaseAdmin();
   let businesses: Business[] = [];
   let sites: WidgetSite[] = [];
+  let leadCounts: Record<string, number> = {};
   let errorMessage: string | null = query.error ? "Widget site could not be saved. Check required fields and make sure Site ID is unique." : null;
 
   if (!supabase) {
@@ -65,6 +66,15 @@ export default async function AdminSitesPage({
     } else {
       sites = (sitesResult.data || []) as unknown as WidgetSite[];
     }
+
+    const leadResult = await supabase
+      .from("seller_leads")
+      .select("site_id");
+
+    for (const row of leadResult.data || []) {
+      if (!row.site_id) continue;
+      leadCounts[row.site_id] = (leadCounts[row.site_id] || 0) + 1;
+    }
   }
 
   const appUrl = process.env.APP_URL || "https://cashofferchat.com";
@@ -74,7 +84,7 @@ export default async function AdminSitesPage({
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div>
-            <Link href="/admin" className="text-sm font-bold text-slate-500 underline">Back to Admin</Link>
+            <Link href="/admin" className="text-sm font-bold text-slate-500 underline">Back to Admin Dashboard</Link>
             <h1 className="mt-2 text-2xl font-bold text-navy">Widget Sites</h1>
             <p className="text-sm text-slate-500">Create and manage widget embed sites.</p>
           </div>
@@ -153,11 +163,16 @@ export default async function AdminSitesPage({
                     <p className="text-sm text-slate-500">Business: {businessName(site.businesses)}</p>
                     <p className="text-sm text-slate-500">Site ID: {site.site_id}</p>
                     <p className="text-sm text-slate-500">Domain: {site.domain || "—"}</p>
-                    <p className="text-sm text-slate-500">Allowed: {site.allowed_domains || "—"}</p>
+                    <p className="text-sm text-slate-500">Leads: {leadCounts[site.site_id] || 0}</p>
                   </div>
-                  <span className={site.is_active === false ? "rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700" : "rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700"}>
-                    {site.is_active === false ? "Inactive" : "Active"}
-                  </span>
+                  <div className="flex flex-col items-start gap-3 lg:items-end">
+                    <span className={site.is_active === false ? "rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700" : "rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700"}>
+                      {site.is_active === false ? "Inactive" : "Active"}
+                    </span>
+                    <Link href={`/admin/sites/${site.id}`} className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy">
+                      Open Site
+                    </Link>
+                  </div>
                 </div>
 
                 <div className="mt-5">
