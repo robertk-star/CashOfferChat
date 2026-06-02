@@ -1,31 +1,85 @@
-# CashOfferChat Client Auth Repair
+# CashOfferChat Phase 3G — System Health + Navigation Consolidation
 
-This fixes the Vercel build error:
+This phase adds consistent navigation and a master system health page.
 
-```text
-Module '"@/lib/clientAuth"' has no exported member 'verifyClientSessionToken'
-```
+## What this adds
 
-## What changed
+### Admin navigation
 
-Restores the full client auth helper:
+New shared component:
 
 ```text
-src/lib/clientAuth.ts
+src/components/AdminNav.tsx
 ```
 
-Exports:
+Admin pages can use this component to show:
 
-- `clientCookieName`
-- `hashClientPassword`
-- `verifyClientPassword`
-- `createClientSessionToken`
-- `verifyClientSessionToken`
+- Dashboard
+- Businesses
+- Onboarding
+- Widget Sites
+- Client Users
+- Settings
+- Analytics
+- System
+- Log Out
 
-## SQL
+### Client navigation
+
+New shared component:
+
+```text
+src/components/ClientNav.tsx
+```
+
+Client pages can use this component to show:
+
+- Dashboard
+- Settings
+- Account
+- Log Out
+
+### System health page
+
+New route:
+
+```text
+/admin/system
+```
+
+The page checks:
+
+- Required environment variables
+- Optional environment variables
+- Supabase table reachability
+- Key route file presence
+- Overall system status
+
+### System health API
+
+New route:
+
+```text
+/api/admin/system/health
+```
+
+Returns JSON health information for admin troubleshooting.
+
+## Files included
+
+```text
+src/components/AdminNav.tsx
+src/components/ClientNav.tsx
+src/lib/systemHealth.ts
+src/app/admin/system/page.tsx
+src/app/api/admin/system/health/route.ts
+README.md
+```
+
+## SQL migration
 
 No new SQL migration is required.
 
-## Environment variables
+## Vercel environment variables
 
-No new Vercel environment variables are required if `CLIENT_SESSION_SECRET` already exists.
+No new Vercel environment variables are required.
