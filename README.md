@@ -1,53 +1,32 @@
-# CashOfferChat Repository Core Repair
+# CashOfferChat Admin Sites Repair
 
-Your uploaded GitHub zip is missing the core Next.js app files and shared libraries.
+This package restores the missing `/admin/sites` page and site-save API route.
 
-The Vercel error:
+## What this fixes
 
-```text
-admin/businesses/page.tsx doesn't have a root layout
-```
-
-happens because `src/app/layout.tsx` is missing.
-
-The uploaded repo also does not include shared files required by the new admin pages, including:
-
-```text
-src/lib/auth.ts
-src/lib/supabaseAdmin.ts
-src/lib/clientAuth.ts
-src/lib/siteId.ts
-```
-
-This repair package adds the missing core files.
+- `/admin/sites` was returning 404 because the current GitHub files do not include:
+  - `src/app/admin/sites/page.tsx`
+  - `src/app/api/admin/sites/route.ts`
 
 ## Files included
 
 ```text
-src/app/layout.tsx
-src/app/globals.css
-src/app/page.tsx
-src/app/admin/page.tsx
-src/app/admin/login/page.tsx
-src/app/api/admin/login/route.ts
-src/app/api/admin/logout/route.ts
-src/lib/auth.ts
-src/lib/supabaseAdmin.ts
-src/lib/clientAuth.ts
-src/lib/siteId.ts
+src/app/admin/sites/page.tsx
+src/app/api/admin/sites/route.ts
+README.md
 ```
 
 ## SQL migration
 
-No SQL migration is required for this repair.
+No new SQL migration is required if you already ran the onboarding schema stabilization migration.
+
+The page expects these existing tables:
+
+```text
+businesses
+widget_sites
+```
 
 ## Vercel environment variables
 
-No new Vercel variables are required, but these must already be present for admin/database features:
-
-```text
-ADMIN_DASHBOARD_PASSWORD
-ADMIN_SESSION_SECRET
-NEXT_PUBLIC_SUPABASE_URL
-SUPABASE_SERVICE_ROLE_KEY
-```
+No new Vercel environment variables are required.
