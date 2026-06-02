@@ -5,6 +5,7 @@ import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 import { defaultBusinessSettings, getBusinessSettingsContext } from "@/lib/businessSettings";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { defaultCashBuyerFAQ } from "@/lib/defaultFaqKnowledge";
+import { CustomFAQEditor } from "@/components/CustomFAQEditor";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Business Settings | CashOfferChat" };
@@ -32,9 +33,6 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
   const business = settings.business;
   const appUrl = (process.env.APP_URL || "https://cashofferchat.com").replace(/\/$/, "");
   const embedCode = `<script src="${appUrl}/widget.js" data-site-id="demo"></script>`;
-  const qaRows = [...settings.customQA];
-  while (qaRows.length < 6) qaRows.push({ trigger_question: "", answer: "" });
-
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
@@ -112,16 +110,11 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
           </section>
 
           <section className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
-            <h2 className="text-xl font-bold text-navy">Custom Q&amp;A Knowledge Base</h2>
-            <p className="mt-2 text-sm text-slate-600">The AI should prioritize these custom answers when a visitor asks a matching question.</p>
-            <div className="mt-5 space-y-5">
-              {qaRows.map((row, index) => (
-                <div key={index} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <label className="block text-sm font-semibold text-slate-700">What question should I look for?<input name="qa_trigger" defaultValue={row.trigger_question} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Do you buy houses with tenants?" /></label>
-                  <label className="mt-3 block text-sm font-semibold text-slate-700">What is your answer to that question?<textarea name="qa_answer" defaultValue={row.answer} className="mt-1 min-h-24 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-normal outline-none focus:border-gold" placeholder="Yes. We can review tenant-occupied properties..." /></label>
-                </div>
-              ))}
-            </div>
+            <h2 className="text-xl font-bold text-navy">Custom FAQ / Q&amp;A Knowledge Base</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Add as many business-specific FAQs as needed. These answers are used before the built-in default FAQ knowledge base.
+            </p>
+            <CustomFAQEditor initialRows={settings.customQA} />
           </section>
 
 

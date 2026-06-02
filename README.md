@@ -2,42 +2,42 @@
 
 AI seller intake assistant for cash home buyer websites.
 
-## Phase 2F update
+## Current build
 
-This package adds a controlled Default FAQ Knowledge Base for the widget/chat.
+Phase 2F Hotfix — Add More FAQs in Settings
 
-### What changed
+This update adds an editable FAQ builder to `/admin/settings` so the business can add as many custom FAQs as needed.
 
-- Added `src/lib/defaultFaqKnowledge.ts` with cash-buyer FAQ answers.
-- Updated `/api/chat` to answer in this order:
-  1. Business-specific Custom Q&A from `/admin/settings`
-  2. Default FAQ Knowledge Base
-  3. Business settings such as buying areas, referral areas, and buying criteria
-  4. Safe generic fallback answer
-- Updated the OpenAI prompt context so it references the default FAQ and does not browse the web or add unsupported claims.
-- Added a read-only Default FAQ Knowledge Base section to `/admin/settings` so the admin can see the built-in answers.
-- Custom Q&A remains the override mechanism. Add a custom answer to override a default FAQ answer for a specific business.
+## What changed
 
-### SQL migrations
+- Added `src/components/CustomFAQEditor.tsx`
+- Replaced the fixed 6-row Q&A section with a dynamic FAQ editor
+- Added an `Add Another FAQ` button
+- Added a `Remove` button for each FAQ row
+- Custom FAQs still save to the existing `custom_qa_items` table
+- The widget continues to prioritize Custom FAQ / Q&A answers before default FAQ answers
 
-No new Supabase SQL migration is required for Phase 2F.
+## Required SQL
 
-### Environment variables
+No new Supabase SQL migration is required.
+
+The existing Phase 2B table is used:
+
+```sql
+custom_qa_items
+```
+
+## Required environment variables
 
 No new Vercel environment variables are required.
 
-### Test questions
+## Testing
 
-Try these in `/widget-demo` or the widget:
-
-- How is the cash offer determined?
-- Do you pay full market value?
-- Are there hidden fees or commissions?
-- Do I need to clean the house or make repairs?
-- What types of property situations do you buy?
-- How fast can you close?
-- Do I have to move out immediately?
-- Am I obligated to sell if I request an offer?
-- Can I sell if I already have an agent?
-
-The widget should answer from the built-in FAQ knowledge base unless a Custom Q&A item in admin settings provides a more specific answer.
+1. Log in to `/admin/login`.
+2. Open `/admin/settings`.
+3. Go to `Custom FAQ / Q&A Knowledge Base`.
+4. Click `Add Another FAQ`.
+5. Add a question and answer.
+6. Save Business Settings.
+7. Ask the widget a matching question.
+8. Confirm the widget uses the custom answer before the default FAQ answer.
