@@ -27,13 +27,9 @@ async function insertNamedRows(supabase: any, table: string, businessId: string,
 }
 
 async function makeUniqueBusinessSlug(supabase: any, baseSlug: string) {
-  let slug = baseSlug;
-  const { data: existing } = await supabase.from("businesses").select("id").eq("slug", slug).maybeSingle();
-
-  if (!existing?.id) return slug;
-
-  slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
-  return slug;
+  const { data: existing } = await supabase.from("businesses").select("id").eq("slug", baseSlug).maybeSingle();
+  if (!existing?.id) return baseSlug;
+  return `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
 export async function POST(request: Request) {
@@ -90,11 +86,13 @@ export async function POST(request: Request) {
   if (businessError || !business?.id) return fail(request, "business_create_failed", businessError);
 
   const businessId = business.id;
+  const siteDisplayName = value(formData, "site_name") || `${businessName} Widget`;
 
   const { error: siteError } = await supabase.from("widget_sites").insert({
     business_id: businessId,
     site_id: siteId,
-    site_name: value(formData, "site_name") || `${businessName} Widget`,
+    name: siteDisplayName,
+    site_name: siteDisplayName,
     domain,
     allowed_domains: allowedDomains,
     is_active: true,

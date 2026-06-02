@@ -1,31 +1,28 @@
-# CashOfferChat Phase 3E Hotfix — Business Slug + Required Field Clarity
+# CashOfferChat Phase 3E Hotfix — Widget Site Name Column
 
 This hotfix fixes the onboarding error:
 
 ```text
-null value in column "slug" of relation "businesses" violates not-null constraint
+null value in column "name" of relation "widget_sites" violates not-null constraint
 ```
 
 ## What changed
 
-- The onboarding API now automatically creates `slug` from the business name.
-- If the generated slug already exists, it appends a short unique suffix.
-- The onboarding form now makes the backend-required fields clear:
-  - Business Name *
-  - Site ID *
-- Optional client-login fields are clearly marked as required only if "Create client login" is checked.
-- The onboarding API now includes `slug` when inserting a new business.
-
-## SQL migration
-
-Run this repair SQL in Supabase before testing again:
+The onboarding route now sends both fields when creating a widget site:
 
 ```text
-sql/012_repair_business_slug.sql
+name
+site_name
 ```
 
-It ensures the `slug` column exists and fills any missing slugs for existing businesses.
+Both use the same site display name.
 
-## Environment variables
+## File changed
+
+```text
+src/app/api/admin/onboarding/route.ts
+```
+
+No new Supabase SQL migration is required.
 
 No new Vercel environment variables are required.
