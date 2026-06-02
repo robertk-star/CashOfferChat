@@ -65,6 +65,16 @@ export async function POST(request: Request) {
     lead_notification_email: get("lead_notification_email") || null,
     from_email: get("from_email") || null,
     use_custom_faq_knowledge_base: formData.get("use_managed_faqs") === "1",
+    widget_title: get("widget_title") || "Seller Intake Assistant",
+    widget_subtitle: get("widget_subtitle") || "Answers questions and collects property basics",
+    widget_bubble_text: get("widget_bubble_text") || "Questions? Chat with us",
+    widget_quote_button_text: get("widget_quote_button_text") || "Enter House Info for a Quote",
+    widget_success_message: get("widget_success_message") || "Thanks. Your information was received. Someone from the team can review the details and follow up.",
+    widget_primary_color: get("widget_primary_color") || "#0f2440",
+    widget_accent_color: get("widget_accent_color") || "#f5b84b",
+    widget_show_call_button: formData.get("widget_show_call_button") === "on",
+    widget_call_button_text: get("widget_call_button_text") || "Call Now",
+    widget_allowed_domains: get("widget_allowed_domains") || null,
     updated_at: new Date().toISOString(),
   };
 

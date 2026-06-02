@@ -2,46 +2,62 @@
   const currentScript = document.currentScript || Array.from(document.scripts).find((script) => script.src && script.src.includes('/widget.js'));
   const baseUrl = currentScript ? new URL(currentScript.src).origin : 'https://cashofferchat.com';
   const siteId = currentScript?.getAttribute('data-site-id') || 'demo';
-  const primaryColor = currentScript?.getAttribute('data-primary-color') || '#0f2440';
-  const accentColor = currentScript?.getAttribute('data-accent-color') || '#f5b84b';
-  const title = currentScript?.getAttribute('data-title') || 'Seller Intake Assistant';
+
+  const settings = {
+    primaryColor: currentScript?.getAttribute('data-primary-color') || '#0f2440',
+    accentColor: currentScript?.getAttribute('data-accent-color') || '#f5b84b',
+    title: currentScript?.getAttribute('data-title') || 'Seller Intake Assistant',
+    subtitle: 'Answers questions and collects property basics',
+    bubbleText: 'Questions? Chat with us',
+    quoteButtonText: 'Enter House Info for a Quote',
+    successMessage: 'Thanks. Your information was received. Someone from the team can review the details and follow up.',
+    showCallButton: true,
+    callButtonText: 'Call Now',
+    phone: '',
+    isAllowedDomain: true,
+  };
 
   if (window.__cashOfferChatLoaded) return;
   window.__cashOfferChatLoaded = true;
 
   const css = `
+    .coc-root { --coc-primary: ${settings.primaryColor}; --coc-accent: ${settings.accentColor}; }
     .coc-root * { box-sizing: border-box; }
     .coc-bubble {
       position: fixed; right: 22px; bottom: 22px; z-index: 2147483647;
-      border: 0; border-radius: 999px; background: ${primaryColor}; color: #fff;
+      border: 0; border-radius: 999px; background: var(--coc-primary); color: #fff;
       padding: 15px 18px; font: 700 15px/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       box-shadow: 0 18px 45px rgba(15,36,64,.28); cursor: pointer;
     }
     .coc-panel {
       position: fixed; right: 22px; bottom: 88px; z-index: 2147483647;
-      width: min(420px, calc(100vw - 28px)); height: min(680px, calc(100vh - 110px));
+      width: min(420px, calc(100vw - 28px)); height: min(700px, calc(100vh - 110px));
       background: #fff; border: 1px solid #e2e8f0; border-radius: 26px; overflow: hidden;
       box-shadow: 0 28px 80px rgba(15,36,64,.28); display: none;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     .coc-panel.coc-open { display: flex; flex-direction: column; }
-    .coc-header { background: ${primaryColor}; color: #fff; padding: 16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .coc-header { background: var(--coc-primary); color: #fff; padding: 16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
     .coc-title { font-weight: 800; font-size: 16px; margin: 0; }
     .coc-status { margin: 3px 0 0; font-size: 12px; opacity: .72; }
     .coc-close { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.1); color:#fff; border-radius: 999px; width: 34px; height: 34px; cursor:pointer; font-size: 20px; line-height: 30px; }
     .coc-top-cta { padding: 12px 14px; background:#fff; border-bottom:1px solid #e2e8f0; }
-    .coc-open-quote { width:100%; border:0; background:${accentColor}; color:#0f2440; border-radius:999px; padding:12px 14px; font-weight:900; cursor:pointer; font-size:14px; }
+    .coc-open-quote { width:100%; border:0; background:var(--coc-accent); color:#0f2440; border-radius:999px; padding:12px 14px; font-weight:900; cursor:pointer; font-size:14px; }
+    .coc-call { display:none; margin-top:8px; width:100%; border:1px solid #cbd5e1; background:#fff; color:#0f2440; border-radius:999px; padding:11px 14px; font-weight:900; text-align:center; text-decoration:none; font-size:14px; }
+    .coc-call.coc-show { display:block; }
+    .coc-domain-warning { display:none; margin:8px 4px 0; color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:8px; font-size:12px; line-height:1.35; }
+    .coc-domain-warning.coc-show { display:block; }
     .coc-top-cta p { margin:7px 4px 0; color:#64748b; font-size:12px; line-height:1.35; }
     .coc-messages { flex: 1; overflow-y: auto; padding: 16px; background: #f8fafc; }
     .coc-msg { max-width: 86%; padding: 12px 14px; border-radius: 18px; margin: 0 0 10px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; }
     .coc-assistant { background: #fff; color: #334155; border: 1px solid #e2e8f0; border-bottom-left-radius: 6px; }
-    .coc-user { background: ${accentColor}; color: #0f2440; margin-left: auto; border-bottom-right-radius: 6px; font-weight: 600; }
+    .coc-user { background: var(--coc-accent); color: #0f2440; margin-left: auto; border-bottom-right-radius: 6px; font-weight: 600; }
     .coc-actions { display:flex; flex-wrap:wrap; gap:8px; padding: 10px 14px 0; background:#f8fafc; }
     .coc-chip { border:1px solid #dbe3ee; background:#fff; color:#334155; border-radius:999px; padding:8px 10px; font-weight:700; font-size:12px; cursor:pointer; }
-    .coc-intake-btn { border: 0; background: ${accentColor}; color: #0f2440; border-radius: 999px; padding: 9px 12px; font-weight: 800; cursor:pointer; margin-top: 8px; }
+    .coc-intake-btn { border: 0; background: var(--coc-accent); color: #0f2440; border-radius: 999px; padding: 9px 12px; font-weight: 800; cursor:pointer; margin-top: 8px; }
     .coc-composer { display:flex; gap:8px; padding: 12px; border-top:1px solid #e2e8f0; background:#fff; }
     .coc-input { flex:1; border:1px solid #cbd5e1; border-radius:999px; padding: 12px 14px; outline:0; font-size:14px; }
-    .coc-send { border:0; border-radius:999px; background:${primaryColor}; color:#fff; padding: 0 15px; font-weight:800; cursor:pointer; }
+    .coc-send { border:0; border-radius:999px; background:var(--coc-primary); color:#fff; padding: 0 15px; font-weight:800; cursor:pointer; }
     .coc-form-wrap { display:none; flex:1; overflow-y:auto; padding:16px; background:#fff; }
     .coc-panel.coc-form-mode .coc-top-cta, .coc-panel.coc-form-mode .coc-messages, .coc-panel.coc-form-mode .coc-actions, .coc-panel.coc-form-mode .coc-composer { display:none; }
     .coc-panel.coc-form-mode .coc-form-wrap { display:block; }
@@ -50,7 +66,7 @@
     .coc-label { display:block; color:#334155; font-weight:800; font-size:13px; margin: 0 0 11px; }
     .coc-field, .coc-textarea, .coc-select { width:100%; margin-top:5px; border:1px solid #cbd5e1; border-radius:14px; padding:11px 12px; font: 400 14px system-ui, sans-serif; outline:0; background:#fff; }
     .coc-textarea { min-height: 86px; resize: vertical; }
-    .coc-submit { width:100%; border:0; background:${accentColor}; color:#0f2440; border-radius:999px; padding:13px; font-weight:900; cursor:pointer; margin-top:5px; }
+    .coc-submit { width:100%; border:0; background:var(--coc-accent); color:#0f2440; border-radius:999px; padding:13px; font-weight:900; cursor:pointer; margin-top:5px; }
     .coc-back { width:100%; border:1px solid #cbd5e1; background:#fff; color:#0f2440; border-radius:999px; padding:11px; font-weight:800; cursor:pointer; margin-top:9px; }
     .coc-error { background:#fef2f2; color:#b91c1c; border-radius:12px; padding:10px; font-size:13px; margin: 0 0 12px; }
     .coc-success { background:#ecfdf5; color:#064e3b; border-radius:12px; padding:10px; font-size:13px; margin: 0 0 12px; }
@@ -67,13 +83,13 @@
   const root = document.createElement('div');
   root.className = 'coc-root';
   root.innerHTML = `
-    <button class="coc-bubble" type="button">Questions? Chat with us</button>
+    <button class="coc-bubble" type="button">${escapeHtml(settings.bubbleText)}</button>
     <section class="coc-panel" aria-label="CashOfferChat seller assistant">
       <header class="coc-header">
-        <div><p class="coc-title">${escapeHtml(title)}</p><p class="coc-status">Answers questions and collects property basics</p></div>
+        <div><p class="coc-title">${escapeHtml(settings.title)}</p><p class="coc-status">${escapeHtml(settings.subtitle)}</p></div>
         <button class="coc-close" type="button" aria-label="Close">×</button>
       </header>
-      <div class="coc-top-cta"><button class="coc-open-quote" type="button">Enter House Info for a Quote</button><p>Ask a question below, or enter your property details when you’re ready.</p></div>
+      <div class="coc-top-cta"><button class="coc-open-quote" type="button">${escapeHtml(settings.quoteButtonText)}</button><a class="coc-call" href="#"></a><div class="coc-domain-warning">This widget is running on a domain that is not in the allowed domain list. It is still enabled for demo testing.</div><p>Ask a question below, or enter your property details when you’re ready.</p></div>
       <div class="coc-messages"></div>
       <div class="coc-actions">
         <button class="coc-chip" type="button" data-msg="Do you buy as-is?">Do you buy as-is?</button>
@@ -122,6 +138,25 @@
     return String(value || '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
   }
 
+  function applySettings(next) {
+    Object.assign(settings, next || {});
+    root.style.setProperty('--coc-primary', settings.primaryColor || '#0f2440');
+    root.style.setProperty('--coc-accent', settings.accentColor || '#f5b84b');
+    root.querySelector('.coc-bubble').textContent = settings.bubbleText || 'Questions? Chat with us';
+    root.querySelector('.coc-title').textContent = settings.title || 'Seller Intake Assistant';
+    root.querySelector('.coc-status').textContent = settings.subtitle || 'Answers questions and collects property basics';
+    root.querySelector('.coc-open-quote').textContent = settings.quoteButtonText || 'Enter House Info for a Quote';
+    const call = root.querySelector('.coc-call');
+    if (settings.showCallButton && settings.phone) {
+      call.textContent = `${settings.callButtonText || 'Call Now'}: ${settings.phone}`;
+      call.href = `tel:${String(settings.phone).replace(/[^0-9+]/g, '')}`;
+      call.classList.add('coc-show');
+    } else {
+      call.classList.remove('coc-show');
+    }
+    if (settings.isAllowedDomain === false) root.querySelector('.coc-domain-warning').classList.add('coc-show');
+  }
+
   function addMessage(role, content, showIntake) {
     const div = document.createElement('div');
     div.className = `coc-msg ${role === 'user' ? 'coc-user' : 'coc-assistant'}`;
@@ -130,7 +165,7 @@
       const btn = document.createElement('button');
       btn.className = 'coc-intake-btn';
       btn.type = 'button';
-      btn.textContent = 'Enter House Info for a Quote';
+      btn.textContent = settings.quoteButtonText || 'Enter House Info for a Quote';
       btn.addEventListener('click', openForm);
       div.appendChild(document.createElement('br'));
       div.appendChild(btn);
@@ -153,7 +188,12 @@
   }));
   root.querySelector('.coc-open-quote').addEventListener('click', openForm);
 
-  addMessage('assistant', 'Hi! I can answer questions about selling a house as-is for cash. To request a review, click “Enter House Info for a Quote” above. There is no obligation.');
+  addMessage('assistant', 'Hi! I can answer questions about selling a house as-is for cash. To request a review, click the quote button above. There is no obligation.');
+
+  fetch(`${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&sourceUrl=${encodeURIComponent(window.location.href)}`)
+    .then((response) => response.ok ? response.json() : null)
+    .then((data) => { if (data) applySettings(data); })
+    .catch(() => {});
 
   async function sendMessage(content) {
     const text = String(content || '').trim();
@@ -205,8 +245,8 @@
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Lead save failed');
-      formStatus.innerHTML = '<div class="coc-success">Thanks. The details were saved for follow-up.</div>';
-      addMessage('assistant', 'Thanks. The property details have been saved for follow-up. The team can review the information and contact the seller.');
+      formStatus.innerHTML = `<div class="coc-success">${escapeHtml(settings.successMessage)}</div>`;
+      addMessage('assistant', settings.successMessage);
     } catch (error) {
       formStatus.innerHTML = `<div class="coc-error">${escapeHtml(error.message || 'Lead could not be saved.')}</div>`;
     }

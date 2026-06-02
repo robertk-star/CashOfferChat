@@ -53,3 +53,29 @@ FROM_EMAIL=
 ```
 
 `OPENAI_API_KEY` and `RESEND_API_KEY` may be omitted during early testing, but email notifications require Resend configuration.
+
+
+## Phase 2H Widget Branding + Demo Site Settings
+
+Run the new migration after the previous migrations:
+
+7. `sql/007_widget_branding_settings.sql`
+
+This adds admin-controlled widget settings:
+
+- widget title and subtitle
+- bubble text
+- quote/intake button text
+- success message
+- header color
+- button color
+- call button visibility/text
+- allowed domains for demo/customer installs
+
+The widget now loads these settings from `/api/widget/settings`, so the embed code can stay simple:
+
+```html
+<script src="https://cashofferchat.com/widget.js" data-site-id="demo"></script>
+```
+
+The allowed-domain check is currently a soft warning for demo testing; it does not block the widget yet.

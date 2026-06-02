@@ -13,6 +13,16 @@ type RawBusinessSettings = {
   lead_notification_email?: string | null;
   from_email?: string | null;
   use_custom_faq_knowledge_base?: boolean | null;
+  widget_title?: string | null;
+  widget_subtitle?: string | null;
+  widget_bubble_text?: string | null;
+  widget_quote_button_text?: string | null;
+  widget_success_message?: string | null;
+  widget_primary_color?: string | null;
+  widget_accent_color?: string | null;
+  widget_show_call_button?: boolean | null;
+  widget_call_button_text?: string | null;
+  widget_allowed_domains?: string | null;
 };
 
 export type ServiceArea = { city: string; state: string | null; notes: string | null };
@@ -53,6 +63,16 @@ export const defaultBusinessSettings: BusinessSettingsContext = {
     lead_notification_email: null,
     from_email: null,
     use_custom_faq_knowledge_base: false,
+    widget_title: "Seller Intake Assistant",
+    widget_subtitle: "Answers questions and collects property basics",
+    widget_bubble_text: "Questions? Chat with us",
+    widget_quote_button_text: "Enter House Info for a Quote",
+    widget_success_message: "Thanks. Your information was received. Someone from the team can review the details and follow up.",
+    widget_primary_color: "#0f2440",
+    widget_accent_color: "#f5b84b",
+    widget_show_call_button: true,
+    widget_call_button_text: "Call Now",
+    widget_allowed_domains: "sellmyhousetodayanywhere.com\nwww.sellmyhousetodayanywhere.com\ncashofferchat.com",
   },
   serviceAreas: [
     { city: "Plano", state: "TX", notes: null },
@@ -93,7 +113,7 @@ export async function getBusinessSettingsContext(supabase: SupabaseClient | null
 
   try {
     const [businessResult, serviceResult, referralResult, criteriaResult, qaResult] = await Promise.all([
-      supabase.from("business_settings").select("business_name, website, phone, email, primary_market, description, preferred_tone, custom_instructions, disclose_referral_contacts, lead_notification_email, from_email, use_custom_faq_knowledge_base").eq("singleton_key", "default").maybeSingle(),
+      supabase.from("business_settings").select("business_name, website, phone, email, primary_market, description, preferred_tone, custom_instructions, disclose_referral_contacts, lead_notification_email, from_email, use_custom_faq_knowledge_base, widget_title, widget_subtitle, widget_bubble_text, widget_quote_button_text, widget_success_message, widget_primary_color, widget_accent_color, widget_show_call_button, widget_call_button_text, widget_allowed_domains").eq("singleton_key", "default").maybeSingle(),
       supabase.from("service_areas").select("city, state, notes").eq("is_active", true).order("city"),
       supabase.from("referral_areas").select("city, state, contact_name, contact_email, contact_phone, notes, auto_forward, public_disclosure").order("city"),
       supabase.from("buying_criteria").select("category, label, notes").order("category").order("label"),
