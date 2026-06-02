@@ -69,28 +69,30 @@ export default async function AdminSystemPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <AdminNav title="System Health" subtitle="Check configuration, database tables, route files, API route files, and manual QA items." />
+      <AdminNav title="System Health" subtitle="Check configuration, database tables, route availability, and manual QA items." />
       <section className="mx-auto max-w-7xl space-y-8 px-6 py-8">
         <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 className="text-xl font-bold text-navy">Overall Status</h2>
               <p className="mt-1 text-sm text-slate-500">Last checked: {new Date(health.checkedAt).toLocaleString()}</p>
+              <p className="mt-1 text-sm text-slate-500">Runtime: {health.environment}</p>
             </div>
             <StatusBadge status={health.overallStatus} />
           </div>
 
           <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
             <div className="font-bold text-navy">How to use this page</div>
-            <p className="mt-1">Fix red items first. Yellow items are usually optional services or manual checks. Green items are ready.</p>
+            <p className="mt-1">Fix red items first. Yellow items are usually optional services or manual checks.</p>
+            <p className="mt-2">In Vercel production, source route files are not checked directly. Protected and dynamic routes are marked as manual checks so they do not create false errors.</p>
             <p className="mt-2">API JSON: <code className="rounded bg-white px-2 py-1">/api/admin/system/health</code></p>
           </div>
         </div>
 
         <HealthSection title="Environment Variables" items={health.env} />
         <HealthSection title="Supabase Tables" items={health.tables} />
-        <HealthSection title="Page Route Files" items={health.routes} />
-        <HealthSection title="API Route Files" items={health.apiRoutes} />
+        <HealthSection title="Page Routes" items={health.routes} />
+        <HealthSection title="API Routes" items={health.apiRoutes} />
         <HealthSection title="Manual QA Checklist" items={health.qaChecklist} />
 
         <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
