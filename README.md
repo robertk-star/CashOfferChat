@@ -1,45 +1,85 @@
-# CashOfferChat Hotfix — Multi-Business Settings
+# CashOfferChat Phase 3O — Public Sales Page + Homepage Widget Demo
 
-This fixes the onboarding error:
+This phase turns `cashofferchat.com` into a public-facing SaaS sales website.
 
-```text
-duplicate key value violates unique constraint "business_settings_singleton_key_key"
-Key (singleton_key)=(default) already exists.
-```
+## What this adds
 
-## What happened
-
-`business_settings` was originally created for a single-business/demo setup. It has an old unique constraint on `singleton_key`, which only allows one settings row.
-
-Now CashOfferChat is multi-business, so each business needs its own settings row.
-
-## SQL migration required
-
-Run this in Supabase SQL Editor:
+Public pages:
 
 ```text
-sql/017_multibusiness_settings_fix.sql
+/
+ /demo
+ /pricing
+ /contact
+ /privacy
+ /terms
 ```
 
-This migration:
+## Homepage
 
-- Adds `business_id` if missing
-- Drops the old singleton unique constraint
-- Creates a unique index on `business_id`
-- Keeps `singleton_key` if it exists, but makes it harmless by setting it uniquely per business/settings row
-
-## Code changes
-
-Updates onboarding so business settings are saved with `upsert(... onConflict: "business_id")` instead of a plain insert.
-
-## Files included
+The homepage now positions CashOfferChat as:
 
 ```text
-sql/017_multibusiness_settings_fix.sql
-src/app/api/admin/onboarding/route.ts
-README.md
+AI chat that helps cash home buyers capture and qualify more seller leads
 ```
+
+It includes:
+
+- Hero section
+- CTA buttons
+- Product positioning
+- Feature cards
+- How it works
+- Widget demo section
+- Pricing preview
+- FAQ
+- Final CTA
+- Footer
+- Widget loaded with `data-site-id="demo"`
+
+## Demo page
+
+`/demo` explains how to test the widget and embeds the widget with:
+
+```html
+<script src="/widget.js" data-site-id="demo"></script>
+```
+
+## Pricing page
+
+`/pricing` shows early package concepts:
+
+- Starter
+- Growth
+- Pro
+
+No Stripe or billing is added yet.
+
+## Contact page
+
+`/contact` includes a simple early access/setup inquiry form mockup.
+
+The form is intentionally non-functional for now.
+
+## Legal pages
+
+Basic placeholder pages:
+
+- `/privacy`
+- `/terms`
+
+These should be reviewed by an attorney before public launch.
+
+## SQL migration
+
+No SQL migration is required.
 
 ## Vercel environment variables
 
 No new Vercel environment variables are required.
+
+## Important
+
+This does not add Stripe.
+
+Stripe remains a later/final build.
