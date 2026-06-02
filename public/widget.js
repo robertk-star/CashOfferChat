@@ -134,6 +134,22 @@
   const back = root.querySelector('.coc-back');
   let conversationId = null;
 
+  function track(eventName, metadata) {
+    try {
+      fetch(`${baseUrl}/api/widget/events`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          siteId,
+          eventName,
+          sourceUrl: window.location.href,
+          conversationId,
+          metadata: metadata || {},
+        }),
+      }).catch(() => {});
+    } catch {}
+  }
+
   function escapeHtml(value) {
     return String(value || '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
   }
@@ -174,10 +190,10 @@
     messages.scrollTop = messages.scrollHeight;
   }
 
-  function openPanel() { panel.classList.add('coc-open'); bubble.style.display = 'none'; }
-  function closePanel() { panel.classList.remove('coc-open'); bubble.style.display = ''; }
-  function openForm() { panel.classList.add('coc-form-mode'); }
-  function closeForm() { panel.classList.remove('coc-form-mode'); }
+  function openPanel() { panel.classList.add('coc-open'); bubble.style.display = 'none'; track('widget_opened'); }
+  function closePanel() { panel.classList.remove('coc-open'); bubble.style.display = ''; track('widget_closed'); }
+  function openForm() { panel.classList.add('coc-form-mode'); track('quote_form_opened'); }
+  function closeForm() { panel.classList.remove('coc-form-mode'); track('quote_form_closed'); }
 
   bubble.addEventListener('click', openPanel);
   close.addEventListener('click', closePanel);
@@ -189,6 +205,7 @@
   root.querySelector('.coc-open-quote').addEventListener('click', openForm);
 
   addMessage('assistant', 'Hi! I can answer questions about selling a house as-is for cash. To request a review, click the quote button above. There is no obligation.');
+  track('widget_loaded');
 
   fetch(`${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&sourceUrl=${encodeURIComponent(window.location.href)}`)
     .then((response) => response.ok ? response.json() : null)
@@ -199,6 +216,7 @@
     const text = String(content || '').trim();
     if (!text) return;
     addMessage('user', text);
+    track('chat_message_sent', { length: text.length });
     input.value = '';
     addMessage('assistant', 'Typing...');
     const typing = messages.lastChild;
@@ -210,6 +228,7 @@
       });
       const data = await response.json();
       if (data.conversationId) conversationId = data.conversationId;
+      track('chat_response_received', { showIntake: Boolean(data.showIntake) });
       typing.remove();
       addMessage('assistant', data.reply || 'I can answer questions, or open the short intake form when you are ready.', Boolean(data.showIntake));
       if (data.showIntake) setTimeout(openForm, 550);
@@ -237,6 +256,7 @@
       return;
     }
     formStatus.innerHTML = '<div class="coc-success">Saving lead...</div>';
+    track('lead_form_submitted');
     try {
       const response = await fetch(`${baseUrl}/api/leads`, {
         method: 'POST',
@@ -245,9 +265,11 @@
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Lead save failed');
+      track('lead_saved', { leadId: result.id || null, notificationSent: Boolean(result.notificationSent) });
       formStatus.innerHTML = `<div class="coc-success">${escapeHtml(settings.successMessage)}</div>`;
       addMessage('assistant', settings.successMessage);
     } catch (error) {
+      track('lead_save_failed', { message: error.message || 'Lead could not be saved.' });
       formStatus.innerHTML = `<div class="coc-error">${escapeHtml(error.message || 'Lead could not be saved.')}</div>`;
     }
   });

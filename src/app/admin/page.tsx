@@ -72,6 +72,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             <p className="text-sm text-slate-500">Seller leads dashboard</p>
           </div>
           <div className="flex gap-3">
+            <Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/admin/analytics">Analytics</Link>
             <Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/admin/settings">Settings</Link>
             <form action="/api/admin/logout" method="post"><button className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy">Log Out</button></form>
           </div>

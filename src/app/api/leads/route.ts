@@ -91,5 +91,23 @@ export async function POST(request: Request) {
     notification = { sent: false, error: error instanceof Error ? error.message : "Notification failed" };
   }
 
+  try {
+    await supabase.from("widget_events").insert({
+      site_id: lead.siteId || "demo",
+      event_name: "lead_submitted",
+      source_url: lead.sourceUrl || null,
+      page_domain: lead.sourceUrl ? new URL(lead.sourceUrl).hostname.replace(/^www\./, "") : null,
+      conversation_id: lead.conversationId || null,
+      lead_id: data.id,
+      metadata: {
+        propertyCity: lead.propertyCity || null,
+        hasEmail: Boolean(lead.email),
+        notificationSent: notification.sent,
+      },
+    });
+  } catch {
+    // Analytics should never block lead submission.
+  }
+
   return jsonWithCors({ id: data.id, ok: true, notificationSent: notification.sent, notificationError: notification.error });
 }

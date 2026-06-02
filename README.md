@@ -79,3 +79,43 @@ The widget now loads these settings from `/api/widget/settings`, so the embed co
 ```
 
 The allowed-domain check is currently a soft warning for demo testing; it does not block the widget yet.
+
+## Phase 2I - Widget Analytics
+
+This update adds basic widget event tracking and an admin analytics page.
+
+New route:
+
+```text
+/admin/analytics
+```
+
+New public API endpoint:
+
+```text
+/api/widget/events
+```
+
+Tracked events include:
+
+```text
+widget_loaded
+widget_opened
+widget_closed
+chat_message_sent
+chat_response_received
+quote_form_opened
+quote_form_closed
+lead_form_submitted
+lead_saved
+lead_save_failed
+lead_submitted
+```
+
+Run the new Supabase migration after all previous migrations:
+
+```text
+sql/008_widget_analytics.sql
+```
+
+No new Vercel environment variables are required.
