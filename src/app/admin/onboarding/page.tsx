@@ -6,29 +6,30 @@ import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Onboard Business | CashOfferChat" };
 
-function onboardingErrorMessage(code?: string) {
+function onboardingErrorMessage(code?: string, detail?: string) {
+  const details = detail ? ` Details: ${detail}` : "";
   switch (code) {
     case "missing_required":
       return "Business name and Site ID are required.";
     case "duplicate_site_id":
       return "That Site ID already exists. Please choose a unique Site ID.";
     case "business_create_failed":
-      return "The business record could not be created.";
+      return `The business record could not be created.${details}`;
     case "site_create_failed":
-      return "The widget site could not be created. Check the Site ID and domain fields.";
+      return `The widget site could not be created. Check the Site ID and domain fields.${details}`;
     case "settings_create_failed":
-      return "The business settings record could not be created.";
+      return `The business settings record could not be created.${details}`;
     case "supabase_not_configured":
       return "Supabase is not configured. Check the Vercel Supabase environment variables.";
     default:
-      return "Business could not be onboarded. Make sure required fields are filled and the Site ID is unique.";
+      return `Business could not be onboarded. Make sure required fields are filled and the Site ID is unique.${details}`;
   }
 }
 
 export default async function AdminOnboardingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ saved?: string; error?: string; siteId?: string }>;
+  searchParams: Promise<{ saved?: string; error?: string; detail?: string; siteId?: string }>;
 }) {
   const params = await searchParams;
   const cookieStore = await cookies();
@@ -69,7 +70,7 @@ export default async function AdminOnboardingPage({
         )}
         {params.error && (
           <div className="mb-6 rounded-2xl bg-red-50 p-4 text-sm text-red-700">
-            {onboardingErrorMessage(params.error)}
+            {onboardingErrorMessage(params.error, params.detail)}
           </div>
         )}
 

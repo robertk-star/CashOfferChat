@@ -9,8 +9,16 @@ function value(formData: FormData, key: string) {
   return String(formData.get(key) || "").trim();
 }
 
-function fail(request: Request, code: string) {
-  return NextResponse.redirect(new URL(`/admin/onboarding?error=${encodeURIComponent(code)}`, request.url), { status: 303 });
+function detailText(error: unknown) {
+  if (!error || typeof error !== "object") return "";
+  const candidate = error as { message?: string; details?: string; hint?: string; code?: string };
+  return [candidate.message, candidate.details, candidate.hint, candidate.code].filter(Boolean).join(" | ").slice(0, 500);
+}
+
+function fail(request: Request, code: string, error?: unknown) {
+  const detail = detailText(error);
+  const suffix = detail ? `&detail=${encodeURIComponent(detail)}` : "";
+  return NextResponse.redirect(new URL(`/admin/onboarding?error=${encodeURIComponent(code)}${suffix}`, request.url), { status: 303 });
 }
 
 async function insertNamedRows(supabase: any, table: string, businessId: string, lines: string[]) {
@@ -66,7 +74,7 @@ export async function POST(request: Request) {
     .select("id")
     .single();
 
-  if (businessError || !business?.id) return fail(request, "business_create_failed");
+  if (businessError || !business?.id) return fail(request, "business_create_failed", businessError);
 
   const businessId = business.id;
 
@@ -80,7 +88,7 @@ export async function POST(request: Request) {
     updated_at: now,
   });
 
-  if (siteError) return fail(request, "site_create_failed");
+  if (siteError) return fail(request, "site_create_failed", siteError);
 
   const { error: settingsError } = await supabase.from("business_settings").insert({
     business_id: businessId,
@@ -107,7 +115,7 @@ export async function POST(request: Request) {
     updated_at: now,
   });
 
-  if (settingsError) return fail(request, "settings_create_failed");
+  if (settingsError) return fail(request, "settings_create_failed", settingsError);
 
   await insertNamedRows(supabase, "service_areas", businessId, parseLines(value(formData, "service_areas")));
   await insertNamedRows(supabase, "referral_areas", businessId, parseLines(value(formData, "referral_areas")));

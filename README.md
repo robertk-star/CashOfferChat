@@ -1,27 +1,30 @@
-# CashOfferChat Phase 3E Hotfix — Onboarding Reliability + Website URL Normalization
+# CashOfferChat Phase 3E Hotfix — Onboarding Business Table Repair
 
-This hotfix improves the onboarding flow.
+This fixes onboarding failures where the `businesses` table exists but is missing columns the onboarding route needs.
 
-## What changed
+## Run this SQL migration
 
-- Website no longer needs to be entered with `https://`.
-- Website/domain inputs are normalized server-side.
-- If the primary domain is blank, the route tries to infer it from the website.
-- If allowed domains are blank, the route uses the primary domain.
-- Duplicate Site IDs are checked before creating records.
-- Onboarding errors now show a more specific message in the UI.
-- The onboarding page preserves the embed-code success flow.
-
-## Files changed
+Run this in Supabase SQL Editor:
 
 ```text
-src/lib/siteId.ts
-src/app/admin/onboarding/page.tsx
-src/app/api/admin/onboarding/route.ts
+sql/011_repair_businesses_columns.sql
 ```
 
-## Requirements
+## What this fixes
 
-No new Supabase SQL migration is required.
+Adds missing columns to `businesses` if they do not exist:
 
-No new Vercel environment variables are required.
+- website
+- phone
+- email
+- primary_market
+- description
+- is_active
+- updated_at
+
+## Also included
+
+- The onboarding page now displays a more specific database error detail when available.
+- The onboarding route now redirects with a safer error detail parameter for debugging.
+
+## No new Vercel environment variables required.
