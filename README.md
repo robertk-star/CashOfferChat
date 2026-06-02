@@ -1,24 +1,17 @@
-# CashOfferChat Phase 3E Hotfix — Onboarding Duplicate Recovery
+# CashOfferChat Phase 3F — Master Admin Business Directory
 
-This hotfix improves onboarding when a business/site was partly created and the same Site ID is submitted again.
+This phase adds a master-admin business directory so you can manage onboarded businesses from one place.
 
-## What changed
+## What this adds
 
-- If the Site ID already exists, onboarding now redirects to a recovery/success state instead of a hard error.
-- The page shows the embed code for the existing Site ID.
-- The page includes a link to `/admin/sites`.
-- The onboarding route avoids creating a duplicate business when the site already exists.
-- The duplicate-site message is now helpful instead of making the user start over.
+- Business directory page: `/admin/businesses`
+- Business detail/edit page: `/admin/businesses/[id]`
+- Business update route: `/api/admin/businesses/[id]`
 
-## Files changed
+## SQL migration
 
-```text
-src/app/admin/onboarding/page.tsx
-src/app/api/admin/onboarding/route.ts
-```
+No new SQL migration is required if prior migrations are installed through Phase 3E stabilization.
 
-## Requirements
-
-No new Supabase SQL migration is required.
+## Environment variables
 
 No new Vercel environment variables are required.
