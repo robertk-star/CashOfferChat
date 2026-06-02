@@ -10,7 +10,7 @@ function onboardingErrorMessage(code?: string, detail?: string) {
   const details = detail ? ` Details: ${detail}` : "";
   switch (code) {
     case "missing_required":
-      return "Business name and Site ID are required.";
+      return "Business Name and Site ID are required.";
     case "duplicate_site_id":
       return "That Site ID already exists. Please choose a unique Site ID.";
     case "business_create_failed":
@@ -77,9 +77,10 @@ export default async function AdminOnboardingPage({
         <form action="/api/admin/onboarding" method="post" className="space-y-8">
           <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
             <h2 className="text-xl font-bold text-navy">Business Profile</h2>
+            <p className="mt-2 text-sm text-slate-500">Required fields are marked with *.</p>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <label className="block text-sm font-semibold text-slate-700">Business Name *<input name="business_name" required placeholder="Sell My House Today Anywhere" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
-              <label className="block text-sm font-semibold text-slate-700">Website<input name="website" placeholder="sellmyhousetodayanywhere.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /><span className="mt-1 block text-xs text-slate-500">You can enter the domain with or without https://.</span></label>
+              <label className="block text-sm font-semibold text-slate-700">Website<input name="website" placeholder="sellmyhousetodayanywhere.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /><span className="mt-1 block text-xs text-slate-500">Optional. You can enter the domain with or without https://.</span></label>
               <label className="block text-sm font-semibold text-slate-700">Phone<input name="phone" placeholder="972-555-0100" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
               <label className="block text-sm font-semibold text-slate-700">Business Email<input name="email" type="email" placeholder="owner@example.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
               <label className="block text-sm font-semibold text-slate-700">Primary Market<input name="primary_market" placeholder="Plano, Texas and nearby North Texas areas" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
@@ -89,11 +90,12 @@ export default async function AdminOnboardingPage({
 
           <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
             <h2 className="text-xl font-bold text-navy">Widget Site</h2>
+            <p className="mt-2 text-sm text-slate-500">Required fields are marked with *.</p>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <label className="block text-sm font-semibold text-slate-700">Site ID *<input name="site_id" required placeholder="plano-demo" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /><span className="mt-1 block text-xs text-slate-500">Use lowercase letters, numbers, and hyphens. This becomes the widget data-site-id.</span></label>
+              <label className="block text-sm font-semibold text-slate-700">Site ID *<input name="site_id" required placeholder="plano-demo" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /><span className="mt-1 block text-xs text-slate-500">Required. Use lowercase letters, numbers, and hyphens. This becomes the widget data-site-id.</span></label>
               <label className="block text-sm font-semibold text-slate-700">Site Name<input name="site_name" placeholder="Plano Demo Site" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
-              <label className="block text-sm font-semibold text-slate-700">Primary Domain<input name="domain" placeholder="sellmyhousetodayanywhere.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /><span className="mt-1 block text-xs text-slate-500">Do not include https:// here.</span></label>
-              <label className="block text-sm font-semibold text-slate-700 md:col-span-2">Allowed Domains<textarea name="allowed_domains" placeholder={"sellmyhousetodayanywhere.com\nwww.sellmyhousetodayanywhere.com"} className="mt-1 min-h-28 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Primary Domain<input name="domain" placeholder="sellmyhousetodayanywhere.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /><span className="mt-1 block text-xs text-slate-500">Optional. If blank, this can be inferred from the website.</span></label>
+              <label className="block text-sm font-semibold text-slate-700 md:col-span-2">Allowed Domains<textarea name="allowed_domains" placeholder={"sellmyhousetodayanywhere.com\nwww.sellmyhousetodayanywhere.com"} className="mt-1 min-h-28 w-full rounded-xl border border-slate-300 px-4 py-3" /><span className="mt-1 block text-xs text-slate-500">Optional. If blank, the primary domain will be used.</span></label>
             </div>
           </div>
 
@@ -119,11 +121,11 @@ export default async function AdminOnboardingPage({
 
           <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
             <h2 className="text-xl font-bold text-navy">Optional Client Login</h2>
-            <p className="mt-2 text-sm text-slate-600">Create a client portal login for this business owner now.</p>
+            <p className="mt-2 text-sm text-slate-600">If Create client login is checked, Client Email and Temporary Password are required.</p>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <label className="block text-sm font-semibold text-slate-700">Client Name<input name="client_name" placeholder="Business Owner" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
-              <label className="block text-sm font-semibold text-slate-700">Client Email<input name="client_email" type="email" placeholder="owner@example.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
-              <label className="block text-sm font-semibold text-slate-700">Temporary Password<input name="client_password" type="password" minLength={8} placeholder="At least 8 characters" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Client Email * if creating login<input name="client_email" type="email" placeholder="owner@example.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+              <label className="block text-sm font-semibold text-slate-700">Temporary Password * if creating login<input name="client_password" type="password" minLength={8} placeholder="At least 8 characters" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
               <label className="flex items-center gap-3 text-sm font-semibold text-slate-700"><input name="create_client_user" type="checkbox" /> Create client login</label>
             </div>
           </div>

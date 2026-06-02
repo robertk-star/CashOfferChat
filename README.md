@@ -1,30 +1,31 @@
-# CashOfferChat Phase 3E Hotfix — Onboarding Business Table Repair
+# CashOfferChat Phase 3E Hotfix — Business Slug + Required Field Clarity
 
-This fixes onboarding failures where the `businesses` table exists but is missing columns the onboarding route needs.
-
-## Run this SQL migration
-
-Run this in Supabase SQL Editor:
+This hotfix fixes the onboarding error:
 
 ```text
-sql/011_repair_businesses_columns.sql
+null value in column "slug" of relation "businesses" violates not-null constraint
 ```
 
-## What this fixes
+## What changed
 
-Adds missing columns to `businesses` if they do not exist:
+- The onboarding API now automatically creates `slug` from the business name.
+- If the generated slug already exists, it appends a short unique suffix.
+- The onboarding form now makes the backend-required fields clear:
+  - Business Name *
+  - Site ID *
+- Optional client-login fields are clearly marked as required only if "Create client login" is checked.
+- The onboarding API now includes `slug` when inserting a new business.
 
-- website
-- phone
-- email
-- primary_market
-- description
-- is_active
-- updated_at
+## SQL migration
 
-## Also included
+Run this repair SQL in Supabase before testing again:
 
-- The onboarding page now displays a more specific database error detail when available.
-- The onboarding route now redirects with a safer error detail parameter for debugging.
+```text
+sql/012_repair_business_slug.sql
+```
 
-## No new Vercel environment variables required.
+It ensures the `slug` column exists and fills any missing slugs for existing businesses.
+
+## Environment variables
+
+No new Vercel environment variables are required.

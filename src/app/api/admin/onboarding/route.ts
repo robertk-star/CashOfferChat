@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 import { hashClientPassword } from "@/lib/clientAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import { normalizeDomain, normalizeDomainInput, normalizeWebsite, parseLines, slugifySiteId } from "@/lib/siteId";
+import { normalizeDomain, normalizeDomainInput, normalizeWebsite, parseLines, slugifyBusinessSlug, slugifySiteId } from "@/lib/siteId";
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) || "").trim();
@@ -24,6 +24,16 @@ function fail(request: Request, code: string, error?: unknown) {
 async function insertNamedRows(supabase: any, table: string, businessId: string, lines: string[]) {
   if (lines.length === 0) return;
   await supabase.from(table).insert(lines.map((name) => ({ business_id: businessId, name })));
+}
+
+async function makeUniqueBusinessSlug(supabase: any, baseSlug: string) {
+  let slug = baseSlug;
+  const { data: existing } = await supabase.from("businesses").select("id").eq("slug", slug).maybeSingle();
+
+  if (!existing?.id) return slug;
+
+  slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
+  return slug;
 }
 
 export async function POST(request: Request) {
@@ -59,10 +69,13 @@ export async function POST(request: Request) {
   let allowedDomains = normalizeDomainInput(value(formData, "allowed_domains"));
   if (!allowedDomains && domain) allowedDomains = domain;
 
+  const businessSlug = await makeUniqueBusinessSlug(supabase, slugifyBusinessSlug(businessName));
+
   const { data: business, error: businessError } = await supabase
     .from("businesses")
     .insert({
       name: businessName,
+      slug: businessSlug,
       website,
       phone,
       email,
