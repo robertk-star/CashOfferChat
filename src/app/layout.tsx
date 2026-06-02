@@ -1,14 +1,23 @@
+import type { Metadata } from "next";
 import "./globals.css";
+import { PortalRouteNav } from "@/components/PortalRouteNav";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "CashOfferChat",
   description: "AI seller intake assistant for cash home buyer websites.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <PortalRouteNav />
+        {children}
+      </body>
     </html>
   );
 }

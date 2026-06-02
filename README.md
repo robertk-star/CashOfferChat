@@ -1,20 +1,55 @@
-# CashOfferChat Phase 3G — System Health + Navigation Consolidation
+# CashOfferChat Phase 3G Hotfix — Global Portal Navigation
 
-This phase adds consistent navigation and a master system health page.
+This hotfix adds a consistent navigation bar across all admin and client portal pages.
 
 ## What this adds
 
-### Admin navigation
+- Global portal navigation component:
+  - `src/components/PortalRouteNav.tsx`
 
-New shared component:
+- Updated root layout:
+  - `src/app/layout.tsx`
+
+## Behavior
+
+The navigation automatically appears on admin routes:
 
 ```text
-src/components/AdminNav.tsx
+/admin
+/admin/businesses
+/admin/onboarding
+/admin/sites
+/admin/clients
+/admin/settings
+/admin/analytics
+/admin/system
+/admin/leads/[id]
 ```
 
-Admin pages can use this component to show:
+It does not appear on:
 
-- Dashboard
+```text
+/admin/login
+```
+
+The navigation automatically appears on client routes:
+
+```text
+/client
+/client/settings
+/client/account
+/client/leads/[id]
+```
+
+It does not appear on:
+
+```text
+/client/login
+```
+
+## Admin links shown
+
+- Admin Dashboard
 - Businesses
 - Onboarding
 - Widget Sites
@@ -24,61 +59,16 @@ Admin pages can use this component to show:
 - System
 - Log Out
 
-### Client navigation
+## Client links shown
 
-New shared component:
-
-```text
-src/components/ClientNav.tsx
-```
-
-Client pages can use this component to show:
-
-- Dashboard
+- Client Dashboard
 - Settings
 - Account
 - Log Out
 
-### System health page
-
-New route:
-
-```text
-/admin/system
-```
-
-The page checks:
-
-- Required environment variables
-- Optional environment variables
-- Supabase table reachability
-- Key route file presence
-- Overall system status
-
-### System health API
-
-New route:
-
-```text
-/api/admin/system/health
-```
-
-Returns JSON health information for admin troubleshooting.
-
-## Files included
-
-```text
-src/components/AdminNav.tsx
-src/components/ClientNav.tsx
-src/lib/systemHealth.ts
-src/app/admin/system/page.tsx
-src/app/api/admin/system/health/route.ts
-README.md
-```
-
 ## SQL migration
 
-No new SQL migration is required.
+No SQL migration is required.
 
 ## Vercel environment variables
 
