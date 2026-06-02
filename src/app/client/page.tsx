@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { clientCookieName, verifyClientSessionToken } from "@/lib/clientAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { ClientLeadExportButton } from "@/components/ClientLeadExportButton";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Client Dashboard | CashOfferChat" };
@@ -85,6 +86,7 @@ export default async function ClientDashboardPage({
             <p className="text-sm text-slate-500">Client dashboard</p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <ClientLeadExportButton status={selectedStatus === "all" ? undefined : selectedStatus} />
             <Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/client/settings">Settings</Link>
             <Link className="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-navy" href="/client/account">Account</Link>
             <form action="/api/client/logout" method="post">
@@ -116,20 +118,23 @@ export default async function ClientDashboardPage({
           </div>
         </div>
 
-        <div className="mb-6 flex flex-wrap gap-2">
-          {statusOptions.map((status) => (
-            <Link
-              key={status}
-              href={status === "all" ? "/client" : `/client?status=${status}`}
-              className={
-                selectedStatus === status
-                  ? "rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white"
-                  : "rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700"
-              }
-            >
-              {statusLabel(status)}
-            </Link>
-          ))}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2">
+            {statusOptions.map((status) => (
+              <Link
+                key={status}
+                href={status === "all" ? "/client" : `/client?status=${status}`}
+                className={
+                  selectedStatus === status
+                    ? "rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white"
+                    : "rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700"
+                }
+              >
+                {statusLabel(status)}
+              </Link>
+            ))}
+          </div>
+          <ClientLeadExportButton status={selectedStatus === "all" ? undefined : selectedStatus} />
         </div>
 
         <div className="overflow-hidden rounded-[2rem] bg-white shadow-soft ring-1 ring-slate-200">
@@ -153,21 +158,11 @@ export default async function ClientDashboardPage({
                 <tr key={lead.id} className="align-top">
                   <td className="px-5 py-4 text-slate-500">{new Date(lead.created_at).toLocaleString()}</td>
                   <td className="px-5 py-4 font-semibold text-navy">{lead.name || "—"}</td>
-                  <td className="px-5 py-4 text-slate-600">
-                    <div>{lead.phone || "—"}</div>
-                    <div>{lead.email || ""}</div>
-                  </td>
-                  <td className="px-5 py-4 text-slate-600">
-                    <div>{lead.property_address || "—"}</div>
-                    <div>{lead.property_city || ""}</div>
-                  </td>
+                  <td className="px-5 py-4 text-slate-600"><div>{lead.phone || "—"}</div><div>{lead.email || ""}</div></td>
+                  <td className="px-5 py-4 text-slate-600"><div>{lead.property_address || "—"}</div><div>{lead.property_city || ""}</div></td>
                   <td className="px-5 py-4 text-slate-600">{lead.timeline || "—"}</td>
-                  <td className="px-5 py-4">
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{statusLabel(lead.status)}</span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <Link className="font-bold text-navy underline" href={`/client/leads/${lead.id}`}>Open</Link>
-                  </td>
+                  <td className="px-5 py-4"><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{statusLabel(lead.status)}</span></td>
+                  <td className="px-5 py-4"><Link className="font-bold text-navy underline" href={`/client/leads/${lead.id}`}>Open</Link></td>
                 </tr>
               ))}
             </tbody>

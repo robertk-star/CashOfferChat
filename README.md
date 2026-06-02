@@ -1,56 +1,93 @@
-# CashOfferChat Phase 3J Hotfix — Analytics event_type + Duplicate Logout Cleanup
+# CashOfferChat Phase 3L — Lead Export + CSV Downloads
 
-This hotfix fixes two issues.
+This phase adds CSV lead export tools for both master admin and clients.
 
-## 1. Analytics error
+## What this adds
 
-Error:
-
-```text
-column widget_events.event_type does not exist
-```
-
-Run this SQL repair:
+### Admin exports
 
 ```text
-sql/015_widget_events_event_type_repair.sql
+/api/admin/leads/export
 ```
 
-It safely adds/populates:
+Master admin can export all leads, optionally filtered by:
 
 ```text
-widget_events.event_type
-widget_events.site_id
-widget_events.domain
-widget_events.page_url
-widget_events.lead_id
-widget_events.conversation_id
-widget_events.business_id
-widget_events.metadata
+businessId
+siteId
+status
 ```
 
-## 2. Duplicate logout buttons
-
-The global portal nav already has a logout button, but many older pages also have their own logout button.
-
-This update changes:
+Example:
 
 ```text
-src/components/PortalRouteNav.tsx
+/admin/leads/export?status=new
+/api/admin/leads/export?businessId=<business-id>
+/api/admin/leads/export?siteId=demo
 ```
 
-It hides duplicate logout forms on admin/client pages after the global nav loads, leaving only one logout button visible.
-
-## Files included
+### Client exports
 
 ```text
-sql/015_widget_events_event_type_repair.sql
-src/components/PortalRouteNav.tsx
-README.md
+/api/client/leads/export
 ```
 
-## Requirements
+Clients can export only leads tied to their own business.
 
-Run the SQL repair first, then deploy the code.
+Optional filter:
+
+```text
+status
+siteId
+```
+
+Example:
+
+```text
+/api/client/leads/export?status=new
+/api/client/leads/export?siteId=demo
+```
+
+### Export buttons
+
+This package also adds reusable export button components:
+
+```text
+src/components/AdminLeadExportButton.tsx
+src/components/ClientLeadExportButton.tsx
+```
+
+These can be placed on dashboard pages.
+
+## CSV fields
+
+The CSV includes:
+
+- Created At
+- Status
+- Seller Name
+- Phone
+- Email
+- Property Address
+- Property City
+- Situation
+- Timeline
+- Property Condition
+- Seller Notes
+- Admin/Internal Notes
+- Source URL
+- Site ID
+- Business ID
+
+## Security
+
+- Admin export requires admin cookie.
+- Client export requires client cookie and is scoped by session `businessId`.
+
+## SQL migration
+
+No SQL migration is required.
+
+## Vercel environment variables
 
 No new Vercel environment variables are required.
