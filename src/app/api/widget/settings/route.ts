@@ -30,8 +30,7 @@ export async function GET(request: Request) {
   const business = settings.business;
 
   const allowedDomains = String(business.widget_allowed_domains || "")
-    .split(/?
-|,/)
+    .split(/\r?\n|,/)
     .map((item) => normalizeDomain(item))
     .filter(Boolean);
 
