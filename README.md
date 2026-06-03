@@ -1,74 +1,44 @@
-# CashOfferChat Phase 3O — Public Sales Page + Homepage Widget Demo
+# CashOfferChat Phase 3P — Widget Polish + Mobile UX
 
-This phase turns `cashofferchat.com` into a public-facing SaaS sales website.
+This phase improves the customer-facing embeddable widget.
 
 ## What this adds
 
-Public pages:
+Updated:
 
 ```text
-/
- /demo
- /pricing
- /contact
- /privacy
- /terms
+public/widget.js
 ```
 
-## Homepage
+## Widget improvements
 
-The homepage now positions CashOfferChat as:
+- Cleaner widget bubble
+- Better mobile sizing
+- Better desktop sizing
+- Stronger top CTA button
+- Clear quote/intake form view
+- Back-to-chat behavior
+- Better success screen
+- Better error handling
+- Better loading states
+- Source URL tracking
+- Site ID tracking
+- Widget event tracking
+- Settings loaded from `/api/widget/settings`
+- Chat still uses `/api/chat`
+- Lead form still uses `/api/leads`
+- Event tracking still uses `/api/widget/events`
 
-```text
-AI chat that helps cash home buyers capture and qualify more seller leads
-```
+## User-facing widget flow
 
-It includes:
-
-- Hero section
-- CTA buttons
-- Product positioning
-- Feature cards
-- How it works
-- Widget demo section
-- Pricing preview
-- FAQ
-- Final CTA
-- Footer
-- Widget loaded with `data-site-id="demo"`
-
-## Demo page
-
-`/demo` explains how to test the widget and embeds the widget with:
-
-```html
-<script src="/widget.js" data-site-id="demo"></script>
-```
-
-## Pricing page
-
-`/pricing` shows early package concepts:
-
-- Starter
-- Growth
-- Pro
-
-No Stripe or billing is added yet.
-
-## Contact page
-
-`/contact` includes a simple early access/setup inquiry form mockup.
-
-The form is intentionally non-functional for now.
-
-## Legal pages
-
-Basic placeholder pages:
-
-- `/privacy`
-- `/terms`
-
-These should be reviewed by an attorney before public launch.
+1. User sees a bottom-right chat bubble.
+2. User opens the widget.
+3. User can ask questions.
+4. User can click **Enter House Info for a Quote**.
+5. User completes structured lead form.
+6. Lead submits to CashOfferChat.
+7. Success screen appears.
+8. User can return to chat or close the widget.
 
 ## SQL migration
 
@@ -78,8 +48,18 @@ No SQL migration is required.
 
 No new Vercel environment variables are required.
 
-## Important
+## Test checklist
 
-This does not add Stripe.
+After deploying:
 
-Stripe remains a later/final build.
+1. Open `/demo`
+2. Open the widget
+3. Ask: `Do you buy as-is?`
+4. Click `Enter House Info for a Quote`
+5. Submit a test lead with:
+   - name
+   - phone
+   - city or address
+6. Confirm success screen appears
+7. Confirm lead appears in `/admin` and `/client`
+8. Confirm events appear in analytics
