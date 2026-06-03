@@ -1,46 +1,103 @@
-# CashOfferChat Phase 3P Hotfix — Widget FAQ Answer Quality
+# CashOfferChat Phase 3Q — Sell My House Today Anywhere Demo Site
 
-This hotfix fixes the widget returning the same generic answer to different seller questions.
-
-## Problem
-
-The widget was answering questions like:
-
-- "Do you buy as-is?"
-- "How fast can I close?"
-
-with the same generic fallback response.
-
-## What changed
-
-Updated:
+This phase adds a public home-buying demo website called:
 
 ```text
-src/app/api/chat/route.ts
-src/lib/defaultFaqKnowledge.ts
+Sell My House Today Anywhere
 ```
 
-The chat API now answers in this order:
+The goal is to use this as a realistic "we buy houses" demo site with the CashOfferChat widget embedded.
 
-1. Business-specific managed FAQs
-2. Legacy custom Q&A items, if present
-3. Default cash-buyer FAQ knowledge base
-4. Business service-area / buying-criteria rules
-5. Safe fallback answer
+## What this adds
 
-## Improved answers for
+### New demo website route
 
-- Do you buy as-is?
-- How fast can I close?
-- Do I need repairs?
-- Do you buy houses with tenants?
-- Are there fees or commissions?
-- Do you pay full market value?
-- Am I obligated to sell?
-- Can I sell if I already have an agent?
-- Can you stop foreclosure?
-- Do I have to move out immediately?
-- What types of properties do you buy?
+```text
+/sellmyhousetodayanywhere
+```
+
+### Host-based routing middleware
+
+```text
+middleware.ts
+```
+
+When a visitor goes to:
+
+```text
+https://sellmyhousetodayanywhere.com
+https://www.sellmyhousetodayanywhere.com
+```
+
+the app rewrites the homepage request to:
+
+```text
+/sellmyhousetodayanywhere
+```
+
+This lets:
+
+```text
+cashofferchat.com
+```
+
+remain the CashOfferChat SaaS sales site, while:
+
+```text
+sellmyhousetodayanywhere.com
+```
+
+shows the demo cash home buyer site.
+
+## Widget
+
+The page includes the CashOfferChat widget:
+
+```html
+<script src="/widget.js" data-site-id="demo"></script>
+```
+
+If you created a different widget Site ID for this demo, update the page to use that Site ID instead.
+
+Recommended Site ID:
+
+```text
+sell-my-house-today-anywhere
+```
+
+## Files included
+
+```text
+middleware.ts
+src/app/sellmyhousetodayanywhere/page.tsx
+README.md
+```
+
+## Required setup in Vercel
+
+Add the domain to the same Vercel project:
+
+```text
+sellmyhousetodayanywhere.com
+www.sellmyhousetodayanywhere.com
+```
+
+Then point the DNS to Vercel.
+
+## Required setup in CashOfferChat admin
+
+In `/admin/sites`, create or confirm a widget site for:
+
+```text
+Site ID: demo
+Domain: sellmyhousetodayanywhere.com
+Allowed Domains:
+sellmyhousetodayanywhere.com
+www.sellmyhousetodayanywhere.com
+cashofferchat.com
+```
+
+Or update the page to use your preferred Site ID.
 
 ## SQL migration
 
@@ -49,18 +106,3 @@ No SQL migration is required.
 ## Vercel environment variables
 
 No new Vercel environment variables are required.
-
-## Testing
-
-After deploying, test `/demo` and ask:
-
-```text
-Do you buy as-is?
-How fast can I close?
-Do I need repairs?
-Do you buy with tenants?
-Are there fees?
-Am I obligated to sell?
-```
-
-Each should produce a different specific answer.
