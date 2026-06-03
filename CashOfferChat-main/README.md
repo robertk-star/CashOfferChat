@@ -55,3 +55,12 @@ The app still requires the existing project environment variables already docume
 - After import, the Managed FAQs section should show the full Top 100 list for that business.
 - Admin can edit or remove individual approved FAQ answers after importing.
 - No public UI redesign is expected from this phase.
+
+
+### FAQ visibility repair phase
+
+This package adds a dedicated admin FAQ page at `/admin/faqs`. The page shows both the built-in Global Top 100 FAQ Library and the selected business's Managed FAQs. It also provides a visible `Import Top 100 FAQs` action so admins can copy the global FAQs into a business and verify that all 100 questions were imported.
+
+SQL migration needed: No.
+
+Vercel ENV needed: No new variables.

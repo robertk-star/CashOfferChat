@@ -7,6 +7,7 @@ const adminLinks = [
   { href: "/admin/sites", label: "Widget Sites" },
   { href: "/admin/clients", label: "Client Users" },
   { href: "/admin/settings", label: "Settings" },
+  { href: "/admin/faqs", label: "FAQs" },
   { href: "/admin/analytics", label: "Analytics" },
   { href: "/admin/system", label: "System" },
 ];

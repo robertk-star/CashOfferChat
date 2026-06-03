@@ -8,6 +8,12 @@ function value(formData: FormData, key: string) {
   return String(formData.get(key) || "").trim();
 }
 
+function safeRedirectPath(input: string) {
+  if (!input || !input.startsWith("/admin/")) return "/admin/settings?faqsImported=1";
+  if (input.startsWith("//") || input.includes("http://") || input.includes("https://")) return "/admin/settings?faqsImported=1";
+  return input;
+}
+
 export async function POST(request: Request) {
   const cookieStore = await cookies();
   const token = cookieStore.get(adminCookieName())?.value;
@@ -23,6 +29,7 @@ export async function POST(request: Request) {
 
   const formData = await request.formData();
   const businessId = value(formData, "business_id");
+  const redirectTo = safeRedirectPath(value(formData, "redirect_to"));
 
   if (!businessId) {
     return NextResponse.redirect(new URL("/admin/settings?error=1", request.url), { status: 303 });
@@ -46,5 +53,5 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL("/admin/settings?error=1", request.url), { status: 303 });
   }
 
-  return NextResponse.redirect(new URL("/admin/settings?faqsImported=1", request.url), { status: 303 });
+  return NextResponse.redirect(new URL(redirectTo, request.url), { status: 303 });
 }
