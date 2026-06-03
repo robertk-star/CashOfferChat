@@ -12,8 +12,7 @@ export function PublicSiteHeader() {
           <Link href="/demo" className="hover:text-navy">Demo</Link>
           <Link href="/pricing" className="hover:text-navy">Pricing</Link>
           <Link href="/contact" className="hover:text-navy">Contact</Link>
-          <Link href="/client/login" className="hover:text-navy">Client Login</Link>
-          <Link href="/admin/login" className="hover:text-navy">Admin</Link>
+          <Link href="/client/login" className="hover:text-navy">Login</Link>
         </nav>
 
         <Link href="/contact" className="rounded-full bg-gold px-5 py-2 text-sm font-bold text-navy">

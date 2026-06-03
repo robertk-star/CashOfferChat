@@ -17,6 +17,7 @@ export function PublicSiteFooter() {
             <div><Link href="/demo">Demo</Link></div>
             <div><Link href="/pricing">Pricing</Link></div>
             <div><Link href="/contact">Contact</Link></div>
+            <div><Link href="/client/login">Login</Link></div>
           </div>
         </div>
 
@@ -25,7 +26,7 @@ export function PublicSiteFooter() {
           <div className="mt-3 space-y-2 text-sm text-slate-600">
             <div><Link href="/privacy">Privacy</Link></div>
             <div><Link href="/terms">Terms</Link></div>
-            <div><Link href="/client/login">Client Login</Link></div>
+            <div><Link href="/admin/login">Admin</Link></div>
           </div>
         </div>
       </div>

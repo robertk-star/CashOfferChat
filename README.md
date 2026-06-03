@@ -1,103 +1,34 @@
-# CashOfferChat Phase 3Q — Sell My House Today Anywhere Demo Site
+# CashOfferChat Public Navigation Cleanup
 
-This phase adds a public home-buying demo website called:
+This update changes the public CashOfferChat website navigation.
 
-```text
-Sell My House Today Anywhere
-```
+## What changed
 
-The goal is to use this as a realistic "we buy houses" demo site with the CashOfferChat widget embedded.
+On the public header:
 
-## What this adds
-
-### New demo website route
+- Removed the top navigation **Admin** link
+- Changed the public login navigation to a simple **Login** link
+- **Login** points to the customer dashboard login:
 
 ```text
-/sellmyhousetodayanywhere
+/client/login
 ```
 
-### Host-based routing middleware
+In the footer:
+
+- Added/moved **Admin** link to:
 
 ```text
-middleware.ts
+/admin/login
 ```
 
-When a visitor goes to:
+## Files changed
 
 ```text
-https://sellmyhousetodayanywhere.com
-https://www.sellmyhousetodayanywhere.com
-```
-
-the app rewrites the homepage request to:
-
-```text
-/sellmyhousetodayanywhere
-```
-
-This lets:
-
-```text
-cashofferchat.com
-```
-
-remain the CashOfferChat SaaS sales site, while:
-
-```text
-sellmyhousetodayanywhere.com
-```
-
-shows the demo cash home buyer site.
-
-## Widget
-
-The page includes the CashOfferChat widget:
-
-```html
-<script src="/widget.js" data-site-id="demo"></script>
-```
-
-If you created a different widget Site ID for this demo, update the page to use that Site ID instead.
-
-Recommended Site ID:
-
-```text
-sell-my-house-today-anywhere
-```
-
-## Files included
-
-```text
-middleware.ts
-src/app/sellmyhousetodayanywhere/page.tsx
+src/components/PublicSiteHeader.tsx
+src/components/PublicSiteFooter.tsx
 README.md
 ```
-
-## Required setup in Vercel
-
-Add the domain to the same Vercel project:
-
-```text
-sellmyhousetodayanywhere.com
-www.sellmyhousetodayanywhere.com
-```
-
-Then point the DNS to Vercel.
-
-## Required setup in CashOfferChat admin
-
-In `/admin/sites`, create or confirm a widget site for:
-
-```text
-Site ID: demo
-Domain: sellmyhousetodayanywhere.com
-Allowed Domains:
-sellmyhousetodayanywhere.com
-www.sellmyhousetodayanywhere.com
-cashofferchat.com
-```
-
-Or update the page to use your preferred Site ID.
 
 ## SQL migration
 
