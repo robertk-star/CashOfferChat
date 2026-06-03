@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { clientCookieName, verifyClientSessionToken } from "@/lib/clientAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import { deleteLeadAndResetDuplicateState } from "@/lib/deleteLeadReset";
+import { deleteLeadAndResetDuplicateState } from "../../../../../lib/deleteLeadReset";
 
 const allowedStatuses = new Set([
   "new",
