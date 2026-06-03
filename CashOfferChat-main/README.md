@@ -64,3 +64,17 @@ This package adds a dedicated admin FAQ page at `/admin/faqs`. The page shows bo
 SQL migration needed: No.
 
 Vercel ENV needed: No new variables.
+
+
+## FAQ Route / Settings Visibility Fix
+
+This package includes both FAQ access points:
+
+- `/admin/settings` — existing admin settings page with the Managed FAQs list and Import Top 100 FAQs button.
+- `/admin/faqs` — dedicated FAQ review page with Managed FAQs and the Global Top 100 FAQ Library.
+
+If `/admin/faqs` returns 404 after deployment, verify this package was the one uploaded and deployed. `/admin/settings` should continue to work because it is an existing route.
+
+SQL migration needed: No.
+
+Vercel ENV needed: No new variables.
