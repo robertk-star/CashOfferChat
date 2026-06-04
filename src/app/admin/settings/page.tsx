@@ -9,7 +9,7 @@ export const metadata = { title: "Settings | CashOfferChat" };
 
 type Business = { id: string; name: string };
 
-export default async function AdminSettingsPage({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string }> }) {
+export default async function AdminSettingsPage({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string; faqsImported?: string }> }) {
   const query = await searchParams;
   const cookieStore = await cookies();
   const token = cookieStore.get(adminCookieName())?.value;
@@ -67,6 +67,7 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
 
       <section className="mx-auto max-w-7xl px-6 py-8">
         {query.saved && <div className="mb-6 rounded-2xl bg-green-50 p-4 text-sm text-green-800">Settings saved.</div>}
+        {query.faqsImported && <div className="mb-6 rounded-2xl bg-green-50 p-4 text-sm text-green-800">Top 100 seller FAQs imported into Managed FAQs.</div>}
         {errorMessage && <div className="mb-6 rounded-2xl bg-red-50 p-4 text-sm text-red-700">{errorMessage}</div>}
 
         {!business ? (
@@ -110,7 +111,21 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
             </div>
 
             <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
-              <h2 className="text-xl font-bold text-navy">Managed FAQs</h2>
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-navy">Managed FAQs</h2>
+                  <p className="mt-1 text-sm text-slate-500">These approved answers are checked before the global fallback FAQ library.</p>
+                </div>
+                <button
+                  type="submit"
+                  formAction="/api/admin/settings/faqs/import-defaults"
+                  formMethod="post"
+                  className="rounded-full border border-slate-300 px-5 py-3 text-sm font-bold text-navy"
+                >
+                  Import Top 100 FAQs
+                </button>
+              </div>
+              <p className="mt-3 text-xs text-slate-500">Importing replaces this business's current Managed FAQs with the approved top 100 seller questions.</p>
               <div className="mt-6 space-y-4">
                 {faqs.map((faq: any, index: number) => (
                   <div key={faq.id || index} className="rounded-2xl border border-slate-200 p-4">
