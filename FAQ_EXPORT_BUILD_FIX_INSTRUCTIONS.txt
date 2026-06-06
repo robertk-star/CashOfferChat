@@ -1,0 +1,18 @@
+This fixes the build error:
+
+Attempted import error: 'getDefaultFaqItems' is not exported from '@/lib/defaultFaqKnowledge'
+
+Apply these files at the project root:
+
+1. src/lib/defaultFaqKnowledge.ts
+2. CashOfferChat-main/src/lib/defaultFaqKnowledge.ts
+
+Important:
+The build log also shows TypeScript is checking a nested folder named CashOfferChat-main/src/...
+That means the GitHub repo may contain a duplicated project folder from a prior upload.
+The best cleanup is to delete the nested CashOfferChat-main folder from the GitHub repo.
+
+If you are not ready to delete it, this ZIP includes the same fixed file inside both locations so the build should pass either way.
+
+No SQL migration is needed.
+No Vercel environment variable changes are needed.

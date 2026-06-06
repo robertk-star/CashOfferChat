@@ -1259,6 +1259,10 @@ export const defaultFaqItems: DefaultFAQItem[] = [
   }
 ];
 
+export function getDefaultFaqItems(): DefaultFAQItem[] {
+  return defaultFaqItems;
+}
+
 export function findDefaultFaqMatch(message: string): DefaultFAQItem | null {
   const normalized = message.toLowerCase();
 
