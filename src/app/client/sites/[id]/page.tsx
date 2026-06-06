@@ -64,7 +64,8 @@ export default async function ClientSiteDetailPage({
   const businessName = businessResult.data?.name || "Your Business";
   const leads = leadsResult.data || [];
   const events = eventsResult.data || [];
-  const appUrl = process.env.APP_URL || "https://cashofferchat.com";
+  const widgetBaseUrl = "https://www.cashofferchat.com";
+  const widgetScriptVersion = "embed-sync-canonical-api-20260606e";
   const label = siteLabel(site);
 
   return (
@@ -120,7 +121,7 @@ export default async function ClientSiteDetailPage({
           <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
             <h2 className="text-xl font-bold text-navy">Install Code</h2>
             <p className="mt-2 text-sm text-slate-600">Paste this before the closing body tag on your website.</p>
-            <pre className="mt-4 overflow-x-auto rounded-xl bg-slate-50 p-4 text-xs text-slate-700">{`<script src="${appUrl}/widget.js" data-site-id="${site.site_id}"></script>`}</pre>
+            <pre className="mt-4 overflow-x-auto rounded-xl bg-slate-50 p-4 text-xs text-slate-700">{`<script src="${widgetBaseUrl}/widget.js?v=${widgetScriptVersion}" data-site-id="${site.site_id}"></script>`}</pre>
 
             <div className="mt-5 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
               <div className="font-bold text-navy">Test checklist</div>

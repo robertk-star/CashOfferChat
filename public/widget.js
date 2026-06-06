@@ -1,14 +1,14 @@
 (() => {
-  window.CASHOFFERCHAT_WIDGET_VERSION = "dynamic-settings-20260606b";
   if (window.__cashOfferChatLoaded) return;
   window.__cashOfferChatLoaded = true;
 
   const script = document.currentScript;
   const siteId = script?.getAttribute("data-site-id") || "demo";
-  const widgetCacheBust = String(Date.now());
-  const baseUrl = new URL(script?.src || window.location.href).origin;
+  const baseUrl = "https://www.cashofferchat.com";
   const sourceUrl = window.location.href;
   const sourceDomain = window.location.hostname;
+  window.CASHOFFERCHAT_WIDGET_VERSION = "embed-sync-canonical-api-20260606e";
+  window.CASHOFFERCHAT_WIDGET_API_BASE = baseUrl;
 
   const DEFAULT_SETTINGS = {
     widgetTitle: "Seller Intake Assistant",
@@ -482,10 +482,9 @@
 
   async function loadSettings() {
     try {
-      const settingsUrl = `${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&domain=${encodeURIComponent(sourceDomain)}&url=${encodeURIComponent(sourceUrl)}&v=${encodeURIComponent(widgetCacheBust)}`;
+      const settingsUrl = `${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&domain=${encodeURIComponent(sourceDomain)}&url=${encodeURIComponent(sourceUrl)}&v=${Date.now()}`;
       const res = await fetch(settingsUrl, {
         headers: { Accept: "application/json" },
-        cache: "no-store",
       });
 
       if (!res.ok) return;
