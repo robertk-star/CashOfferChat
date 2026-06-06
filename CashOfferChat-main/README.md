@@ -78,3 +78,8 @@ If `/admin/faqs` returns 404 after deployment, verify this package was the one u
 SQL migration needed: No.
 
 Vercel ENV needed: No new variables.
+
+
+## FAQ Update — Revised Top 100 Answers
+
+This package replaces the existing global Top 100 FAQ answers with Robert's revised CTA-focused version. The FAQ questions and IDs remain the same; the answer text has been updated. Existing imported Managed FAQs in Supabase will not automatically change unless the admin re-imports the Top 100 FAQs for that business.

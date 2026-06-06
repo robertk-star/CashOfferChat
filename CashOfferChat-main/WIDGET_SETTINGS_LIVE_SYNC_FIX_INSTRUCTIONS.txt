@@ -1,0 +1,24 @@
+CashOfferChat Widget Settings Live Sync Fix
+
+Apply this ZIP at the project root. Do not upload it into a nested folder.
+
+This package was rebuilt against the latest uploaded files from CashOfferChat-main (3).zip.
+
+Confirm these exact files are updated in GitHub before deploying:
+1. src/app/sellmyhousetodayanywhere/page.tsx
+   - should contain: data-site-id="smhta"
+   - should contain: /widget.js?v=client-settings-sync-20260606
+
+2. src/app/api/widget/settings/route.ts
+   - should contain: Cache-Control: no-store
+   - should contain: findDomainMatchedSite
+
+3. public/widget.js
+   - should fetch /api/widget/settings with &v=${Date.now()}
+
+Also confirm there are no extra nested folders being compiled, especially:
+- CashOfferChat-main/CashOfferChat-main
+- coc_combined_fix
+- temp_extract
+
+If those folders exist inside the repository root, remove them. They are old duplicate copies and can cause confusing builds.

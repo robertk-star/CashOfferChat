@@ -471,7 +471,6 @@
           pageUrl: sourceUrl,
           domain: sourceDomain,
           conversationId: state.conversationId,
-          leadId: metadata && metadata.leadId ? metadata.leadId : null,
           metadata,
         }),
       });
@@ -480,7 +479,7 @@
 
   async function loadSettings() {
     try {
-      const res = await fetch(`${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}`, {
+      const res = await fetch(`${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&v=${Date.now()}`, {
         headers: { Accept: "application/json" },
       });
 
