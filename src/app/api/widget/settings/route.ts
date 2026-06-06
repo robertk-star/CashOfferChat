@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type WidgetSite = {
   id: string;
@@ -19,7 +20,7 @@ function corsHeaders() {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Accept",
-    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+    "Cache-Control": "no-store, no-cache, max-age=0, must-revalidate",
     "Pragma": "no-cache",
     "Expires": "0",
   };
@@ -48,9 +49,8 @@ function splitDomains(value?: string | null) {
     .filter(Boolean);
 }
 
-function getRequestDomain(request: Request) {
-  const url = new URL(request.url);
-  const explicitDomain = url.searchParams.get("domain") || url.searchParams.get("host");
+function getRequestDomain(request: Request, url: URL) {
+  const explicitDomain = url.searchParams.get("domain") || "";
   if (explicitDomain) return normalizeDomain(explicitDomain);
 
   const explicitUrl = url.searchParams.get("url") || "";
@@ -70,14 +70,19 @@ function getRequestDomain(request: Request) {
   }
 }
 
+function siteDomains(site: WidgetSite) {
+  return [...splitDomains(site.allowed_domains), normalizeDomain(site.domain)].filter(Boolean);
+}
+
+function domainMatches(site: WidgetSite, requestDomain: string) {
+  if (!requestDomain) return false;
+  return siteDomains(site).some((domain) => requestDomain === domain || requestDomain.endsWith(`.${domain}`));
+}
+
 function isAllowedDomain(site: WidgetSite, requestDomain: string) {
-  const allowedDomains = splitDomains(site.allowed_domains);
-  const primaryDomain = normalizeDomain(site.domain);
-  const configuredDomains = [...allowedDomains, primaryDomain].filter(Boolean);
-
+  const configuredDomains = siteDomains(site);
   if (!requestDomain || configuredDomains.length === 0) return true;
-
-  return configuredDomains.some((domain) => requestDomain === domain || requestDomain.endsWith(`.${domain}`));
+  return domainMatches(site, requestDomain);
 }
 
 function defaultSettings(siteId: string) {
@@ -98,9 +103,51 @@ function defaultSettings(siteId: string) {
   };
 }
 
+async function findWidgetSite(supabase: NonNullable<ReturnType<typeof getSupabaseAdmin>>, siteId: string, requestDomain: string) {
+  // First try the exact site id.
+  const exactResult = await supabase
+    .from("widget_sites")
+    .select("id, site_id, business_id, name, site_name, domain, allowed_domains, is_active")
+    .eq("site_id", siteId)
+    .maybeSingle();
+
+  if (exactResult.error) {
+    return { site: null as WidgetSite | null, error: exactResult.error.message };
+  }
+
+  const exactSite = exactResult.data as WidgetSite | null;
+
+  // If the exact site is active and the domain is allowed, use it.
+  if (exactSite && exactSite.is_active !== false && isAllowedDomain(exactSite, requestDomain)) {
+    return { site: exactSite, error: null as string | null };
+  }
+
+  // If the embedded site id is old/wrong, find the active widget site by the page domain.
+  // This makes sellmyhousetodayanywhere.com still use its correct business settings even if
+  // an old embed still says data-site-id="demo".
+  if (requestDomain) {
+    const domainResult = await supabase
+      .from("widget_sites")
+      .select("id, site_id, business_id, name, site_name, domain, allowed_domains, is_active")
+      .eq("is_active", true)
+      .limit(200);
+
+    if (!domainResult.error && domainResult.data) {
+      const domainSite = (domainResult.data as WidgetSite[]).find((candidate) => domainMatches(candidate, requestDomain));
+      if (domainSite) return { site: domainSite, error: null as string | null };
+    }
+  }
+
+  // Return the exact site even if blocked so the caller can give the right status.
+  if (exactSite) return { site: exactSite, error: null as string | null };
+
+  return { site: null as WidgetSite | null, error: null as string | null };
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const siteId = String(url.searchParams.get("siteId") || "demo").trim() || "demo";
+  const requestDomain = getRequestDomain(request, url);
   const fallback = defaultSettings(siteId);
   const supabase = getSupabaseAdmin();
 
@@ -108,52 +155,22 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, settings: fallback }, { headers: corsHeaders() });
   }
 
-  const requestDomain = getRequestDomain(request);
+  const { site, error } = await findWidgetSite(supabase, siteId, requestDomain);
 
-  const siteSelect = "id, site_id, business_id, name, site_name, domain, allowed_domains, is_active";
-  const bySiteId = await supabase
-    .from("widget_sites")
-    .select(siteSelect)
-    .eq("site_id", siteId)
-    .maybeSingle();
-
-  if (bySiteId.error) {
-    return NextResponse.json(
-      { error: bySiteId.error.message },
-      { status: 500, headers: corsHeaders() },
-    );
-  }
-
-  let site = bySiteId.data as WidgetSite | null;
-
-  if (!site && requestDomain) {
-    const byDomain = await supabase
-      .from("widget_sites")
-      .select(siteSelect)
-      .or(`domain.ilike.%${requestDomain}%,allowed_domains.ilike.%${requestDomain}%`)
-      .limit(1);
-
-    if (!byDomain.error && byDomain.data && byDomain.data.length > 0) {
-      site = byDomain.data[0] as WidgetSite;
-    }
+  if (error) {
+    return NextResponse.json({ error }, { status: 500, headers: corsHeaders() });
   }
 
   if (!site) {
-    return NextResponse.json({ ok: true, settings: fallback }, { headers: corsHeaders() });
+    return NextResponse.json({ ok: true, settings: fallback, debug: { reason: "site_not_found", siteId, requestDomain } }, { headers: corsHeaders() });
   }
 
   if (site.is_active === false) {
-    return NextResponse.json(
-      { error: "Widget site is not active" },
-      { status: 403, headers: corsHeaders() }
-    );
+    return NextResponse.json({ error: "Widget site is not active" }, { status: 403, headers: corsHeaders() });
   }
 
-  if (!isAllowedDomain(site as WidgetSite, requestDomain)) {
-    return NextResponse.json(
-      { error: "This domain is not allowed for this widget site" },
-      { status: 403, headers: corsHeaders() }
-    );
+  if (!isAllowedDomain(site, requestDomain)) {
+    return NextResponse.json({ error: "This domain is not allowed for this widget site" }, { status: 403, headers: corsHeaders() });
   }
 
   let business: any = null;
@@ -162,11 +179,11 @@ export async function GET(request: Request) {
   if (site.business_id) {
     const [businessResult, settingsResult] = await Promise.all([
       supabase.from("businesses").select("id, name, phone, email, website, primary_market").eq("id", site.business_id).maybeSingle(),
-      supabase.from("business_settings").select("*").eq("business_id", site.business_id).maybeSingle(),
+      supabase.from("business_settings").select("*").eq("business_id", site.business_id).order("updated_at", { ascending: false }).limit(1),
     ]);
 
     business = businessResult.data || null;
-    settings = settingsResult.data || null;
+    settings = settingsResult.data?.[0] || null;
   }
 
   const mergedSettings = {
@@ -189,7 +206,12 @@ export async function GET(request: Request) {
   };
 
   return NextResponse.json(
-    { ok: true, site: { id: site.id, siteId: site.site_id, businessId: site.business_id }, settings: mergedSettings },
-    { headers: corsHeaders() }
+    {
+      ok: true,
+      site: { id: site.id, siteId: site.site_id, businessId: site.business_id },
+      settings: mergedSettings,
+      debug: { requestedSiteId: siteId, resolvedSiteId: site.site_id, requestDomain, settingsUpdatedAt: settings?.updated_at || null },
+    },
+    { headers: corsHeaders() },
   );
 }

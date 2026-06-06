@@ -1,4 +1,5 @@
 (() => {
+  window.CASHOFFERCHAT_WIDGET_VERSION = "dynamic-settings-20260606b";
   if (window.__cashOfferChatLoaded) return;
   window.__cashOfferChatLoaded = true;
 

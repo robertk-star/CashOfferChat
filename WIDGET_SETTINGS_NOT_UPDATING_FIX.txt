@@ -1,0 +1,25 @@
+This fix is for the case where /api/widget/settings returns the correct saved widgetTitle, but the live widget still shows the old title.
+
+What this proves:
+- The client settings are saving correctly.
+- The widget settings API is returning the correct title.
+- The live page is loading an old script, wrong siteId, or cached widget.js.
+
+Files that must be applied at the actual deployed project root:
+1. public/widget.js
+2. src/app/api/widget/settings/route.ts
+3. src/app/sellmyhousetodayanywhere/page.tsx
+4. next.config.mjs
+
+The Sell My House Today Anywhere page must load:
+<script src="https://www.cashofferchat.com/widget.js?v=dynamic-settings-20260606b" data-site-id="smhta"></script>
+
+Do not use data-site-id="demo" for this page.
+
+After deploying, open the live page, then in browser console run:
+window.CASHOFFERCHAT_WIDGET_VERSION
+
+It should return:
+dynamic-settings-20260606b
+
+If it does not, the live site is still loading an old widget.js or a different deployed project.
