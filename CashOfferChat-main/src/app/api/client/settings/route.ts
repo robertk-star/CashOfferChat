@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     .from("business_settings")
     .select("id")
     .eq("business_id", session.businessId)
-    .maybeSingle();
+    .limit(50);
 
   if (existingSettings.error) {
     return redirectWithMessage(
@@ -99,11 +99,13 @@ export async function POST(request: Request) {
     );
   }
 
-  if (existingSettings.data?.id) {
+  if ((existingSettings.data || []).length > 0) {
+    // Update every settings row for the business. This avoids stale widget settings if older
+    // migrations accidentally created more than one business_settings row.
     const settingsUpdate = await supabase
       .from("business_settings")
       .update(settingsPayload)
-      .eq("id", existingSettings.data.id);
+      .eq("business_id", session.businessId);
 
     if (settingsUpdate.error) {
       return redirectWithMessage(

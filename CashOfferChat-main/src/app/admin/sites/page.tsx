@@ -24,31 +24,16 @@ type WidgetSite = {
   businesses: { name?: string | null } | { name?: string | null }[] | null;
 };
 
-type AdminSitesSearchParams = {
-  saved?: string;
-  error?: string;
-  business_id?: string;
-  site_id?: string;
-  site_name?: string;
-  domain?: string;
-  allowed_domains?: string;
-  is_active?: string;
-};
-
 function businessName(value: WidgetSite["businesses"]) {
   if (!value) return "—";
   if (Array.isArray(value)) return value[0]?.name || "—";
   return value.name || "—";
 }
 
-function queryValue(query: AdminSitesSearchParams, key: keyof AdminSitesSearchParams) {
-  return typeof query[key] === "string" ? query[key] || "" : "";
-}
-
 export default async function AdminSitesPage({
   searchParams,
 }: {
-  searchParams: Promise<AdminSitesSearchParams>;
+  searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
   const query = await searchParams;
   const cookieStore = await cookies();
@@ -59,7 +44,7 @@ export default async function AdminSitesPage({
   let businesses: Business[] = [];
   let sites: WidgetSite[] = [];
   let leadCounts: Record<string, number> = {};
-  let errorMessage: string | null = query.error ? query.error : null;
+  let errorMessage: string | null = query.error ? "Widget site could not be saved. Check required fields and make sure Site ID is unique." : null;
 
   if (!supabase) {
     errorMessage = "Supabase is not configured.";
@@ -69,11 +54,7 @@ export default async function AdminSitesPage({
       .select("id, name")
       .order("name", { ascending: true });
 
-    if (businessResult.error) {
-      errorMessage = businessResult.error.message;
-    } else {
-      businesses = (businessResult.data || []) as Business[];
-    }
+    businesses = (businessResult.data || []) as Business[];
 
     const sitesResult = await supabase
       .from("widget_sites")
@@ -97,8 +78,6 @@ export default async function AdminSitesPage({
   }
 
   const appUrl = process.env.APP_URL || "https://cashofferchat.com";
-  const selectedBusinessId = queryValue(query, "business_id") || (businesses.length === 1 ? businesses[0]?.id || "" : "");
-  const defaultActive = query.is_active === "false" ? false : true;
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -122,12 +101,11 @@ export default async function AdminSitesPage({
         <div className="mb-8 rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
           <h2 className="text-xl font-bold text-navy">Add Widget Site</h2>
           <p className="mt-2 text-sm text-slate-500">Required fields are marked with *.</p>
-          <p className="mt-2 text-sm text-slate-500">To change an existing widget site, use the <strong>Open Site</strong> button below instead of creating the same Site ID again.</p>
 
           <form action="/api/admin/sites" method="post" className="mt-6 grid gap-4 md:grid-cols-2">
             <label className="block text-sm font-semibold text-slate-700">
               Business *
-              <select name="business_id" required defaultValue={selectedBusinessId} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3">
+              <select name="business_id" required className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3">
                 <option value="">Select a business</option>
                 {businesses.map((business) => (
                   <option key={business.id} value={business.id}>{business.name}</option>
@@ -137,27 +115,27 @@ export default async function AdminSitesPage({
 
             <label className="block text-sm font-semibold text-slate-700">
               Site ID *
-              <input name="site_id" required defaultValue={queryValue(query, "site_id")} placeholder="plano-demo" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
+              <input name="site_id" required placeholder="plano-demo" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
               <span className="mt-1 block text-xs text-slate-500">Lowercase letters, numbers, and hyphens. This becomes the widget data-site-id.</span>
             </label>
 
             <label className="block text-sm font-semibold text-slate-700">
               Site Name
-              <input name="site_name" defaultValue={queryValue(query, "site_name")} placeholder="Plano Demo Site" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
+              <input name="site_name" placeholder="Plano Demo Site" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
             </label>
 
             <label className="block text-sm font-semibold text-slate-700">
               Primary Domain
-              <input name="domain" defaultValue={queryValue(query, "domain")} placeholder="sellmyhousetodayanywhere.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
+              <input name="domain" placeholder="sellmyhousetodayanywhere.com" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
             </label>
 
             <label className="block text-sm font-semibold text-slate-700 md:col-span-2">
               Allowed Domains
-              <textarea name="allowed_domains" defaultValue={queryValue(query, "allowed_domains")} placeholder={"sellmyhousetodayanywhere.com\nwww.sellmyhousetodayanywhere.com"} className="mt-1 min-h-28 w-full rounded-xl border border-slate-300 px-4 py-3" />
+              <textarea name="allowed_domains" placeholder={"sellmyhousetodayanywhere.com\nwww.sellmyhousetodayanywhere.com"} className="mt-1 min-h-28 w-full rounded-xl border border-slate-300 px-4 py-3" />
             </label>
 
             <label className="flex items-center gap-3 text-sm font-semibold text-slate-700">
-              <input name="is_active" type="checkbox" defaultChecked={defaultActive} /> Active
+              <input name="is_active" type="checkbox" defaultChecked /> Active
             </label>
 
             <div className="md:col-span-2">

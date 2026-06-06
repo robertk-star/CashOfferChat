@@ -4,6 +4,7 @@
 
   const script = document.currentScript;
   const siteId = script?.getAttribute("data-site-id") || "demo";
+  const widgetCacheBust = String(Date.now());
   const baseUrl = new URL(script?.src || window.location.href).origin;
   const sourceUrl = window.location.href;
   const sourceDomain = window.location.hostname;
@@ -480,8 +481,10 @@
 
   async function loadSettings() {
     try {
-      const res = await fetch(`${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}`, {
+      const settingsUrl = `${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&domain=${encodeURIComponent(sourceDomain)}&url=${encodeURIComponent(sourceUrl)}&v=${encodeURIComponent(widgetCacheBust)}`;
+      const res = await fetch(settingsUrl, {
         headers: { Accept: "application/json" },
+        cache: "no-store",
       });
 
       if (!res.ok) return;
