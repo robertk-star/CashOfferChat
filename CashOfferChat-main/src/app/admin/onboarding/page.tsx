@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
+import { buildWidgetEmbedCode } from "@/lib/widgetEmbed";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Onboard Business | CashOfferChat" };
@@ -44,9 +45,8 @@ export default async function AdminOnboardingPage({
   const token = cookieStore.get(adminCookieName())?.value;
   if (!verifyAdminSessionToken(token)) redirect("/admin/login");
 
-  const appUrl = process.env.APP_URL || "https://cashofferchat.com";
   const embedCode = params.siteId
-    ? `<script src="${appUrl}/widget.js" data-site-id="${params.siteId}"></script>`
+    ? buildWidgetEmbedCode(params.siteId)
     : "";
 
   return (

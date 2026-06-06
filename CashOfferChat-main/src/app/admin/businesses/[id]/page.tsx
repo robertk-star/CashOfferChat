@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { buildWidgetEmbedCode } from "@/lib/widgetEmbed";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Business Detail | CashOfferChat" };
@@ -35,7 +36,6 @@ export default async function AdminBusinessDetailPage({
   const sites = (sitesResult.data || []) as Array<any>;
   const users = (usersResult.data || []) as Array<any>;
   const leads = (leadsResult.data || []) as Array<any>;
-  const appUrl = process.env.APP_URL || "https://cashofferchat.com";
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -85,7 +85,7 @@ export default async function AdminBusinessDetailPage({
                         <div><div className="font-bold text-navy">{label}</div><div className="text-sm text-slate-500">{site.domain || "No domain set"}</div><div className="text-xs text-slate-400">Site ID: {site.site_id}</div></div>
                         <span className={site.is_active === false ? "rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700" : "rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700"}>{site.is_active === false ? "Inactive" : "Active"}</span>
                       </div>
-                      <pre className="mt-3 overflow-x-auto rounded-xl bg-slate-50 p-3 text-xs text-slate-700">{`<script src="${appUrl}/widget.js" data-site-id="${site.site_id}"></script>`}</pre>
+                      <pre className="mt-3 overflow-x-auto rounded-xl bg-slate-50 p-3 text-xs text-slate-700">{buildWidgetEmbedCode(site.site_id)}</pre>
                     </div>
                   );
                 })}

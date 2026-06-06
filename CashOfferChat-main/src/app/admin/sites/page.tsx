@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { buildWidgetEmbedCode } from "@/lib/widgetEmbed";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Widget Sites | CashOfferChat" };
@@ -77,7 +78,6 @@ export default async function AdminSitesPage({
     }
   }
 
-  const appUrl = process.env.APP_URL || "https://cashofferchat.com";
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -177,7 +177,7 @@ export default async function AdminSitesPage({
 
                 <div className="mt-5">
                   <div className="text-sm font-bold text-slate-700">Embed code</div>
-                  <pre className="mt-2 overflow-x-auto rounded-xl bg-slate-50 p-4 text-xs text-slate-700">{`<script src="${appUrl}/widget.js" data-site-id="${site.site_id}"></script>`}</pre>
+                  <pre className="mt-2 overflow-x-auto rounded-xl bg-slate-50 p-4 text-xs text-slate-700">{buildWidgetEmbedCode(site.site_id)}</pre>
                 </div>
               </div>
             );
