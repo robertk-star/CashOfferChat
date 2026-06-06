@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { clientCookieName, verifyClientSessionToken } from "@/lib/clientAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import { buildWidgetEmbedCode } from "@/lib/widgetEmbed";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Widget Sites | CashOfferChat" };
@@ -61,6 +60,8 @@ export default async function ClientSitesPage() {
     }
   }
 
+  const widgetBaseUrl = "https://www.cashofferchat.com";
+  const widgetScriptVersion = "embed-sync-canonical-api-20260606e";
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -126,7 +127,7 @@ export default async function ClientSitesPage() {
 
                 <div className="mt-5">
                   <div className="text-sm font-bold text-slate-700">Embed code</div>
-                  <pre className="mt-2 overflow-x-auto rounded-xl bg-slate-50 p-4 text-xs text-slate-700">{buildWidgetEmbedCode(site.site_id)}</pre>
+                  <pre className="mt-2 overflow-x-auto rounded-xl bg-slate-50 p-4 text-xs text-slate-700">{`<script src="${widgetBaseUrl}/widget.js?v=${widgetScriptVersion}" data-site-id="${site.site_id}"></script>`}</pre>
                 </div>
 
                 <div className="mt-5 flex flex-wrap gap-3">

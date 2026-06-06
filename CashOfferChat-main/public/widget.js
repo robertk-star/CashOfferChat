@@ -2,17 +2,13 @@
   if (window.__cashOfferChatLoaded) return;
   window.__cashOfferChatLoaded = true;
 
-  window.CASHOFFERCHAT_WIDGET_VERSION = "embed-sync-canonical-api-20260606d";
-
   const script = document.currentScript;
   const siteId = script?.getAttribute("data-site-id") || "demo";
-  const scriptOrigin = new URL(script?.src || window.location.href).origin;
-  const apiBaseUrl = scriptOrigin.includes("localhost") || scriptOrigin.includes("127.0.0.1")
-    ? scriptOrigin
-    : "https://www.cashofferchat.com";
-  window.CASHOFFERCHAT_WIDGET_API_BASE = apiBaseUrl;
+  const baseUrl = "https://www.cashofferchat.com";
   const sourceUrl = window.location.href;
   const sourceDomain = window.location.hostname;
+  window.CASHOFFERCHAT_WIDGET_VERSION = "embed-sync-canonical-api-20260606e";
+  window.CASHOFFERCHAT_WIDGET_API_BASE = baseUrl;
 
   const DEFAULT_SETTINGS = {
     widgetTitle: "Seller Intake Assistant",
@@ -466,7 +462,7 @@
 
   async function track(eventType, metadata = {}) {
     try {
-      await fetch(`${apiBaseUrl}/api/widget/events`, {
+      await fetch(`${baseUrl}/api/widget/events`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         keepalive: true,
@@ -486,7 +482,8 @@
 
   async function loadSettings() {
     try {
-      const res = await fetch(`${apiBaseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&domain=${encodeURIComponent(sourceDomain)}&url=${encodeURIComponent(sourceUrl)}&v=${Date.now()}`, {
+      const settingsUrl = `${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&domain=${encodeURIComponent(sourceDomain)}&url=${encodeURIComponent(sourceUrl)}&v=${Date.now()}`;
+      const res = await fetch(settingsUrl, {
         headers: { Accept: "application/json" },
       });
 
@@ -587,7 +584,7 @@
     try {
       track("lead_form_submitted");
 
-      const res = await fetch(`${apiBaseUrl}/api/leads`, {
+      const res = await fetch(`${baseUrl}/api/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -635,7 +632,7 @@
     try {
       track("chat_message_sent", { message });
 
-      const res = await fetch(`${apiBaseUrl}/api/chat`, {
+      const res = await fetch(`${baseUrl}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

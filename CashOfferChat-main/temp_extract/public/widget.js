@@ -4,30 +4,10 @@
 
   const script = document.currentScript;
   const siteId = script?.getAttribute("data-site-id") || "demo";
+  const baseUrl = "https://www.cashofferchat.com";
   const sourceUrl = window.location.href;
   const sourceDomain = window.location.hostname;
-  const WIDGET_VERSION = "cors-final-canonical-api-20260606c";
-
-  function canonicalApiBase(value) {
-    try {
-      const url = new URL(value || "https://www.cashofferchat.com");
-      const host = url.hostname.toLowerCase().replace(/^www\./, "");
-
-      if (host === "cashofferchat.com") {
-        return "https://www.cashofferchat.com";
-      }
-
-      return url.origin;
-    } catch (_) {
-      return "https://www.cashofferchat.com";
-    }
-  }
-
-  const scriptOrigin = canonicalApiBase(script?.src || "https://www.cashofferchat.com/widget.js");
-  const configuredApiBase = script?.getAttribute("data-api-base");
-  const baseUrl = canonicalApiBase(configuredApiBase || scriptOrigin);
-
-  window.CASHOFFERCHAT_WIDGET_VERSION = WIDGET_VERSION;
+  window.CASHOFFERCHAT_WIDGET_VERSION = "embed-sync-canonical-api-20260606e";
   window.CASHOFFERCHAT_WIDGET_API_BASE = baseUrl;
 
   const DEFAULT_SETTINGS = {
@@ -484,7 +464,6 @@
     try {
       await fetch(`${baseUrl}/api/widget/events`, {
         method: "POST",
-        mode: "cors",
         headers: { "Content-Type": "application/json" },
         keepalive: true,
         body: JSON.stringify({
@@ -503,18 +482,8 @@
 
   async function loadSettings() {
     try {
-      const params = new URLSearchParams({
-        siteId,
-        domain: sourceDomain,
-        url: sourceUrl,
-        v: WIDGET_VERSION,
-        t: String(Date.now()),
-      });
-
-      const res = await fetch(`${baseUrl}/api/widget/settings?${params.toString()}`, {
-        method: "GET",
-        mode: "cors",
-        cache: "no-store",
+      const settingsUrl = `${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&domain=${encodeURIComponent(sourceDomain)}&url=${encodeURIComponent(sourceUrl)}&v=${Date.now()}`;
+      const res = await fetch(settingsUrl, {
         headers: { Accept: "application/json" },
       });
 
@@ -617,7 +586,6 @@
 
       const res = await fetch(`${baseUrl}/api/leads`, {
         method: "POST",
-        mode: "cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           conversationId: state.conversationId,
@@ -666,7 +634,6 @@
 
       const res = await fetch(`${baseUrl}/api/chat`, {
         method: "POST",
-        mode: "cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           siteId,

@@ -44,9 +44,10 @@ export default async function AdminOnboardingPage({
   const token = cookieStore.get(adminCookieName())?.value;
   if (!verifyAdminSessionToken(token)) redirect("/admin/login");
 
-  const appUrl = process.env.APP_URL || "https://cashofferchat.com";
+  const widgetBaseUrl = "https://www.cashofferchat.com";
+  const widgetScriptVersion = "embed-sync-canonical-api-20260606e";
   const embedCode = params.siteId
-    ? `<script src="${appUrl}/widget.js" data-site-id="${params.siteId}"></script>`
+    ? `<script src="${widgetBaseUrl}/widget.js?v=${widgetScriptVersion}" data-site-id="${params.siteId}"></script>`
     : "";
 
   return (

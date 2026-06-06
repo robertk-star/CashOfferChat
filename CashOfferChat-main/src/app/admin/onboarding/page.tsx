@@ -2,7 +2,6 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
-import { buildWidgetEmbedCode } from "@/lib/widgetEmbed";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Onboard Business | CashOfferChat" };
@@ -45,8 +44,10 @@ export default async function AdminOnboardingPage({
   const token = cookieStore.get(adminCookieName())?.value;
   if (!verifyAdminSessionToken(token)) redirect("/admin/login");
 
+  const widgetBaseUrl = "https://www.cashofferchat.com";
+  const widgetScriptVersion = "embed-sync-canonical-api-20260606e";
   const embedCode = params.siteId
-    ? buildWidgetEmbedCode(params.siteId)
+    ? `<script src="${widgetBaseUrl}/widget.js?v=${widgetScriptVersion}" data-site-id="${params.siteId}"></script>`
     : "";
 
   return (

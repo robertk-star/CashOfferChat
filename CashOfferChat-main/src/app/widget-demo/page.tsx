@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Script from "next/script";
-import { buildWidgetScriptSrc } from "@/lib/widgetEmbed";
 
 export const metadata = { title: "Widget Demo | CashOfferChat" };
 
@@ -19,7 +18,7 @@ export default function WidgetDemoPage() {
           </div>
         </div>
       </section>
-      <Script src={buildWidgetScriptSrc()} data-site-id="demo" strategy="afterInteractive" />
+      <Script src="/widget.js" data-site-id="demo" strategy="afterInteractive" />
     </main>
   );
 }

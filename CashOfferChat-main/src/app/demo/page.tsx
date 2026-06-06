@@ -1,5 +1,4 @@
 import Script from "next/script";
-import { buildWidgetScriptSrc } from "@/lib/widgetEmbed";
 import Link from "next/link";
 import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
@@ -38,7 +37,7 @@ export default function DemoPage() {
         <div className="mt-10 rounded-[2rem] bg-slate-950 p-8 text-white">
           <h2 className="text-2xl font-black">Demo embed code</h2>
           <p className="mt-2 text-sm text-slate-300">This is the style of embed code customers will install.</p>
-          <pre className="mt-4 overflow-x-auto rounded-xl bg-white/10 p-4 text-xs">{`<script src="https://www.cashofferchat.com/widget.js?v=embed-sync-canonical-api-20260606d" data-site-id="demo"></script>`}</pre>
+          <pre className="mt-4 overflow-x-auto rounded-xl bg-white/10 p-4 text-xs">{`<script src="https://www.cashofferchat.com/widget.js?v=embed-sync-canonical-api-20260606e" data-site-id="demo"></script>`}</pre>
         </div>
 
         <div className="mt-10">
@@ -47,7 +46,7 @@ export default function DemoPage() {
       </section>
 
       <PublicSiteFooter />
-      <Script src={buildWidgetScriptSrc()} strategy="afterInteractive" data-site-id="demo" />
+      <Script src="/widget.js" strategy="afterInteractive" data-site-id="demo" />
     </main>
   );
 }

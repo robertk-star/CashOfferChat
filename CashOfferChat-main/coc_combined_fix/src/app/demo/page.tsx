@@ -37,7 +37,7 @@ export default function DemoPage() {
         <div className="mt-10 rounded-[2rem] bg-slate-950 p-8 text-white">
           <h2 className="text-2xl font-black">Demo embed code</h2>
           <p className="mt-2 text-sm text-slate-300">This is the style of embed code customers will install.</p>
-          <pre className="mt-4 overflow-x-auto rounded-xl bg-white/10 p-4 text-xs">{`<script src="https://cashofferchat.com/widget.js" data-site-id="demo"></script>`}</pre>
+          <pre className="mt-4 overflow-x-auto rounded-xl bg-white/10 p-4 text-xs">{`<script src="https://www.cashofferchat.com/widget.js?v=embed-sync-canonical-api-20260606e" data-site-id="demo"></script>`}</pre>
         </div>
 
         <div className="mt-10">

@@ -1,5 +1,4 @@
 import Script from "next/script";
-import { buildWidgetScriptSrc } from "@/lib/widgetEmbed";
 import Link from "next/link";
 import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
@@ -227,7 +226,7 @@ export default function HomePage() {
 
       <PublicSiteFooter />
 
-      <Script src={buildWidgetScriptSrc()} strategy="afterInteractive" data-site-id="demo" />
+      <Script src="/widget.js" strategy="afterInteractive" data-site-id="demo" />
     </main>
   );
 }

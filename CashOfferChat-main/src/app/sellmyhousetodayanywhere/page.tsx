@@ -1,5 +1,4 @@
 import Script from "next/script";
-import { buildWidgetScriptSrc } from "@/lib/widgetEmbed";
 
 export const metadata = {
   title: "Sell My House Today Anywhere | Cash Home Buyer Demo",
@@ -249,7 +248,7 @@ export default function SellMyHouseTodayAnywherePage() {
 
       <Footer />
 
-      <Script src={buildWidgetScriptSrc()} strategy="afterInteractive" data-site-id="smhta" />
+      <Script src="https://www.cashofferchat.com/widget.js?v=embed-sync-canonical-api-20260606e" strategy="afterInteractive" data-site-id="smhta" />
     </main>
   );
 }
