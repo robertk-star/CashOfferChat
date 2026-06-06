@@ -2,7 +2,9 @@
   if (window.__cashOfferChatLoaded) return;
   window.__cashOfferChatLoaded = true;
 
-  const script = document.currentScript;
+  const script =
+    document.currentScript ||
+    Array.from(document.getElementsByTagName("script")).find((item) => (item.src || "").includes("/widget.js"));
   const siteId = script?.getAttribute("data-site-id") || "demo";
   const baseUrl = new URL(script?.src || window.location.href).origin;
   const sourceUrl = window.location.href;
@@ -480,9 +482,13 @@
 
   async function loadSettings() {
     try {
-      const res = await fetch(`${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}`, {
-        headers: { Accept: "application/json" },
-      });
+      const res = await fetch(
+        `${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&domain=${encodeURIComponent(sourceDomain)}&url=${encodeURIComponent(sourceUrl)}&t=${Date.now()}`,
+        {
+          cache: "no-store",
+          headers: { Accept: "application/json" },
+        },
+      );
 
       if (!res.ok) return;
 

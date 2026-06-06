@@ -49,6 +49,19 @@ function splitDomains(value?: string | null) {
 }
 
 function getRequestDomain(request: Request) {
+  const url = new URL(request.url);
+  const explicitDomain = url.searchParams.get("domain") || url.searchParams.get("host");
+  if (explicitDomain) return normalizeDomain(explicitDomain);
+
+  const explicitUrl = url.searchParams.get("url") || "";
+  if (explicitUrl) {
+    try {
+      return normalizeDomain(new URL(explicitUrl).hostname);
+    } catch {
+      return normalizeDomain(explicitUrl);
+    }
+  }
+
   const origin = request.headers.get("origin") || request.headers.get("referer") || "";
   try {
     return normalizeDomain(new URL(origin).hostname);
@@ -57,25 +70,14 @@ function getRequestDomain(request: Request) {
   }
 }
 
-function siteDomains(site: WidgetSite) {
-  return [normalizeDomain(site.domain), ...splitDomains(site.allowed_domains)].filter(Boolean);
-}
-
 function isAllowedDomain(site: WidgetSite, requestDomain: string) {
-  const configuredDomains = siteDomains(site);
+  const allowedDomains = splitDomains(site.allowed_domains);
+  const primaryDomain = normalizeDomain(site.domain);
+  const configuredDomains = [...allowedDomains, primaryDomain].filter(Boolean);
 
   if (!requestDomain || configuredDomains.length === 0) return true;
 
   return configuredDomains.some((domain) => requestDomain === domain || requestDomain.endsWith(`.${domain}`));
-}
-
-function findDomainMatchedSite(sites: WidgetSite[], requestDomain: string) {
-  if (!requestDomain) return null;
-  return (
-    sites.find((site) =>
-      siteDomains(site).some((domain) => requestDomain === domain || requestDomain.endsWith(`.${domain}`)),
-    ) || null
-  );
 }
 
 function defaultSettings(siteId: string) {
@@ -108,34 +110,31 @@ export async function GET(request: Request) {
 
   const requestDomain = getRequestDomain(request);
 
-  const { data: requestedSite, error: siteError } = await supabase
+  const siteSelect = "id, site_id, business_id, name, site_name, domain, allowed_domains, is_active";
+  const bySiteId = await supabase
     .from("widget_sites")
-    .select("id, site_id, business_id, name, site_name, domain, allowed_domains, is_active")
+    .select(siteSelect)
     .eq("site_id", siteId)
     .maybeSingle();
 
-  if (siteError) {
+  if (bySiteId.error) {
     return NextResponse.json(
-      { error: siteError.message },
+      { error: bySiteId.error.message },
       { status: 500, headers: corsHeaders() },
     );
   }
 
-  let site: WidgetSite | null = (requestedSite as WidgetSite | null) || null;
+  let site = bySiteId.data as WidgetSite | null;
 
-  // Important for demos and client websites:
-  // If a generic/default siteId is embedded by mistake, prefer the widget site that matches the current domain.
-  // This lets client settings update the live widget even when a page still has data-site-id="demo".
-  const shouldTryDomainFallback = !site || !site.business_id || siteId === "demo";
-  if (shouldTryDomainFallback && requestDomain) {
-    const { data: candidateSites, error: candidateError } = await supabase
+  if (!site && requestDomain) {
+    const byDomain = await supabase
       .from("widget_sites")
-      .select("id, site_id, business_id, name, site_name, domain, allowed_domains, is_active")
-      .neq("is_active", false);
+      .select(siteSelect)
+      .or(`domain.ilike.%${requestDomain}%,allowed_domains.ilike.%${requestDomain}%`)
+      .limit(1);
 
-    if (!candidateError) {
-      const matchedSite = findDomainMatchedSite((candidateSites || []) as WidgetSite[], requestDomain);
-      if (matchedSite) site = matchedSite;
+    if (!byDomain.error && byDomain.data && byDomain.data.length > 0) {
+      site = byDomain.data[0] as WidgetSite;
     }
   }
 
@@ -146,14 +145,14 @@ export async function GET(request: Request) {
   if (site.is_active === false) {
     return NextResponse.json(
       { error: "Widget site is not active" },
-      { status: 403, headers: corsHeaders() },
+      { status: 403, headers: corsHeaders() }
     );
   }
 
-  if (!isAllowedDomain(site, requestDomain)) {
+  if (!isAllowedDomain(site as WidgetSite, requestDomain)) {
     return NextResponse.json(
       { error: "This domain is not allowed for this widget site" },
-      { status: 403, headers: corsHeaders() },
+      { status: 403, headers: corsHeaders() }
     );
   }
 
@@ -190,11 +189,7 @@ export async function GET(request: Request) {
   };
 
   return NextResponse.json(
-    {
-      ok: true,
-      site: { id: site.id, siteId: site.site_id, businessId: site.business_id },
-      settings: mergedSettings,
-    },
-    { headers: corsHeaders() },
+    { ok: true, site: { id: site.id, siteId: site.site_id, businessId: site.business_id }, settings: mergedSettings },
+    { headers: corsHeaders() }
   );
 }

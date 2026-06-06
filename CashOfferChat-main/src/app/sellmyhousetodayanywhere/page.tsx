@@ -248,7 +248,7 @@ export default function SellMyHouseTodayAnywherePage() {
 
       <Footer />
 
-      <Script src="/widget.js?v=client-settings-sync-20260606" strategy="afterInteractive" data-site-id="smhta" />
+      <Script src="/widget.js?v=settings-live-sync-20260606" strategy="afterInteractive" data-site-id="smhta" />
     </main>
   );
 }

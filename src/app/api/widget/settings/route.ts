@@ -19,6 +19,9 @@ function corsHeaders() {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Accept",
+    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0",
   };
 }
 
@@ -46,6 +49,19 @@ function splitDomains(value?: string | null) {
 }
 
 function getRequestDomain(request: Request) {
+  const url = new URL(request.url);
+  const explicitDomain = url.searchParams.get("domain") || url.searchParams.get("host");
+  if (explicitDomain) return normalizeDomain(explicitDomain);
+
+  const explicitUrl = url.searchParams.get("url") || "";
+  if (explicitUrl) {
+    try {
+      return normalizeDomain(new URL(explicitUrl).hostname);
+    } catch {
+      return normalizeDomain(explicitUrl);
+    }
+  }
+
   const origin = request.headers.get("origin") || request.headers.get("referer") || "";
   try {
     return normalizeDomain(new URL(origin).hostname);
@@ -92,17 +108,34 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, settings: fallback }, { headers: corsHeaders() });
   }
 
-  const { data: site, error: siteError } = await supabase
+  const requestDomain = getRequestDomain(request);
+
+  const siteSelect = "id, site_id, business_id, name, site_name, domain, allowed_domains, is_active";
+  const bySiteId = await supabase
     .from("widget_sites")
-    .select("id, site_id, business_id, name, site_name, domain, allowed_domains, is_active")
+    .select(siteSelect)
     .eq("site_id", siteId)
     .maybeSingle();
 
-  if (siteError) {
+  if (bySiteId.error) {
     return NextResponse.json(
-      { error: siteError.message },
-      { status: 500, headers: corsHeaders() }
+      { error: bySiteId.error.message },
+      { status: 500, headers: corsHeaders() },
     );
+  }
+
+  let site = bySiteId.data as WidgetSite | null;
+
+  if (!site && requestDomain) {
+    const byDomain = await supabase
+      .from("widget_sites")
+      .select(siteSelect)
+      .or(`domain.ilike.%${requestDomain}%,allowed_domains.ilike.%${requestDomain}%`)
+      .limit(1);
+
+    if (!byDomain.error && byDomain.data && byDomain.data.length > 0) {
+      site = byDomain.data[0] as WidgetSite;
+    }
   }
 
   if (!site) {
@@ -116,7 +149,6 @@ export async function GET(request: Request) {
     );
   }
 
-  const requestDomain = getRequestDomain(request);
   if (!isAllowedDomain(site as WidgetSite, requestDomain)) {
     return NextResponse.json(
       { error: "This domain is not allowed for this widget site" },
