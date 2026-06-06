@@ -20,6 +20,7 @@ function corsHeaders() {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Accept",
+    "Access-Control-Max-Age": "86400",
     "Cache-Control": "no-store, no-cache, max-age=0, must-revalidate",
     "Pragma": "no-cache",
     "Expires": "0",

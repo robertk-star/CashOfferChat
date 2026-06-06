@@ -1,12 +1,34 @@
 (() => {
-  window.CASHOFFERCHAT_WIDGET_VERSION = "dynamic-settings-20260606b";
   if (window.__cashOfferChatLoaded) return;
   window.__cashOfferChatLoaded = true;
 
   const script = document.currentScript;
   const siteId = script?.getAttribute("data-site-id") || "demo";
   const widgetCacheBust = String(Date.now());
-  const baseUrl = new URL(script?.src || window.location.href).origin;
+
+  function resolveApiBaseUrl() {
+    const fallback = "https://www.cashofferchat.com";
+    try {
+      const scriptUrl = new URL(script?.src || fallback);
+      const host = scriptUrl.hostname.toLowerCase();
+
+      // Important: cross-domain browser preflight requests cannot follow redirects.
+      // Always call the canonical www host so /api/widget/settings and /api/widget/events
+      // do not redirect from cashofferchat.com to www.cashofferchat.com.
+      if (host === "cashofferchat.com" || host === "www.cashofferchat.com") {
+        return "https://www.cashofferchat.com";
+      }
+
+      return scriptUrl.origin;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  const baseUrl = resolveApiBaseUrl();
+  window.CASHOFFERCHAT_WIDGET_VERSION = "cors-canonical-api-20260606";
+  window.CASHOFFERCHAT_WIDGET_API_BASE = baseUrl;
+
   const sourceUrl = window.location.href;
   const sourceDomain = window.location.hostname;
 
