@@ -19,6 +19,9 @@ function corsHeaders() {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Accept",
+    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0",
   };
 }
 
@@ -92,11 +95,36 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, settings: fallback }, { headers: corsHeaders() });
   }
 
-  const { data: site, error: siteError } = await supabase
+  const requestDomainFromQuery = normalizeDomain(url.searchParams.get("domain"));
+  const requestUrlFromQuery = url.searchParams.get("url") || "";
+  let pageDomain = requestDomainFromQuery;
+  if (!pageDomain && requestUrlFromQuery) {
+    try {
+      pageDomain = normalizeDomain(new URL(requestUrlFromQuery).hostname);
+    } catch {}
+  }
+
+  let { data: site, error: siteError } = await supabase
     .from("widget_sites")
     .select("id, site_id, business_id, name, site_name, domain, allowed_domains, is_active")
     .eq("site_id", siteId)
     .maybeSingle();
+
+  if (!site && pageDomain) {
+    const { data: sitesByDomain, error: domainError } = await supabase
+      .from("widget_sites")
+      .select("id, site_id, business_id, name, site_name, domain, allowed_domains, is_active")
+      .eq("is_active", true);
+
+    if (domainError) {
+      siteError = domainError;
+    } else {
+      site = (sitesByDomain || []).find((candidate: WidgetSite) => {
+        const domains = [normalizeDomain(candidate.domain), ...splitDomains(candidate.allowed_domains)].filter(Boolean);
+        return domains.some((domain) => pageDomain === domain || pageDomain.endsWith(`.${domain}`));
+      }) || null;
+    }
+  }
 
   if (siteError) {
     return NextResponse.json(
@@ -116,7 +144,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const requestDomain = getRequestDomain(request);
+  const requestDomain = pageDomain || getRequestDomain(request);
   if (!isAllowedDomain(site as WidgetSite, requestDomain)) {
     return NextResponse.json(
       { error: "This domain is not allowed for this widget site" },

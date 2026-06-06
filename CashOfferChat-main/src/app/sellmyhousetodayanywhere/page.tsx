@@ -248,7 +248,7 @@ export default function SellMyHouseTodayAnywherePage() {
 
       <Footer />
 
-      <Script src="https://www.cashofferchat.com/widget.js?v=cors-canonical-api-20260606" strategy="afterInteractive" data-site-id="smhta" />
+      <Script src="https://www.cashofferchat.com/widget.js?v=cors-final-canonical-api-20260606c" strategy="afterInteractive" data-site-id="smhta" />
     </main>
   );
 }

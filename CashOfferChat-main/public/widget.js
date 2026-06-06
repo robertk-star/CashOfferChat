@@ -4,33 +4,31 @@
 
   const script = document.currentScript;
   const siteId = script?.getAttribute("data-site-id") || "demo";
-  const widgetCacheBust = String(Date.now());
+  const sourceUrl = window.location.href;
+  const sourceDomain = window.location.hostname;
+  const WIDGET_VERSION = "cors-final-canonical-api-20260606c";
 
-  function resolveApiBaseUrl() {
-    const fallback = "https://www.cashofferchat.com";
+  function canonicalApiBase(value) {
     try {
-      const scriptUrl = new URL(script?.src || fallback);
-      const host = scriptUrl.hostname.toLowerCase();
+      const url = new URL(value || "https://www.cashofferchat.com");
+      const host = url.hostname.toLowerCase().replace(/^www\./, "");
 
-      // Important: cross-domain browser preflight requests cannot follow redirects.
-      // Always call the canonical www host so /api/widget/settings and /api/widget/events
-      // do not redirect from cashofferchat.com to www.cashofferchat.com.
-      if (host === "cashofferchat.com" || host === "www.cashofferchat.com") {
+      if (host === "cashofferchat.com") {
         return "https://www.cashofferchat.com";
       }
 
-      return scriptUrl.origin;
+      return url.origin;
     } catch (_) {
-      return fallback;
+      return "https://www.cashofferchat.com";
     }
   }
 
-  const baseUrl = resolveApiBaseUrl();
-  window.CASHOFFERCHAT_WIDGET_VERSION = "cors-canonical-api-20260606";
-  window.CASHOFFERCHAT_WIDGET_API_BASE = baseUrl;
+  const scriptOrigin = canonicalApiBase(script?.src || "https://www.cashofferchat.com/widget.js");
+  const configuredApiBase = script?.getAttribute("data-api-base");
+  const baseUrl = canonicalApiBase(configuredApiBase || scriptOrigin);
 
-  const sourceUrl = window.location.href;
-  const sourceDomain = window.location.hostname;
+  window.CASHOFFERCHAT_WIDGET_VERSION = WIDGET_VERSION;
+  window.CASHOFFERCHAT_WIDGET_API_BASE = baseUrl;
 
   const DEFAULT_SETTINGS = {
     widgetTitle: "Seller Intake Assistant",
@@ -486,6 +484,7 @@
     try {
       await fetch(`${baseUrl}/api/widget/events`, {
         method: "POST",
+        mode: "cors",
         headers: { "Content-Type": "application/json" },
         keepalive: true,
         body: JSON.stringify({
@@ -504,10 +503,19 @@
 
   async function loadSettings() {
     try {
-      const settingsUrl = `${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&domain=${encodeURIComponent(sourceDomain)}&url=${encodeURIComponent(sourceUrl)}&v=${encodeURIComponent(widgetCacheBust)}`;
-      const res = await fetch(settingsUrl, {
-        headers: { Accept: "application/json" },
+      const params = new URLSearchParams({
+        siteId,
+        domain: sourceDomain,
+        url: sourceUrl,
+        v: WIDGET_VERSION,
+        t: String(Date.now()),
+      });
+
+      const res = await fetch(`${baseUrl}/api/widget/settings?${params.toString()}`, {
+        method: "GET",
+        mode: "cors",
         cache: "no-store",
+        headers: { Accept: "application/json" },
       });
 
       if (!res.ok) return;
@@ -609,6 +617,7 @@
 
       const res = await fetch(`${baseUrl}/api/leads`, {
         method: "POST",
+        mode: "cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           conversationId: state.conversationId,
@@ -657,6 +666,7 @@
 
       const res = await fetch(`${baseUrl}/api/chat`, {
         method: "POST",
+        mode: "cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           siteId,
