@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
+import { buildWidgetEmbedCode } from "@/lib/widgetEmbed";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Onboard Business | CashOfferChat" };
