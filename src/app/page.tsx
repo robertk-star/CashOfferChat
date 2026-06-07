@@ -1,4 +1,3 @@
-import Script from "next/script";
 import Link from "next/link";
 import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
@@ -29,6 +28,8 @@ const features = [
     text: "Send leads to Zapier, Make, GoHighLevel, or another CRM using webhook delivery.",
   },
 ];
+
+const liveDemoUrl = "https://www.sellmyhousetodayanywhere.com/";
 
 const faqs = [
   {
@@ -64,12 +65,12 @@ export default function HomePage() {
               AI chat that helps turn seller website visitors into qualified leads.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-              CashOfferChat answers seller questions, opens a structured house-info form, captures lead details, and sends the lead to your team.
+              CashOfferChat answers seller questions, opens a structured house-info form, captures lead details, and sends the lead to your team. See it working on a live cash buyer demo site.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/demo" className="rounded-full bg-gold px-7 py-4 text-base font-black text-navy shadow-soft">
-                View Demo
+              <Link href={liveDemoUrl} target="_blank" rel="noopener noreferrer" className="rounded-full bg-gold px-7 py-4 text-base font-black text-navy shadow-soft">
+                View Live Demo Site
               </Link>
               <Link href="/contact" className="rounded-full border border-slate-300 bg-white px-7 py-4 text-base font-black text-navy">
                 Request Early Access
@@ -155,19 +156,18 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
           <div>
-            <h2 className="text-4xl font-black text-navy">Try the demo widget.</h2>
+            <h2 className="text-4xl font-black text-navy">See CashOfferChat on a real demo site.</h2>
             <p className="mt-4 text-lg leading-8 text-slate-600">
-              Open the widget in the bottom-right corner. Ask a seller question or click the quote button to see the intake flow.
+              Send prospects to the Sell My House Today Anywhere demo so they can see the widget inside a real cash buyer website experience.
             </p>
             <div className="mt-6 flex flex-wrap gap-3 text-sm font-semibold text-slate-600">
-              <span className="rounded-full bg-slate-100 px-4 py-2">“Do you buy as-is?”</span>
-              <span className="rounded-full bg-slate-100 px-4 py-2">“How fast can I close?”</span>
-              <span className="rounded-full bg-slate-100 px-4 py-2">“Can you look at my house?”</span>
+              <Link href={liveDemoUrl} target="_blank" rel="noopener noreferrer" className="rounded-full bg-gold px-5 py-3 font-black text-navy">Open Live Demo Site</Link>
+              <span className="rounded-full bg-slate-100 px-4 py-3">Demo domain: sellmyhousetodayanywhere.com</span>
             </div>
           </div>
 
           <div className="rounded-[2rem] bg-slate-50 p-8 ring-1 ring-slate-200">
-            <h3 className="text-2xl font-black text-navy">What the demo should show</h3>
+            <h3 className="text-2xl font-black text-navy">What prospects can test</h3>
             <ul className="mt-5 space-y-3 text-sm leading-6 text-slate-600">
               <li>✓ Clear quote/intake button</li>
               <li>✓ AI-style FAQ answers using business knowledge</li>
@@ -213,12 +213,12 @@ export default function HomePage() {
 
       <section className="bg-amber-50">
         <div className="mx-auto max-w-4xl px-6 py-16 text-center">
-          <h2 className="text-4xl font-black text-navy">Ready to test CashOfferChat?</h2>
+          <h2 className="text-4xl font-black text-navy">Ready to see CashOfferChat live?</h2>
           <p className="mt-4 text-lg leading-8 text-slate-600">
-            Start with a demo site, install the widget, and capture your first test seller lead.
+            Visit the Sell My House Today Anywhere demo site and test the widget the way a real seller would use it.
           </p>
           <div className="mt-8 flex justify-center gap-4">
-            <Link href="/demo" className="rounded-full bg-gold px-7 py-4 font-black text-navy">View Demo</Link>
+            <Link href={liveDemoUrl} target="_blank" rel="noopener noreferrer" className="rounded-full bg-gold px-7 py-4 font-black text-navy">View Live Demo Site</Link>
             <Link href="/contact" className="rounded-full border border-slate-300 bg-white px-7 py-4 font-black text-navy">Request Early Access</Link>
           </div>
         </div>
@@ -226,7 +226,6 @@ export default function HomePage() {
 
       <PublicSiteFooter />
 
-      <Script src="/widget.js" strategy="afterInteractive" data-site-id="demo" />
     </main>
   );
 }

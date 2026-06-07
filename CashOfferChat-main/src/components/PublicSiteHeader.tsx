@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+const liveDemoUrl = "https://www.sellmyhousetodayanywhere.com/";
+
 export function PublicSiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
@@ -9,7 +11,7 @@ export function PublicSiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm font-bold text-slate-600 md:flex">
-          <Link href="/demo" className="hover:text-navy">Demo</Link>
+          <Link href={liveDemoUrl} target="_blank" rel="noopener noreferrer" className="hover:text-navy">Live Demo</Link>
           <Link href="/pricing" className="hover:text-navy">Pricing</Link>
           <Link href="/contact" className="hover:text-navy">Contact</Link>
           <Link href="/client/login" className="hover:text-navy">Login</Link>

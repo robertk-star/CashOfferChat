@@ -1,0 +1,23 @@
+CashOfferChat home page live demo update
+
+Apply these files at the active project root.
+
+Purpose:
+- Direct visitors on cashofferchat.com to the live demo site:
+  https://www.sellmyhousetodayanywhere.com/
+
+Confirm after upload:
+1. src/app/page.tsx contains:
+   View Live Demo Site
+   https://www.sellmyhousetodayanywhere.com/
+
+2. src/components/PublicSiteHeader.tsx has the public nav label:
+   Live Demo
+
+3. src/components/PublicSiteFooter.tsx has the footer product link:
+   Live Demo
+
+4. The CashOfferChat home page no longer loads the local demo widget script on the home page.
+
+No SQL migration is needed.
+No new Vercel ENV variables are needed.
