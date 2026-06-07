@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { buildWidgetEmbedCode } from "@/lib/widgetEmbed";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Widget Site Detail | CashOfferChat" };
@@ -41,8 +42,6 @@ export default async function AdminSiteDetailPage({
   const businesses = businessesResult.data || [];
   const leads = leadsResult.data || [];
   const events = eventsResult.data || [];
-  const widgetBaseUrl = "https://www.cashofferchat.com";
-  const widgetScriptVersion = "embed-sync-canonical-api-20260606e";
   const label = site.site_name || site.name || site.site_id;
 
   return (
@@ -113,7 +112,7 @@ export default async function AdminSiteDetailPage({
           <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
             <h2 className="text-xl font-bold text-navy">Installation</h2>
             <p className="mt-2 text-sm text-slate-600">Paste this before the closing body tag on the customer website.</p>
-            <pre className="mt-4 overflow-x-auto rounded-xl bg-slate-50 p-4 text-xs text-slate-700">{`<script src="${widgetBaseUrl}/widget.js?v=${widgetScriptVersion}" data-site-id="${site.site_id}"></script>`}</pre>
+            <pre className="mt-4 overflow-x-auto rounded-xl bg-slate-50 p-4 text-xs text-slate-700">{buildWidgetEmbedCode(site.site_id)}</pre>
           </div>
         </div>
 

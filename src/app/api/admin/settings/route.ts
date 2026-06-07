@@ -53,6 +53,8 @@ export async function POST(request: Request) {
     widget_title: value(formData, "widget_title"),
     widget_subtitle: value(formData, "widget_subtitle"),
     widget_quote_button_text: value(formData, "widget_quote_button_text"),
+    widget_show_call_button: formData.get("widget_show_call_button") === "on",
+    widget_call_button_text: value(formData, "widget_call_button_text") || "Call Now",
     lead_notification_email: value(formData, "lead_notification_email"),
     widget_allowed_domains: value(formData, "widget_allowed_domains"),
     updated_at: now,

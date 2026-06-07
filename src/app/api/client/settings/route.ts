@@ -7,23 +7,21 @@ function value(formData: FormData, key: string) {
   return String(formData.get(key) || "").trim();
 }
 
+function checked(formData: FormData, key: string) {
+  return formData.get(key) === "on";
+}
+
 function redirectWithMessage(request: Request, kind: "saved" | "error", message?: string) {
   const url = new URL("/client/settings", request.url);
-  if (kind === "saved") url.searchParams.set("saved", message || "Settings saved.");
+  if (kind === "saved") url.searchParams.set("saved", message || "1");
   else url.searchParams.set("error", message || "Settings could not be saved.");
   return NextResponse.redirect(url, { status: 303 });
 }
 
 function cleanDbMessage(message?: string | null) {
   if (!message) return "Database update failed.";
-  if (message.includes("multiple (or no) rows returned")) {
-    return "More than one settings row exists for this business. This has been handled in the updated save route; reload and try again.";
-  }
   if (message.includes("business_settings_business_id") || message.includes("ON CONFLICT")) {
-    return "The business_settings table is missing the multi-business unique index. Run sql/017_multibusiness_settings_fix.sql.";
-  }
-  if (message.includes("singleton_key") && message.includes("duplicate")) {
-    return "The old singleton settings constraint is still active. Run sql/017_multibusiness_settings_fix.sql.";
+    return "Settings table needs the multi-business settings SQL migration, or the business settings row could not be found.";
   }
   if (message.includes("column") && message.includes("does not exist")) {
     return `Settings table is missing a required column: ${message}`;
@@ -44,10 +42,6 @@ export async function POST(request: Request) {
     return redirectWithMessage(request, "error", "Supabase is not configured.");
   }
 
-  if (!session.businessId) {
-    return redirectWithMessage(request, "error", "Your client account is not attached to a business.");
-  }
-
   const formData = await request.formData();
   const businessName = value(formData, "business_name");
   const phone = value(formData, "phone");
@@ -55,7 +49,13 @@ export async function POST(request: Request) {
   const primaryMarket = value(formData, "primary_market");
   const widgetTitle = value(formData, "widget_title") || "Seller Intake Assistant";
   const widgetQuoteButtonText = value(formData, "widget_quote_button_text") || "Enter House Info for a Quote";
+  const widgetShowCallButton = checked(formData, "widget_show_call_button");
+  const widgetCallButtonText = value(formData, "widget_call_button_text") || "Call Now";
   const now = new Date().toISOString();
+
+  if (!session.businessId) {
+    return redirectWithMessage(request, "error", "Your client account is not attached to a business.");
+  }
 
   if (!businessName) {
     return redirectWithMessage(request, "error", "Business name is required.");
@@ -88,11 +88,11 @@ export async function POST(request: Request) {
     primary_market: primaryMarket,
     widget_title: widgetTitle,
     widget_quote_button_text: widgetQuoteButtonText,
+    widget_show_call_button: widgetShowCallButton,
+    widget_call_button_text: widgetCallButtonText,
     updated_at: now,
   };
 
-  // Do not use maybeSingle here. Some older builds created duplicate settings rows.
-  // Selecting a list lets the route save cleanly even if duplicates exist.
   const existingSettings = await supabase
     .from("business_settings")
     .select("id")
@@ -103,12 +103,13 @@ export async function POST(request: Request) {
     return redirectWithMessage(
       request,
       "error",
-      `Settings row could not be checked: ${cleanDbMessage(existingSettings.error.message)}`,
+      `Settings rows could not be checked: ${cleanDbMessage(existingSettings.error.message)}`,
     );
   }
 
-  if ((existingSettings.data || []).length > 0) {
-    // Update every row for this business so the widget API cannot read a stale duplicate row.
+  const existingRows = existingSettings.data || [];
+
+  if (existingRows.length > 0) {
     const settingsUpdate = await supabase
       .from("business_settings")
       .update(settingsPayload)
@@ -122,13 +123,9 @@ export async function POST(request: Request) {
       );
     }
   } else {
-    // Include singleton_key for older databases that still have the original not-null singleton column.
     const settingsInsert = await supabase
       .from("business_settings")
-      .insert({
-        ...settingsPayload,
-        singleton_key: session.businessId,
-      });
+      .insert(settingsPayload);
 
     if (settingsInsert.error) {
       return redirectWithMessage(
@@ -139,5 +136,9 @@ export async function POST(request: Request) {
     }
   }
 
-  return redirectWithMessage(request, "saved", "Settings saved. The widget may need a hard refresh or updated embed script if the external site was using an old widget.js URL.");
+  return redirectWithMessage(
+    request,
+    "saved",
+    "Settings saved. The phone display setting will be used the next time the widget loads with the current embed script.",
+  );
 }

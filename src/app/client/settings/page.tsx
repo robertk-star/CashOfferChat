@@ -41,7 +41,7 @@ export default async function ClientSettingsPage({ searchParams }: { searchParam
     const br = await supabase.from("businesses").select("*").eq("id", session.businessId).maybeSingle();
     const sr = await supabase.from("business_settings").select("*").eq("business_id", session.businessId).order("updated_at", { ascending: false }).limit(1);
     business = br.data || {};
-    settings = Array.isArray(sr.data) ? (sr.data[0] || {}) : (sr.data || {});
+    settings = Array.isArray(sr.data) ? sr.data[0] || {} : sr.data || {};
 
     if (br.error) errorMessage = `Business profile could not be loaded: ${br.error.message}`;
     else if (sr.error) errorMessage = `Widget settings could not be loaded: ${sr.error.message}`;
@@ -98,6 +98,17 @@ export default async function ClientSettingsPage({ searchParams }: { searchParam
               <label className="block text-sm font-semibold text-slate-700">
                 Quote Button Text
                 <input name="widget_quote_button_text" defaultValue={settings.widget_quote_button_text || "Enter House Info for a Quote"} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
+              </label>
+              <label className="block text-sm font-semibold text-slate-700">
+                Call Button Text
+                <input name="widget_call_button_text" defaultValue={settings.widget_call_button_text || "Call Now"} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
+              </label>
+              <label className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-sm font-semibold text-slate-700 md:col-span-2">
+                <input name="widget_show_call_button" type="checkbox" defaultChecked={settings.widget_show_call_button !== false} className="mt-1" />
+                <span>
+                  Show phone number / call button in the widget
+                  <span className="block pt-1 text-xs font-normal text-slate-500">Turn this off if you do not want visitors to see the business phone number inside the widget.</span>
+                </span>
               </label>
             </div>
           </div>
