@@ -7,6 +7,17 @@ function value(formData: FormData, key: string) {
   return String(formData.get(key) || "").trim();
 }
 
+function cleanHexColor(value: string, fallback: string) {
+  const color = value.trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(color)) return color.toLowerCase();
+  if (/^#[0-9a-fA-F]{3}$/.test(color)) return color.toLowerCase();
+  return fallback;
+}
+
+function isChecked(formData: FormData, key: string) {
+  return formData.get(key) === "on" || formData.get(key) === "true";
+}
+
 function parseLines(input: string) {
   return input.split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean);
 }
@@ -53,7 +64,11 @@ export async function POST(request: Request) {
     widget_title: value(formData, "widget_title"),
     widget_subtitle: value(formData, "widget_subtitle"),
     widget_quote_button_text: value(formData, "widget_quote_button_text"),
-    widget_show_call_button: formData.get("widget_show_call_button") === "on",
+    widget_header_color: cleanHexColor(value(formData, "widget_header_color"), "#0f172a"),
+    widget_header_text_color: cleanHexColor(value(formData, "widget_header_text_color"), "#ffffff"),
+    widget_button_color: cleanHexColor(value(formData, "widget_button_color"), "#f5b51b"),
+    widget_button_text_color: cleanHexColor(value(formData, "widget_button_text_color"), "#0f172a"),
+    widget_show_call_button: isChecked(formData, "widget_show_call_button"),
     widget_call_button_text: value(formData, "widget_call_button_text") || "Call Now",
     lead_notification_email: value(formData, "lead_notification_email"),
     widget_allowed_domains: value(formData, "widget_allowed_domains"),

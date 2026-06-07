@@ -1,0 +1,19 @@
+Apply this ZIP at the active CashOfferChat project root.
+
+This fixes the build error:
+getDefaultFaqItems is not exported from @/lib/defaultFaqKnowledge
+
+Files to replace at the active root:
+- src/app/api/chat/route.ts
+- src/app/api/admin/settings/faqs/import-defaults/route.ts
+- src/lib/defaultFaqKnowledge.ts
+
+Important:
+Do not place these files inside CashOfferChat-main/CashOfferChat-main.
+Do not place these files inside coc_combined_fix or temp_extract.
+
+After applying, confirm:
+1. src/app/api/chat/route.ts imports defaultFaqItems, not getDefaultFaqItems.
+2. src/app/api/admin/settings/faqs/import-defaults/route.ts imports defaultFaqItems, not getDefaultFaqItems.
+3. src/lib/defaultFaqKnowledge.ts exports defaultFaqItems and also includes a compatibility getDefaultFaqItems function.
+4. Run npm run build.

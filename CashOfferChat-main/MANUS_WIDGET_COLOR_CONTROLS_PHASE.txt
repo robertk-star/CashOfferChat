@@ -1,0 +1,15 @@
+Apply this ZIP at the active CashOfferChat project root.
+
+This phase adds widget color controls for:
+- Header background color
+- Header font color
+- Quote button background color
+- Quote button font color
+
+Run this Supabase SQL migration once before testing saves if these columns do not already exist:
+sql/018_widget_color_text_controls.sql
+
+Confirm root public/widget.js contains:
+color-controls-canonical-api-20260607a
+
+Confirm /client/settings and /admin/settings show the new color controls.
