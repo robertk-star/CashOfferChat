@@ -1,0 +1,13 @@
+Apply this ZIP at the CashOfferChat project root.
+
+Files changed:
+- src/app/api/client/settings/route.ts
+- src/app/client/settings/page.tsx
+
+Also included under CashOfferChat-main/src/... only because the current GitHub repo has previously shown a nested duplicate folder in build logs. The correct long-term fix is to delete the nested CashOfferChat-main folder from the repo if it is not the Vercel project root.
+
+After applying, run:
+npm run build
+
+No SQL migration is required for this phase.
+No Vercel environment variable changes are required for this phase.
