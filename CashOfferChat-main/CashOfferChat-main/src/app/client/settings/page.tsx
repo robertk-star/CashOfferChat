@@ -96,6 +96,10 @@ export default async function ClientSettingsPage({ searchParams }: { searchParam
                 <input name="widget_title" defaultValue={settings.widget_title || "Seller Intake Assistant"} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
               </label>
               <label className="block text-sm font-semibold text-slate-700">
+                Widget Subtitle
+                <input name="widget_subtitle" defaultValue={settings.widget_subtitle || "Answers questions and collects property basics"} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
+              </label>
+              <label className="block text-sm font-semibold text-slate-700">
                 Quote Button Text
                 <input name="widget_quote_button_text" defaultValue={settings.widget_quote_button_text || "Enter House Info for a Quote"} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
               </label>

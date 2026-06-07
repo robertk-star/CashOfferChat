@@ -65,6 +65,7 @@ export async function POST(request: Request) {
   const website = value(formData, "website");
   const primaryMarket = value(formData, "primary_market");
   const widgetTitle = value(formData, "widget_title") || "Seller Intake Assistant";
+  const widgetSubtitle = value(formData, "widget_subtitle") || "Answers questions and collects property basics";
   const widgetQuoteButtonText = value(formData, "widget_quote_button_text") || "Enter House Info for a Quote";
   const widgetCallButtonText = value(formData, "widget_call_button_text") || "Call Now";
   const widgetShowCallButton = isChecked(formData, "widget_show_call_button");
@@ -104,6 +105,7 @@ export async function POST(request: Request) {
     website,
     primary_market: primaryMarket,
     widget_title: widgetTitle,
+    widget_subtitle: widgetSubtitle,
     widget_quote_button_text: widgetQuoteButtonText,
     widget_header_color: widgetHeaderColor,
     widget_header_text_color: widgetHeaderTextColor,
