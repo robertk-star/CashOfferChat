@@ -7,7 +7,7 @@
   const baseUrl = "https://www.cashofferchat.com";
   const sourceUrl = window.location.href;
   const sourceDomain = window.location.hostname;
-  window.CASHOFFERCHAT_WIDGET_VERSION = "color-controls-canonical-api-20260607a";
+  window.CASHOFFERCHAT_WIDGET_VERSION = "send-green-canonical-api-20260607a";
   window.CASHOFFERCHAT_WIDGET_API_BASE = baseUrl;
 
   const DEFAULT_SETTINGS = {
@@ -301,7 +301,7 @@
         border: 0;
         border-radius: 999px;
         padding: 0 18px;
-        background: #0f172a;
+        background: #16a34a;
         color: #fff;
         font-weight: 900;
         cursor: pointer;
