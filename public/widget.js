@@ -1,15 +1,14 @@
 (() => {
-  window.CASHOFFERCHAT_WIDGET_VERSION = "phone-toggle-canonical-api-20260607a";
   if (window.__cashOfferChatLoaded) return;
   window.__cashOfferChatLoaded = true;
 
   const script = document.currentScript;
   const siteId = script?.getAttribute("data-site-id") || "demo";
-  const widgetCacheBust = String(Date.now());
   const baseUrl = "https://www.cashofferchat.com";
-  window.CASHOFFERCHAT_WIDGET_API_BASE = baseUrl;
   const sourceUrl = window.location.href;
   const sourceDomain = window.location.hostname;
+  window.CASHOFFERCHAT_WIDGET_VERSION = "color-controls-canonical-api-20260607a";
+  window.CASHOFFERCHAT_WIDGET_API_BASE = baseUrl;
 
   const DEFAULT_SETTINGS = {
     widgetTitle: "Seller Intake Assistant",
@@ -19,7 +18,9 @@
     widgetSuccessMessage:
       "Thanks. Your information was received. Someone from the team can review the details and follow up.",
     widgetHeaderColor: "#0f172a",
+    widgetHeaderTextColor: "#ffffff",
     widgetButtonColor: "#f5b51b",
+    widgetButtonTextColor: "#0f172a",
     widgetShowCallButton: true,
     widgetCallButtonText: "Call Now",
     businessPhone: "",
@@ -104,7 +105,9 @@
     style.textContent = css`
       :root {
         --coc-header: ${state.settings.widgetHeaderColor || DEFAULT_SETTINGS.widgetHeaderColor};
+        --coc-header-text: ${state.settings.widgetHeaderTextColor || DEFAULT_SETTINGS.widgetHeaderTextColor};
         --coc-button: ${state.settings.widgetButtonColor || DEFAULT_SETTINGS.widgetButtonColor};
+        --coc-button-text: ${state.settings.widgetButtonTextColor || DEFAULT_SETTINGS.widgetButtonTextColor};
       }
 
       #coc-root,
@@ -125,7 +128,7 @@
         border-radius: 999px;
         padding: 14px 18px;
         background: var(--coc-header);
-        color: #fff;
+        color: var(--coc-header-text);
         font-weight: 800;
         font-size: 15px;
         box-shadow: 0 18px 40px rgba(15, 23, 42, 0.25);
@@ -157,7 +160,7 @@
 
       #coc-header {
         background: var(--coc-header);
-        color: #fff;
+        color: var(--coc-header-text);
         padding: 18px 18px 16px;
       }
 
@@ -177,14 +180,15 @@
       .coc-subtitle {
         margin-top: 4px;
         font-size: 12px;
-        color: rgba(255, 255, 255, 0.78);
+        color: var(--coc-header-text);
+        opacity: 0.78;
         line-height: 1.35;
       }
 
       .coc-close {
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        border: 1px solid color-mix(in srgb, var(--coc-header-text) 28%, transparent);
         background: rgba(255, 255, 255, 0.12);
-        color: #fff;
+        color: var(--coc-header-text);
         border-radius: 999px;
         width: 34px;
         height: 34px;
@@ -204,18 +208,18 @@
         border-radius: 16px;
         padding: 13px 14px;
         background: var(--coc-button);
-        color: #0f172a;
+        color: var(--coc-button-text);
         font-size: 14px;
         font-weight: 900;
         cursor: pointer;
       }
 
       .coc-secondary-button {
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        border: 1px solid color-mix(in srgb, var(--coc-header-text) 28%, transparent);
         border-radius: 16px;
         padding: 12px 14px;
         background: rgba(255, 255, 255, 0.12);
-        color: #fff;
+        color: var(--coc-header-text);
         font-size: 14px;
         font-weight: 800;
         cursor: pointer;
@@ -253,7 +257,7 @@
 
       .coc-user {
         margin-left: auto;
-        background: var(--coc-header);
+        background: #0f172a;
         color: #fff;
       }
 
@@ -297,7 +301,7 @@
         border: 0;
         border-radius: 999px;
         padding: 0 18px;
-        background: var(--coc-header);
+        background: #0f172a;
         color: #fff;
         font-weight: 900;
         cursor: pointer;
@@ -483,10 +487,9 @@
 
   async function loadSettings() {
     try {
-      const settingsUrl = `${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&domain=${encodeURIComponent(sourceDomain)}&url=${encodeURIComponent(sourceUrl)}&v=${encodeURIComponent(widgetCacheBust)}`;
+      const settingsUrl = `${baseUrl}/api/widget/settings?siteId=${encodeURIComponent(siteId)}&domain=${encodeURIComponent(sourceDomain)}&url=${encodeURIComponent(sourceUrl)}&v=${Date.now()}`;
       const res = await fetch(settingsUrl, {
         headers: { Accept: "application/json" },
-        cache: "no-store",
       });
 
       if (!res.ok) return;
@@ -524,10 +527,18 @@
           settings.widgetHeaderColor ||
           settings.widget_header_color ||
           state.settings.widgetHeaderColor,
+        widgetHeaderTextColor:
+          settings.widgetHeaderTextColor ||
+          settings.widget_header_text_color ||
+          state.settings.widgetHeaderTextColor,
         widgetButtonColor:
           settings.widgetButtonColor ||
           settings.widget_button_color ||
           state.settings.widgetButtonColor,
+        widgetButtonTextColor:
+          settings.widgetButtonTextColor ||
+          settings.widget_button_text_color ||
+          state.settings.widgetButtonTextColor,
         widgetShowCallButton:
           settings.widgetShowCallButton ??
           settings.widget_show_call_button ??

@@ -1,4 +1,4 @@
-export const WIDGET_SCRIPT_VERSION = "phone-toggle-canonical-api-20260607a";
+export const WIDGET_SCRIPT_VERSION = "color-controls-canonical-api-20260607a";
 export const CANONICAL_WIDGET_ORIGIN = "https://www.cashofferchat.com";
 
 export function getWidgetScriptOrigin() {

@@ -41,7 +41,7 @@ export default async function ClientSettingsPage({ searchParams }: { searchParam
     const br = await supabase.from("businesses").select("*").eq("id", session.businessId).maybeSingle();
     const sr = await supabase.from("business_settings").select("*").eq("business_id", session.businessId).order("updated_at", { ascending: false }).limit(1);
     business = br.data || {};
-    settings = Array.isArray(sr.data) ? sr.data[0] || {} : sr.data || {};
+    settings = Array.isArray(sr.data) ? (sr.data[0] || {}) : (sr.data || {});
 
     if (br.error) errorMessage = `Business profile could not be loaded: ${br.error.message}`;
     else if (sr.error) errorMessage = `Widget settings could not be loaded: ${sr.error.message}`;
@@ -86,7 +86,6 @@ export default async function ClientSettingsPage({ searchParams }: { searchParam
                 <input name="primary_market" defaultValue={business.primary_market || settings.primary_market || ""} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
               </label>
             </div>
-            <p className="mt-3 text-xs text-slate-500">The header color only changes the top part of the widget. The body where the questions appear stays light.</p>
           </div>
 
           <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
@@ -120,14 +119,12 @@ export default async function ClientSettingsPage({ searchParams }: { searchParam
                 Call Button Text
                 <input name="widget_call_button_text" defaultValue={settings.widget_call_button_text || "Call Now"} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
               </label>
-              <label className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-sm font-semibold text-slate-700 md:col-span-2">
-                <input name="widget_show_call_button" type="checkbox" defaultChecked={settings.widget_show_call_button !== false} className="mt-1" />
-                <span>
-                  Show phone number / call button in the widget
-                  <span className="block pt-1 text-xs font-normal text-slate-500">Turn this off if you do not want visitors to see the business phone number inside the widget.</span>
-                </span>
+              <label className="flex items-center gap-3 rounded-2xl border border-slate-200 p-4 text-sm font-semibold text-slate-700 md:col-span-2">
+                <input name="widget_show_call_button" type="checkbox" defaultChecked={settings.widget_show_call_button ?? true} className="h-5 w-5" />
+                Show phone number / call button in the widget
               </label>
             </div>
+            <p className="mt-3 text-xs text-slate-500">The header color only changes the top part of the widget. The body where the questions appear stays light.</p>
           </div>
 
           <button className="w-full rounded-full bg-gold px-7 py-4 font-bold text-navy" type="submit">Save Client Settings</button>
