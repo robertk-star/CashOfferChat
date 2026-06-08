@@ -1,13 +1,22 @@
-Apply this ZIP at the CashOfferChat project root.
+CashOfferChat FAQ Route Root-Folder Fix
 
-Files changed:
-- src/app/api/client/settings/route.ts
-- src/app/client/settings/page.tsx
+Important: This ZIP is intentionally packaged with the root folder name CashOfferChat-main.
+Please replace the existing project files with the contents of CashOfferChat-main, then commit/push/deploy.
 
-Also included under CashOfferChat-main/src/... only because the current GitHub repo has previously shown a nested duplicate folder in build logs. The correct long-term fix is to delete the nested CashOfferChat-main folder from the repo if it is not the Vercel project root.
+This package must add these files/routes:
+- src/app/admin/faqs/page.tsx
+- src/app/api/admin/settings/faqs/import-defaults/route.ts
+- src/lib/defaultFaqKnowledge.ts
 
-After applying, run:
-npm run build
+This package must update these files:
+- src/app/admin/settings/page.tsx
+- src/components/AdminNav.tsx
+- README.md
 
-No SQL migration is required for this phase.
-No Vercel environment variable changes are required for this phase.
+Post-deploy checks:
+- /admin/faqs should not 404
+- /admin/settings should show Import Top 100 FAQs
+- Admin nav should include FAQs
+
+SQL migration needed: No
+Vercel ENV needed: No

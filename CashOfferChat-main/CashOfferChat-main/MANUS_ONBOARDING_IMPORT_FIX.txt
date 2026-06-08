@@ -1,0 +1,13 @@
+Apply this ZIP at the active CashOfferChat project root.
+
+This fixes the build error:
+Cannot find name buildWidgetEmbedCode in src/app/admin/onboarding/page.tsx
+
+Confirm the active root file contains:
+import { buildWidgetEmbedCode } from "@/lib/widgetEmbed";
+
+Confirm these root files exist:
+src/app/admin/onboarding/page.tsx
+src/lib/widgetEmbed.ts
+
+The nested CashOfferChat-main copy is included only because the repo has previously compiled nested duplicate files. The better long-term fix is to delete nested duplicate project folders.

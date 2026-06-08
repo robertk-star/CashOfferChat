@@ -1,0 +1,28 @@
+CashOfferChat Widget CORS / Dynamic Settings Fix
+
+Problem seen in browser console:
+- Access to fetch at https://cashofferchat.com/api/widget/settings from origin https://www.sellmyhousetodayanywhere.com blocked by CORS
+- Response to preflight request does not pass access control check: Redirect is not allowed for a preflight request
+
+Cause:
+The widget script was calling the non-www API host (https://cashofferchat.com). That redirects to https://www.cashofferchat.com. Browser CORS preflight OPTIONS requests cannot follow redirects, so the settings request failed before the widget could load the saved title.
+
+Files changed:
+- public/widget.js
+- src/app/sellmyhousetodayanywhere/page.tsx
+- src/app/api/widget/settings/route.ts
+- src/app/api/widget/events/route.ts
+- src/app/api/chat/route.ts
+- src/app/api/leads/route.ts
+
+Verify after deploy:
+1. Open https://www.sellmyhousetodayanywhere.com in an incognito window.
+2. Open DevTools Console.
+3. Run: window.CASHOFFERCHAT_WIDGET_VERSION
+   Expected: cors-canonical-api-20260606
+4. Run: window.CASHOFFERCHAT_WIDGET_API_BASE
+   Expected: https://www.cashofferchat.com
+5. Open the widget. The title should match /client/settings.
+
+SQL migration needed = No
+Vercel ENV needed = No

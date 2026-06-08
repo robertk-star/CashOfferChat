@@ -1,0 +1,16 @@
+Apply this ZIP to the active CashOfferChat project root.
+
+This fixes the missing color controls on /client/settings and /admin/settings.
+
+After applying, confirm these ACTIVE ROOT files contain the text "Header Background Color":
+- src/app/client/settings/page.tsx
+- src/app/admin/settings/page.tsx
+
+Also confirm the nested duplicate copies contain the same text if the repo still compiles them:
+- CashOfferChat-main/src/app/client/settings/page.tsx
+- CashOfferChat-main/src/app/admin/settings/page.tsx
+
+Run this SQL once in Supabase if not already run:
+- sql/018_widget_color_text_controls.sql
+
+Then run npm run build.

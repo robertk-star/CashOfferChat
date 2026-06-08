@@ -1,0 +1,14 @@
+Apply these files at the active project root.
+
+Confirm these active root files were updated:
+- src/app/page.tsx
+- src/app/demo/page.tsx
+- src/components/PublicSiteHeader.tsx
+- src/components/PublicSiteFooter.tsx
+
+Expected:
+- Public header says Live Demo and links to https://www.sellmyhousetodayanywhere.com/
+- Public footer says Live Demo and links to https://www.sellmyhousetodayanywhere.com/
+- Home page CTA says View Live Demo Site and links to https://www.sellmyhousetodayanywhere.com/
+- /demo redirects to https://www.sellmyhousetodayanywhere.com/
+- Home page no longer loads the local /widget.js demo script.

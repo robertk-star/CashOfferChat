@@ -1,0 +1,18 @@
+CashOfferChat revised FAQ update
+
+Apply this ZIP at the CashOfferChat project root.
+
+The main updated file is:
+- src/lib/defaultFaqKnowledge.ts
+
+This replaces the old global Top 100 FAQ answer library with the revised answers Robert provided.
+
+Important:
+- Do not place the files inside a nested folder.
+- The file must land at src/lib/defaultFaqKnowledge.ts in the existing GitHub repo.
+- Run npm run build after applying.
+
+After deployment:
+1. Go to /admin/faqs or /admin/settings.
+2. Click Import Top 100 FAQs for the business/site you want updated.
+3. Existing already-imported FAQs in Supabase may need to be re-imported because they were copied into the database from the old library.

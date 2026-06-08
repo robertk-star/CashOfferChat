@@ -1,0 +1,24 @@
+CashOfferChat Phone Toggle Root Fix
+
+Apply this ZIP at the active project root.
+
+Do not place these files inside:
+- CashOfferChat-main/CashOfferChat-main
+- coc_combined_fix
+- temp_extract
+
+After applying, confirm these root files contain phone-toggle-canonical-api-20260607a:
+- public/widget.js
+- src/lib/widgetEmbed.ts
+
+Confirm these root pages show the phone display control:
+- src/app/client/settings/page.tsx
+- src/app/admin/settings/page.tsx
+
+Confirm the project root no longer contains duplicate nested project folders:
+- CashOfferChat-main
+- coc_combined_fix
+- temp_extract
+
+SQL migration needed: No
+Vercel ENV needed: No
