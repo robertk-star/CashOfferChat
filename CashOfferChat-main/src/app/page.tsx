@@ -1,4 +1,3 @@
-import Script from "next/script";
 import Link from "next/link";
 import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
@@ -68,8 +67,8 @@ export default function HomePage() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/demo" className="rounded-full bg-gold px-7 py-4 text-base font-black text-navy shadow-soft">
-                View Demo
+              <Link href="https://www.sellmyhousetodayanywhere.com/" className="rounded-full bg-gold px-7 py-4 text-base font-black text-navy shadow-soft">
+                View Live Demo Site
               </Link>
               <Link href="/contact" className="rounded-full border border-slate-300 bg-white px-7 py-4 text-base font-black text-navy">
                 Request Early Access
@@ -155,9 +154,9 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
           <div>
-            <h2 className="text-4xl font-black text-navy">Try the demo widget.</h2>
+            <h2 className="text-4xl font-black text-navy">See a live demo site.</h2>
             <p className="mt-4 text-lg leading-8 text-slate-600">
-              Open the widget in the bottom-right corner. Ask a seller question or click the quote button to see the intake flow.
+              Visit the live Sell My House Today Anywhere demo site to see the widget working on a real cash home buyer website.
             </p>
             <div className="mt-6 flex flex-wrap gap-3 text-sm font-semibold text-slate-600">
               <span className="rounded-full bg-slate-100 px-4 py-2">“Do you buy as-is?”</span>
@@ -167,7 +166,7 @@ export default function HomePage() {
           </div>
 
           <div className="rounded-[2rem] bg-slate-50 p-8 ring-1 ring-slate-200">
-            <h3 className="text-2xl font-black text-navy">What the demo should show</h3>
+            <h3 className="text-2xl font-black text-navy">What the live demo shows</h3>
             <ul className="mt-5 space-y-3 text-sm leading-6 text-slate-600">
               <li>✓ Clear quote/intake button</li>
               <li>✓ AI-style FAQ answers using business knowledge</li>
@@ -215,18 +214,16 @@ export default function HomePage() {
         <div className="mx-auto max-w-4xl px-6 py-16 text-center">
           <h2 className="text-4xl font-black text-navy">Ready to test CashOfferChat?</h2>
           <p className="mt-4 text-lg leading-8 text-slate-600">
-            Start with a demo site, install the widget, and capture your first test seller lead.
+            Open the live demo site, test the widget, and see how it guides sellers toward a quote request.
           </p>
           <div className="mt-8 flex justify-center gap-4">
-            <Link href="/demo" className="rounded-full bg-gold px-7 py-4 font-black text-navy">View Demo</Link>
+            <Link href="https://www.sellmyhousetodayanywhere.com/" className="rounded-full bg-gold px-7 py-4 font-black text-navy">View Live Demo Site</Link>
             <Link href="/contact" className="rounded-full border border-slate-300 bg-white px-7 py-4 font-black text-navy">Request Early Access</Link>
           </div>
         </div>
       </section>
 
       <PublicSiteFooter />
-
-      <Script src="/widget.js" strategy="afterInteractive" data-site-id="demo" />
     </main>
   );
 }

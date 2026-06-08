@@ -14,7 +14,7 @@ export function PublicSiteFooter() {
         <div>
           <div className="font-bold text-navy">Product</div>
           <div className="mt-3 space-y-2 text-sm text-slate-600">
-            <div><Link href="/demo">Demo</Link></div>
+            <div><Link href="https://www.sellmyhousetodayanywhere.com/">Live Demo</Link></div>
             <div><Link href="/pricing">Pricing</Link></div>
             <div><Link href="/contact">Contact</Link></div>
             <div><Link href="/client/login">Login</Link></div>

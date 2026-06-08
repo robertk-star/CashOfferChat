@@ -1,0 +1,19 @@
+Apply this ZIP to the active CashOfferChat project root.
+
+Important cleanup:
+Delete any nested duplicate project folders from GitHub if they exist:
+- CashOfferChat-main/CashOfferChat-main
+- coc_combined_fix
+- temp_extract
+
+Confirm these active root files were updated:
+- src/app/page.tsx
+- src/app/demo/page.tsx
+- src/components/PublicSiteHeader.tsx
+- src/components/PublicSiteFooter.tsx
+
+Expected:
+- Header link says Live Demo and points to https://www.sellmyhousetodayanywhere.com/
+- Home page buttons say View Live Demo Site and point to https://www.sellmyhousetodayanywhere.com/
+- /demo redirects to https://www.sellmyhousetodayanywhere.com/
+- The CashOfferChat home page no longer loads the demo widget script directly.

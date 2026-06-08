@@ -9,7 +9,7 @@ export function PublicSiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm font-bold text-slate-600 md:flex">
-          <Link href="/demo" className="hover:text-navy">Demo</Link>
+          <Link href="https://www.sellmyhousetodayanywhere.com/" className="hover:text-navy">Live Demo</Link>
           <Link href="/pricing" className="hover:text-navy">Pricing</Link>
           <Link href="/contact" className="hover:text-navy">Contact</Link>
           <Link href="/client/login" className="hover:text-navy">Login</Link>

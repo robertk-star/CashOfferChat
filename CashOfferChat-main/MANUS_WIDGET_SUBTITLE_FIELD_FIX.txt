@@ -1,0 +1,17 @@
+CashOfferChat Widget Subtitle Field Fix
+
+Apply this ZIP at the active CashOfferChat project root.
+
+This update adds Widget Subtitle to the client settings form and saves it to business_settings.widget_subtitle.
+
+Confirm these active-root files are updated:
+- src/app/client/settings/page.tsx contains: Widget Subtitle
+- src/app/api/client/settings/route.ts contains: widget_subtitle: widgetSubtitle
+
+Do not place the files inside nested folders such as:
+- CashOfferChat-main/CashOfferChat-main
+- coc_combined_fix
+- temp_extract
+
+SQL migration needed: No. The widget_subtitle column already exists in prior migrations.
+Vercel ENV needed: No.
