@@ -23,7 +23,7 @@ export default async function AdminClientDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ saved?: string; error?: string }>;
+  searchParams: Promise<{ saved?: string; error?: string; message?: string }>;
 }) {
   const { id } = await params;
   const query = await searchParams;
@@ -49,6 +49,17 @@ export default async function AdminClientDetailPage({
 
   const businesses = businessesResult.data || [];
   const businessName = getBusinessName(user.businesses);
+  const errorMessages: Record<string, string> = {
+    business_required: "Please select a business before saving.",
+    email_required: "Email is required before saving.",
+    role_invalid: "Please select a valid role before saving.",
+    password_short: "Password must be at least 8 characters. Leave the password blank if you do not want to change it.",
+    supabase: "Database connection is missing. Check the Supabase environment variables.",
+    database: query.message ? decodeURIComponent(query.message) : "Database update failed. The email may already be used by another client user.",
+    "1": "Client user could not be saved. Check required fields and password length.",
+  };
+  const saveMessage = query.saved === "password" ? "Client user saved and password updated." : "Client user saved.";
+  const errorMessage = query.error ? errorMessages[query.error] || "Client user could not be saved." : "";
 
   const [leadStatsResult, recentLeadsResult, sitesResult] = await Promise.all([
     supabase.from("seller_leads").select("id", { count: "exact", head: true }).eq("business_id", user.business_id),
@@ -86,8 +97,8 @@ export default async function AdminClientDetailPage({
 
       <section className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[.9fr_1.1fr]">
         <div className="space-y-6">
-          {query.saved && <div className="rounded-2xl bg-green-50 p-4 text-sm text-green-800">Client user saved.</div>}
-          {query.error && <div className="rounded-2xl bg-red-50 p-4 text-sm text-red-700">Client user could not be saved. Check required fields and password length.</div>}
+          {query.saved && <div className="rounded-2xl bg-green-50 p-4 text-sm text-green-800">{saveMessage}</div>}
+          {errorMessage && <div className="rounded-2xl bg-red-50 p-4 text-sm text-red-700">{errorMessage}</div>}
 
           <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
             <h2 className="text-xl font-bold text-navy">Edit Client User</h2>
@@ -121,7 +132,8 @@ export default async function AdminClientDetailPage({
 
               <label className="block text-sm font-semibold text-slate-700">
                 New Password
-                <input name="password" type="password" minLength={8} placeholder="Leave blank to keep current password" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
+                <input name="password" type="password" minLength={8} autoComplete="new-password" placeholder="Leave blank to keep current password" className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
+                <span className="mt-2 block text-xs font-medium text-slate-500">Use at least 8 characters. Leave this blank if you only want to update the name, email, role, business, or active status.</span>
               </label>
 
               <label className="flex items-center gap-3 text-sm font-semibold text-slate-700">

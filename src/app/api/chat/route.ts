@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import { defaultFaqItems } from "@/lib/defaultFaqKnowledge";
+import { getDefaultFaqItems } from "@/lib/defaultFaqKnowledge";
 
 export const dynamic = "force-dynamic";
 
@@ -356,7 +356,7 @@ function getAnswer(message: string, context: BusinessContext) {
   const managedAnswer = answerFromFaqList(message, context.managedFaqs);
   if (managedAnswer) return managedAnswer;
 
-  const defaultAnswer = answerFromFaqList(message, defaultFaqItems);
+  const defaultAnswer = answerFromFaqList(message, getDefaultFaqItems());
   if (defaultAnswer) return defaultAnswer;
 
   const businessAnswer = answerFromBusinessRules(message, context);

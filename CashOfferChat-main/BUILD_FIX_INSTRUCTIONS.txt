@@ -1,3 +1,0 @@
-Build fix: added missing buildWidgetEmbedCode import to nested admin onboarding page. Apply at active project root and remove duplicate nested folders when possible.
-SQL migration still needed for color controls: sql/018_widget_color_text_controls.sql
-No new Vercel ENV needed.

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
-import { defaultFaqItems } from "@/lib/defaultFaqKnowledge";
+import { getDefaultFaqItems } from "@/lib/defaultFaqKnowledge";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
 function value(formData: FormData, key: string) {
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL("/admin/settings?error=1", request.url), { status: 303 });
   }
 
-  const faqItems = defaultFaqItems;
+  const faqItems = getDefaultFaqItems();
 
   await supabase.from("managed_faq_items").delete().eq("business_id", businessId);
 

@@ -1,4 +1,3 @@
-import Script from "next/script";
 import Link from "next/link";
 import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
@@ -68,8 +67,8 @@ export default function HomePage() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/demo" className="rounded-full bg-gold px-7 py-4 text-base font-black text-navy shadow-soft">
-                View Demo
+              <Link href="https://www.sellmyhousetodayanywhere.com/" className="rounded-full bg-gold px-7 py-4 text-base font-black text-navy shadow-soft">
+                View Live Demo Site
               </Link>
               <Link href="/contact" className="rounded-full border border-slate-300 bg-white px-7 py-4 text-base font-black text-navy">
                 Request Early Access
@@ -89,7 +88,7 @@ export default function HomePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-black">Seller Intake Assistant</div>
-                  <div className="text-sm text-slate-300">Demo conversation</div>
+                  <div className="text-sm text-slate-300">Live demo conversation</div>
                 </div>
                 <div className="rounded-full bg-gold px-3 py-1 text-xs font-black text-navy">LIVE DEMO</div>
               </div>
@@ -155,7 +154,7 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
           <div>
-            <h2 className="text-4xl font-black text-navy">Try the demo widget.</h2>
+            <h2 className="text-4xl font-black text-navy">See the widget on a real demo site.</h2>
             <p className="mt-4 text-lg leading-8 text-slate-600">
               Open the widget in the bottom-right corner. Ask a seller question or click the quote button to see the intake flow.
             </p>
@@ -215,18 +214,16 @@ export default function HomePage() {
         <div className="mx-auto max-w-4xl px-6 py-16 text-center">
           <h2 className="text-4xl font-black text-navy">Ready to test CashOfferChat?</h2>
           <p className="mt-4 text-lg leading-8 text-slate-600">
-            Start with a demo site, install the widget, and capture your first test seller lead.
+            See the widget running on a real home buyer demo site, then install it on your own website.
           </p>
           <div className="mt-8 flex justify-center gap-4">
-            <Link href="/demo" className="rounded-full bg-gold px-7 py-4 font-black text-navy">View Demo</Link>
+            <Link href="https://www.sellmyhousetodayanywhere.com/" className="rounded-full bg-gold px-7 py-4 font-black text-navy">View Live Demo Site</Link>
             <Link href="/contact" className="rounded-full border border-slate-300 bg-white px-7 py-4 font-black text-navy">Request Early Access</Link>
           </div>
         </div>
       </section>
 
       <PublicSiteFooter />
-
-      <Script src="/widget.js" strategy="afterInteractive" data-site-id="demo" />
     </main>
   );
 }
