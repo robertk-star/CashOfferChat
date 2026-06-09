@@ -4,6 +4,7 @@ import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 import { hashClientPassword } from "@/lib/clientAuth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { normalizeDomain, normalizeDomainInput, normalizeWebsite, parseLines, slugifyBusinessSlug, slugifySiteId } from "@/lib/siteId";
+import { maxWidgetSitesForPlan, normalizePlanName } from "@/lib/planLimits";
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) || "").trim();
@@ -53,6 +54,8 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const businessName = value(formData, "business_name");
   const siteId = slugifySiteId(value(formData, "site_id"));
+  const planName = normalizePlanName(value(formData, "plan_name"));
+  const maxWidgetSites = maxWidgetSitesForPlan(planName);
   const now = new Date().toISOString();
 
   if (!businessName || !siteId) return fail(request, "missing_required");
@@ -92,6 +95,8 @@ export async function POST(request: Request) {
       email,
       primary_market: primaryMarket,
       description,
+      plan_name: planName,
+      max_widget_sites: maxWidgetSites,
       is_active: true,
       updated_at: now,
     })
