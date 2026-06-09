@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { planLabel } from "@/lib/planLimits";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Businesses | CashOfferChat" };
@@ -17,6 +18,8 @@ type Business = {
   email: string | null;
   primary_market: string | null;
   is_active: boolean | null;
+  plan_name: string | null;
+  max_widget_sites: number | null;
 };
 
 type CountMap = Record<string, number>;
@@ -52,7 +55,7 @@ export default async function AdminBusinessesPage({
   } else {
     const { data, error } = await supabase
       .from("businesses")
-      .select("id, created_at, name, slug, website, phone, email, primary_market, is_active")
+      .select("id, created_at, name, slug, website, phone, email, primary_market, is_active, plan_name, max_widget_sites")
       .order("created_at", { ascending: false });
 
     if (error) errorMessage = error.message;
@@ -99,7 +102,7 @@ export default async function AdminBusinessesPage({
               <tr>
                 <th className="px-5 py-4">Business</th>
                 <th className="px-5 py-4">Contact</th>
-                <th className="px-5 py-4">Market</th>
+                <th className="px-5 py-4">Plan</th>
                 <th className="px-5 py-4">Leads</th>
                 <th className="px-5 py-4">Sites</th>
                 <th className="px-5 py-4">Users</th>
@@ -111,22 +114,26 @@ export default async function AdminBusinessesPage({
               {businesses.length === 0 && (
                 <tr><td className="px-5 py-8 text-center text-slate-500" colSpan={8}>No businesses yet.</td></tr>
               )}
-              {businesses.map((business) => (
-                <tr key={business.id} className="align-top">
-                  <td className="px-5 py-4">
-                    <div className="font-bold text-navy">{business.name}</div>
-                    <div className="text-xs text-slate-500">{business.slug || business.id}</div>
-                    {business.website && <div className="mt-1 text-xs text-slate-500">{business.website}</div>}
-                  </td>
-                  <td className="px-5 py-4 text-slate-600"><div>{business.phone || "—"}</div><div>{business.email || ""}</div></td>
-                  <td className="px-5 py-4 text-slate-600">{business.primary_market || "—"}</td>
-                  <td className="px-5 py-4 font-bold text-navy">{leadCounts[business.id] || 0}</td>
-                  <td className="px-5 py-4 font-bold text-navy">{siteCounts[business.id] || 0}</td>
-                  <td className="px-5 py-4 font-bold text-navy">{userCounts[business.id] || 0}</td>
-                  <td className="px-5 py-4"><span className={business.is_active === false ? "rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700" : "rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700"}>{business.is_active === false ? "Inactive" : "Active"}</span></td>
-                  <td className="px-5 py-4"><Link href={`/admin/businesses/${business.id}`} className="font-bold text-navy underline">Open</Link></td>
-                </tr>
-              ))}
+              {businesses.map((business) => {
+                const siteCount = siteCounts[business.id] || 0;
+                const maxSites = business.max_widget_sites || (business.plan_name === "pro" ? 4 : 1);
+                return (
+                  <tr key={business.id} className="align-top">
+                    <td className="px-5 py-4">
+                      <div className="font-bold text-navy">{business.name}</div>
+                      <div className="text-xs text-slate-500">{business.slug || business.id}</div>
+                      {business.website && <div className="mt-1 text-xs text-slate-500">{business.website}</div>}
+                    </td>
+                    <td className="px-5 py-4 text-slate-600"><div>{business.phone || "—"}</div><div>{business.email || ""}</div></td>
+                    <td className="px-5 py-4 text-slate-600"><div className="font-bold text-navy">{planLabel(business.plan_name)}</div><div className="text-xs text-slate-500">{siteCount}/{maxSites} sites</div></td>
+                    <td className="px-5 py-4 font-bold text-navy">{leadCounts[business.id] || 0}</td>
+                    <td className="px-5 py-4 font-bold text-navy">{siteCount}</td>
+                    <td className="px-5 py-4 font-bold text-navy">{userCounts[business.id] || 0}</td>
+                    <td className="px-5 py-4"><span className={business.is_active === false ? "rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700" : "rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700"}>{business.is_active === false ? "Inactive" : "Active"}</span></td>
+                    <td className="px-5 py-4"><Link href={`/admin/businesses/${business.id}`} className="font-bold text-navy underline">Open</Link></td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
