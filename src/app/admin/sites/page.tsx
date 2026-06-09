@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { buildWidgetEmbedCode } from "@/lib/widgetEmbed";
+import { maxWidgetSitesForPlan, planLabel } from "@/lib/planLimits";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Widget Sites | CashOfferChat" };
@@ -11,6 +12,8 @@ export const metadata = { title: "Widget Sites | CashOfferChat" };
 type Business = {
   id: string;
   name: string;
+  plan_name: string | null;
+  max_widget_sites: number | null;
 };
 
 type WidgetSite = {
@@ -31,6 +34,19 @@ function businessName(value: WidgetSite["businesses"]) {
   return value.name || "—";
 }
 
+function messageFromError(code?: string) {
+  switch (code) {
+    case "site_limit":
+      return "That business has reached its widget site limit. Upgrade it to Pro or remove another site.";
+    case "duplicate_site_id":
+      return "That Site ID already exists. Open the existing widget site and edit it instead.";
+    case "missing_required":
+      return "Business and Site ID are required.";
+    default:
+      return code ? decodeURIComponent(code) : null;
+  }
+}
+
 export default async function AdminSitesPage({
   searchParams,
 }: {
@@ -45,14 +61,15 @@ export default async function AdminSitesPage({
   let businesses: Business[] = [];
   let sites: WidgetSite[] = [];
   let leadCounts: Record<string, number> = {};
-  let errorMessage: string | null = query.error ? "Widget site could not be saved. Check required fields and make sure Site ID is unique." : null;
+  let siteCountsByBusiness: Record<string, number> = {};
+  let errorMessage: string | null = messageFromError(query.error);
 
   if (!supabase) {
     errorMessage = "Supabase is not configured.";
   } else {
     const businessResult = await supabase
       .from("businesses")
-      .select("id, name")
+      .select("id, name, plan_name, max_widget_sites")
       .order("name", { ascending: true });
 
     businesses = (businessResult.data || []) as Business[];
@@ -68,6 +85,11 @@ export default async function AdminSitesPage({
       sites = (sitesResult.data || []) as unknown as WidgetSite[];
     }
 
+    for (const site of sites) {
+      if (!site.business_id) continue;
+      siteCountsByBusiness[site.business_id] = (siteCountsByBusiness[site.business_id] || 0) + 1;
+    }
+
     const leadResult = await supabase
       .from("seller_leads")
       .select("site_id");
@@ -78,6 +100,11 @@ export default async function AdminSitesPage({
     }
   }
 
+  const businessOptions = businesses.map((business) => {
+    const used = siteCountsByBusiness[business.id] || 0;
+    const maxSites = business.max_widget_sites || maxWidgetSitesForPlan(business.plan_name);
+    return { ...business, used, maxSites };
+  });
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -100,15 +127,17 @@ export default async function AdminSitesPage({
 
         <div className="mb-8 rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
           <h2 className="text-xl font-bold text-navy">Add Widget Site</h2>
-          <p className="mt-2 text-sm text-slate-500">Required fields are marked with *.</p>
+          <p className="mt-2 text-sm text-slate-500">Starter allows 1 widget site. Pro allows up to 4 widget sites/accounts.</p>
 
           <form action="/api/admin/sites" method="post" className="mt-6 grid gap-4 md:grid-cols-2">
             <label className="block text-sm font-semibold text-slate-700">
               Business *
               <select name="business_id" required className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3">
                 <option value="">Select a business</option>
-                {businesses.map((business) => (
-                  <option key={business.id} value={business.id}>{business.name}</option>
+                {businessOptions.map((business) => (
+                  <option key={business.id} value={business.id} disabled={business.used >= business.maxSites}>
+                    {business.name} — {planLabel(business.plan_name)} ({business.used}/{business.maxSites} sites)
+                  </option>
                 ))}
               </select>
             </label>
