@@ -1,85 +1,97 @@
-# CashOfferChat AI FAQ Quality Phase
+# CashOfferChat
 
-This package adds the approved Top 100 seller FAQ library on top of the lead delete/reset phase.
+CashOfferChat is an AI chat widget and lead intake tool for cash home buyer websites.
 
-## What changed
+## Current sellable build
 
-### Top 100 approved FAQ answers
+The app includes:
 
-- Replaced the small default FAQ fallback list in `src/lib/defaultFaqKnowledge.ts` with the full approved Top 100 seller questions and answers.
-- The chat API already checks answers in this order:
-  1. Business custom Q&A
-  2. Business managed FAQs
-  3. Global default FAQ library
-  4. Business rules/service areas
-  5. Safe fallback answer
-- Because the approved list is now the global default FAQ library, the widget can answer common seller questions even before a business has custom FAQs configured.
+- Public CashOfferChat marketing site
+- Live demo link to `https://www.sellmyhousetodayanywhere.com/`
+- Embeddable widget script
+- Client dashboard
+- Admin dashboard
+- Lead capture
+- Lead detail pages
+- Delete/reset lead handling
+- Widget settings for title, subtitle, phone visibility, header colors, and button colors
+- Top 100 seller FAQ answer library
+- Optional webhook lead delivery
+- Email notification for new leads
 
-### Admin FAQ import button
+## Lead email notifications
 
-- Added an **Import Top 100 FAQs** button to `/admin/settings`.
-- The button copies the approved Top 100 seller FAQs into the selected business's Managed FAQs.
-- Importing replaces that business's current Managed FAQs so the answers can be reviewed, edited, removed, or saved from the existing settings screen.
+When a seller submits the widget form, `/api/leads` saves the lead and then tries to send an email notification.
 
-### New admin route
+Email delivery is non-blocking. If email delivery fails, the lead still saves in the dashboard.
 
-- Added `src/app/api/admin/settings/faqs/import-defaults/route.ts`.
-- The route requires the existing admin session cookie.
-- The route uses existing `managed_faq_items` rows and does not require a schema change.
+### Recipients
 
-## Files changed
+Lead notification emails go to:
+
+1. Active client users attached to the same business in `business_users`
+2. Any emails listed in the optional `LEAD_NOTIFICATION_EMAIL` environment variable
+
+`LEAD_NOTIFICATION_EMAIL` may contain one or more emails separated by commas, semicolons, or new lines.
+
+### Required Vercel ENV for email notifications
 
 ```text
-README.md
-src/lib/defaultFaqKnowledge.ts
-src/app/admin/settings/page.tsx
-src/app/api/admin/settings/faqs/import-defaults/route.ts
+RESEND_API_KEY
+FROM_EMAIL
 ```
 
-## SQL migration
+Recommended:
 
-No new SQL migration is required for this phase.
+```text
+FROM_EMAIL=CashOfferChat <leads@cashofferchat.com>
+```
 
-This phase uses the existing `managed_faq_items` table already included in the current migrations through `sql/017_multibusiness_settings_fix.sql`.
+Optional fallback/copy recipients:
 
-## Vercel environment variables
+```text
+LEAD_NOTIFICATION_EMAIL=you@example.com
+```
 
-No new Vercel environment variables are required for this phase.
+## Core required Vercel ENV
 
-The app still requires the existing project environment variables already documented in prior phases, including Supabase service role access and session secrets.
+```text
+NEXT_PUBLIC_SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+ADMIN_DASHBOARD_PASSWORD
+ADMIN_SESSION_SECRET
+CLIENT_SESSION_SECRET
+APP_URL
+```
 
-## What should be visible after upload/deploy
+## SQL migrations
 
-- The widget should answer the common seller questions from the approved Top 100 FAQ library.
-- Admin can go to `/admin/settings` and click **Import Top 100 FAQs**.
-- After import, the Managed FAQs section should show the full Top 100 list for that business.
-- Admin can edit or remove individual approved FAQ answers after importing.
-- No public UI redesign is expected from this phase.
+Run SQL files in order from the `sql/` folder.
 
+The latest added migration is:
 
-### FAQ visibility repair phase
+```text
+sql/018_widget_color_text_controls.sql
+```
 
-This package adds a dedicated admin FAQ page at `/admin/faqs`. The page shows both the built-in Global Top 100 FAQ Library and the selected business's Managed FAQs. It also provides a visible `Import Top 100 FAQs` action so admins can copy the global FAQs into a business and verify that all 100 questions were imported.
+No new SQL migration is required for lead email notifications.
 
-SQL migration needed: No.
+## Widget script
 
-Vercel ENV needed: No new variables.
+Widget install scripts should use the canonical `www` host:
 
+```html
+<script src="https://www.cashofferchat.com/widget.js?v=send-green-canonical-api-20260607a" data-site-id="smhta"></script>
+```
 
-## FAQ Route / Settings Visibility Fix
+## Repo cleanup note
 
-This package includes both FAQ access points:
+The active project root is the repository root. Do not upload builds into nested folders such as:
 
-- `/admin/settings` — existing admin settings page with the Managed FAQs list and Import Top 100 FAQs button.
-- `/admin/faqs` — dedicated FAQ review page with Managed FAQs and the Global Top 100 FAQ Library.
+```text
+CashOfferChat-main/
+coc_combined_fix/
+temp_extract/
+```
 
-If `/admin/faqs` returns 404 after deployment, verify this package was the one uploaded and deployed. `/admin/settings` should continue to work because it is an existing route.
-
-SQL migration needed: No.
-
-Vercel ENV needed: No new variables.
-
-
-## FAQ Update — Revised Top 100 Answers
-
-This package replaces the existing global Top 100 FAQ answers with Robert's revised CTA-focused version. The FAQ questions and IDs remain the same; the answer text has been updated. Existing imported Managed FAQs in Supabase will not automatically change unless the admin re-imports the Top 100 FAQs for that business.
+Those paths are ignored and excluded from TypeScript builds.
