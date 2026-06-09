@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { adminCookieName, verifyAdminSessionToken } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { buildWidgetEmbedCode } from "@/lib/widgetEmbed";
+import { maxWidgetSitesForPlan, planDescription, planLabel, normalizePlanName } from "@/lib/planLimits";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Business Detail | CashOfferChat" };
@@ -36,6 +37,8 @@ export default async function AdminBusinessDetailPage({
   const sites = (sitesResult.data || []) as Array<any>;
   const users = (usersResult.data || []) as Array<any>;
   const leads = (leadsResult.data || []) as Array<any>;
+  const planName = normalizePlanName(business.plan_name);
+  const maxSites = business.max_widget_sites || maxWidgetSitesForPlan(planName);
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -67,6 +70,20 @@ export default async function AdminBusinessDetailPage({
               <label className="block text-sm font-semibold text-slate-700">Email<input name="email" type="email" defaultValue={business.email || ""} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
               <label className="block text-sm font-semibold text-slate-700">Primary Market<input name="primary_market" defaultValue={business.primary_market || ""} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
               <label className="block text-sm font-semibold text-slate-700">Description<textarea name="description" defaultValue={business.description || ""} className="mt-1 min-h-28 w-full rounded-xl border border-slate-300 px-4 py-3" /></label>
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="text-sm font-bold text-navy">Plan</div>
+                <p className="mt-1 text-xs text-slate-500">Current: {planLabel(planName)} · {sites.length}/{maxSites} widget sites used.</p>
+                <label className="mt-3 block text-sm font-semibold text-slate-700">
+                  Plan Name
+                  <select name="plan_name" defaultValue={planName} className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-4 py-3">
+                    <option value="starter">Starter — $49/mo, 1 site</option>
+                    <option value="pro">Pro — $99/mo, up to 4 sites/accounts</option>
+                  </select>
+                </label>
+                <p className="mt-2 text-xs text-slate-500">{planDescription(planName)}</p>
+              </div>
+
               <label className="flex items-center gap-3 text-sm font-semibold text-slate-700"><input name="is_active" type="checkbox" defaultChecked={business.is_active !== false} /> Active</label>
               <button className="rounded-full bg-gold px-7 py-3 font-bold text-navy" type="submit">Save Business</button>
             </form>
@@ -75,6 +92,7 @@ export default async function AdminBusinessDetailPage({
           <div className="space-y-6">
             <div className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
               <div className="flex items-center justify-between"><h2 className="text-xl font-bold text-navy">Widget Sites</h2><Link href="/admin/sites" className="text-sm font-bold text-navy underline">Manage Sites</Link></div>
+              <p className="mt-2 text-sm text-slate-500">{planLabel(planName)} plan: {sites.length}/{maxSites} widget sites used.</p>
               <div className="mt-5 space-y-4">
                 {sites.length === 0 && <p className="text-sm text-slate-500">No widget sites yet.</p>}
                 {sites.map((site) => {
