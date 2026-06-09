@@ -3,49 +3,34 @@ import { PublicSiteHeader } from "@/components/PublicSiteHeader";
 import { PublicSiteFooter } from "@/components/PublicSiteFooter";
 
 const features = [
+  ["Answers seller questions", "Handles common questions about as-is sales, repairs, fees, closing timelines, tenants, inherited homes, and next steps."],
+  ["Captures lead details", "Collects name, phone, email, property city, address, situation, timeline, and notes through a structured quote form."],
+  ["Sends lead notifications", "New leads save in the dashboard and can send email notifications to the business owner or active client users."],
+  ["Works on existing sites", "Install the widget with one script tag. No full website rebuild is required."],
+  ["Customizable widget", "Change the title, subtitle, buttons, colors, phone display, and approved FAQ answers."],
+  ["Client dashboard included", "Clients can review leads, update settings, copy the embed script, and manage their widget."],
+];
+
+const pricingPlans = [
   {
-    title: "Answers seller questions",
-    text: "Handles common questions about as-is sales, timelines, repairs, fees, tenants, and next steps.",
+    name: "Starter",
+    price: "$49/mo",
+    label: "1 widget site",
+    text: "Everything included for one cash home buyer website.",
   },
   {
-    title: "Captures better lead details",
-    text: "Uses a structured quote form so seller name, phone, property city, address, situation, and timeline are captured cleanly.",
-  },
-  {
-    title: "Works on existing websites",
-    text: "Add the widget to a cash home buyer website with a simple script tag.",
-  },
-  {
-    title: "Client dashboard included",
-    text: "Clients can view leads, update statuses, export CSVs, review analytics, and manage widget settings.",
-  },
-  {
-    title: "FAQ and business settings",
-    text: "Each business can control service areas, what they buy, what they do not buy, FAQs, and AI instructions.",
-  },
-  {
-    title: "Webhook-ready",
-    text: "Send leads to Zapier, Make, GoHighLevel, or another CRM using webhook delivery.",
+    name: "Pro",
+    price: "$99/mo",
+    label: "Up to 4 sites/accounts",
+    text: "Everything included for buyers or agencies managing multiple sites or accounts.",
   },
 ];
 
 const faqs = [
-  {
-    q: "Is CashOfferChat just a chatbot?",
-    a: "No. It combines AI question-answering with a structured seller intake form, lead dashboard, analytics, exports, and integration tools.",
-  },
-  {
-    q: "Can it be used on any cash home buyer website?",
-    a: "Yes. The widget is designed to be embedded on existing websites using a script tag.",
-  },
-  {
-    q: "Does it make cash offers automatically?",
-    a: "No. CashOfferChat does not make offers or promise prices. It collects property information so the buying team can review the lead.",
-  },
-  {
-    q: "Can each company customize the answers?",
-    a: "Yes. Each business can manage service areas, buying criteria, FAQs, widget text, and AI guidance.",
-  },
+  ["Is CashOfferChat just a chatbot?", "No. It combines AI-style seller Q&A with a structured property intake form, lead dashboard, widget settings, and lead notifications."],
+  ["Does it make offers automatically?", "No. It does not promise prices or make binding offers. It collects property information so the buying team can review the lead."],
+  ["Can each company customize it?", "Yes. Each business can customize the widget text, colors, phone display, FAQ answers, and business settings."],
+  ["Can I see a live demo?", "Yes. The live demo site is sellmyhousetodayanywhere.com."],
 ];
 
 export default function HomePage() {
@@ -53,19 +38,18 @@ export default function HomePage() {
     <main className="min-h-screen bg-white text-slate-900">
       <PublicSiteHeader />
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-amber-50">
+      <section className="bg-gradient-to-br from-slate-50 via-white to-amber-50">
         <div className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
           <div>
             <div className="mb-5 inline-flex rounded-full bg-amber-100 px-4 py-2 text-sm font-bold text-amber-900">
               Built for cash home buyers and motivated seller websites
             </div>
             <h1 className="text-5xl font-black leading-tight tracking-tight text-navy md:text-6xl">
-              AI chat that helps turn seller website visitors into qualified leads.
+              Turn more seller website visitors into leads.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-              CashOfferChat answers seller questions, opens a structured house-info form, captures lead details, and sends the lead to your team.
+              CashOfferChat answers seller questions, opens a house-info form, captures lead details, and sends the lead to your team.
             </p>
-
             <div className="mt-8 flex flex-wrap gap-4">
               <Link href="https://www.sellmyhousetodayanywhere.com/" className="rounded-full bg-gold px-7 py-4 text-base font-black text-navy shadow-soft">
                 View Live Demo Site
@@ -73,13 +57,6 @@ export default function HomePage() {
               <Link href="/contact" className="rounded-full border border-slate-300 bg-white px-7 py-4 text-base font-black text-navy">
                 Request Early Access
               </Link>
-            </div>
-
-            <div className="mt-8 grid gap-3 text-sm font-semibold text-slate-600 sm:grid-cols-2">
-              <div>✓ Capture leads 24/7</div>
-              <div>✓ No offer promises</div>
-              <div>✓ Built-in FAQ controls</div>
-              <div>✓ Client dashboard included</div>
             </div>
           </div>
 
@@ -92,40 +69,25 @@ export default function HomePage() {
                 </div>
                 <div className="rounded-full bg-gold px-3 py-1 text-xs font-black text-navy">LIVE DEMO</div>
               </div>
-
               <div className="mt-6 space-y-4">
-                <div className="max-w-[85%] rounded-2xl bg-white/10 p-4 text-sm leading-6">
-                  Hi! I can answer questions about selling a house as-is and help collect property details for a quote review.
-                </div>
-                <div className="ml-auto max-w-[85%] rounded-2xl bg-gold p-4 text-sm font-semibold leading-6 text-navy">
-                  Do you buy houses that need repairs?
-                </div>
-                <div className="max-w-[85%] rounded-2xl bg-white/10 p-4 text-sm leading-6">
-                  Yes. Many cash buyers review houses as-is. If you want the team to review your property, you can enter house information for a quote.
-                </div>
+                <div className="max-w-[85%] rounded-2xl bg-white/10 p-4 text-sm leading-6">Hi! I can answer questions and help collect property details for a quote review.</div>
+                <div className="ml-auto max-w-[85%] rounded-2xl bg-gold p-4 text-sm font-semibold leading-6 text-navy">Do you buy houses that need repairs?</div>
+                <div className="max-w-[85%] rounded-2xl bg-white/10 p-4 text-sm leading-6">Yes. You can enter your house information so the team can review the property.</div>
               </div>
-
-              <div className="mt-6 rounded-2xl bg-gold p-4 text-center font-black text-navy">
-                Enter House Info for a Quote
-              </div>
+              <div className="mt-6 rounded-2xl bg-gold p-4 text-center font-black text-navy">Enter House Info for a Quote</div>
             </div>
           </div>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20">
-        <div className="max-w-3xl">
-          <h2 className="text-4xl font-black tracking-tight text-navy">Built for the seller lead flow, not generic website chat.</h2>
-          <p className="mt-4 text-lg leading-8 text-slate-600">
-            Motivated sellers often have questions before they submit a form. CashOfferChat helps answer those questions and moves ready sellers into a structured intake form.
-          </p>
-        </div>
-
+        <h2 className="max-w-3xl text-4xl font-black tracking-tight text-navy">Built for the seller lead flow, not generic website chat.</h2>
+        <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">Motivated sellers often have questions before they submit a form. CashOfferChat helps answer those questions and moves ready sellers into a structured intake form.</p>
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature) => (
-            <div key={feature.title} className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
-              <h3 className="text-xl font-black text-navy">{feature.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-slate-600">{feature.text}</p>
+          {features.map(([title, text]) => (
+            <div key={title} className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
+              <h3 className="text-xl font-black text-navy">{title}</h3>
+              <p className="mt-3 text-sm leading-6 text-slate-600">{text}</p>
             </div>
           ))}
         </div>
@@ -136,10 +98,10 @@ export default function HomePage() {
           <h2 className="text-4xl font-black text-navy">How it works</h2>
           <div className="mt-10 grid gap-5 md:grid-cols-4">
             {[
-              ["1", "Create a business profile", "Add service areas, phone number, buying criteria, FAQs, and widget settings."],
-              ["2", "Install the widget", "Copy one script tag and add it to the customer website."],
-              ["3", "Capture seller leads", "The widget answers questions and opens a structured house-info form."],
-              ["4", "Work the lead", "Leads appear in the dashboard, can be exported, and can be sent by webhook."],
+              ["1", "Create profile", "Add the business details and widget settings."],
+              ["2", "Install widget", "Copy one script tag to the customer website."],
+              ["3", "Capture leads", "The widget answers questions and opens the quote form."],
+              ["4", "Follow up", "Leads save in the dashboard and can trigger email notifications."],
             ].map(([number, title, text]) => (
               <div key={number} className="rounded-[2rem] bg-white p-6 shadow-soft ring-1 ring-slate-200">
                 <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-gold font-black text-navy">{number}</div>
@@ -155,23 +117,16 @@ export default function HomePage() {
         <div className="grid gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
           <div>
             <h2 className="text-4xl font-black text-navy">See the widget on a real demo site.</h2>
-            <p className="mt-4 text-lg leading-8 text-slate-600">
-              Open the widget in the bottom-right corner. Ask a seller question or click the quote button to see the intake flow.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3 text-sm font-semibold text-slate-600">
-              <span className="rounded-full bg-slate-100 px-4 py-2">“Do you buy as-is?”</span>
-              <span className="rounded-full bg-slate-100 px-4 py-2">“How fast can I close?”</span>
-              <span className="rounded-full bg-slate-100 px-4 py-2">“Can you look at my house?”</span>
-            </div>
+            <p className="mt-4 text-lg leading-8 text-slate-600">Open the widget in the bottom-right corner. Ask a seller question or click the quote button to see the intake flow.</p>
+            <Link href="https://www.sellmyhousetodayanywhere.com/" className="mt-6 inline-flex rounded-full bg-gold px-7 py-4 font-black text-navy">View Live Demo Site</Link>
           </div>
-
           <div className="rounded-[2rem] bg-slate-50 p-8 ring-1 ring-slate-200">
             <h3 className="text-2xl font-black text-navy">What the demo should show</h3>
             <ul className="mt-5 space-y-3 text-sm leading-6 text-slate-600">
               <li>✓ Clear quote/intake button</li>
-              <li>✓ AI-style FAQ answers using business knowledge</li>
-              <li>✓ Structured lead capture instead of unreliable free-text guessing</li>
-              <li>✓ Lead data ready for dashboard, email, export, and webhook delivery</li>
+              <li>✓ Seller FAQ answers</li>
+              <li>✓ Structured lead capture</li>
+              <li>✓ Lead data ready for dashboard and email delivery</li>
             </ul>
           </div>
         </div>
@@ -179,19 +134,15 @@ export default function HomePage() {
 
       <section className="bg-slate-950 text-white">
         <div className="mx-auto max-w-7xl px-6 py-20">
-          <h2 className="text-4xl font-black">Pricing preview</h2>
-          <p className="mt-4 max-w-2xl text-slate-300">Final billing will be added later. These are placeholder plan concepts.</p>
-
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {[
-              ["Starter", "$149/mo", "1 widget site, lead dashboard, basic settings, CSV export"],
-              ["Growth", "$249/mo", "Analytics, integrations, custom FAQs, webhook delivery"],
-              ["Pro", "$399/mo", "Multiple sites, advanced settings, priority setup support"],
-            ].map(([plan, price, text]) => (
-              <div key={plan} className="rounded-[2rem] bg-white/10 p-6 ring-1 ring-white/10">
-                <h3 className="text-2xl font-black">{plan}</h3>
-                <div className="mt-4 text-3xl font-black text-gold">{price}</div>
-                <p className="mt-4 text-sm leading-6 text-slate-300">{text}</p>
+          <h2 className="text-4xl font-black">Simple pricing</h2>
+          <p className="mt-4 max-w-2xl text-slate-300">Two early-access plans. Both include the full widget, dashboard, settings, FAQs, and lead email notifications.</p>
+          <div className="mt-10 grid gap-5 md:grid-cols-2">
+            {pricingPlans.map((plan) => (
+              <div key={plan.name} className="rounded-[2rem] bg-white/10 p-6 ring-1 ring-white/10">
+                <div className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-wide text-slate-300">{plan.label}</div>
+                <h3 className="mt-4 text-2xl font-black">{plan.name}</h3>
+                <div className="mt-4 text-4xl font-black text-gold">{plan.price}</div>
+                <p className="mt-4 text-sm leading-6 text-slate-300">{plan.text}</p>
               </div>
             ))}
           </div>
@@ -201,10 +152,10 @@ export default function HomePage() {
       <section className="mx-auto max-w-4xl px-6 py-20">
         <h2 className="text-4xl font-black text-navy">FAQ</h2>
         <div className="mt-8 space-y-4">
-          {faqs.map((faq) => (
-            <details key={faq.q} className="rounded-2xl bg-white p-5 shadow-soft ring-1 ring-slate-200">
-              <summary className="cursor-pointer font-black text-navy">{faq.q}</summary>
-              <p className="mt-3 text-sm leading-6 text-slate-600">{faq.a}</p>
+          {faqs.map(([q, a]) => (
+            <details key={q} className="rounded-2xl bg-white p-5 shadow-soft ring-1 ring-slate-200">
+              <summary className="cursor-pointer font-black text-navy">{q}</summary>
+              <p className="mt-3 text-sm leading-6 text-slate-600">{a}</p>
             </details>
           ))}
         </div>
@@ -213,9 +164,7 @@ export default function HomePage() {
       <section className="bg-amber-50">
         <div className="mx-auto max-w-4xl px-6 py-16 text-center">
           <h2 className="text-4xl font-black text-navy">Ready to test CashOfferChat?</h2>
-          <p className="mt-4 text-lg leading-8 text-slate-600">
-            See the widget running on a real home buyer demo site, then install it on your own website.
-          </p>
+          <p className="mt-4 text-lg leading-8 text-slate-600">See the widget running on a real home buyer demo site, then install it on your own website.</p>
           <div className="mt-8 flex justify-center gap-4">
             <Link href="https://www.sellmyhousetodayanywhere.com/" className="rounded-full bg-gold px-7 py-4 font-black text-navy">View Live Demo Site</Link>
             <Link href="/contact" className="rounded-full border border-slate-300 bg-white px-7 py-4 font-black text-navy">Request Early Access</Link>
