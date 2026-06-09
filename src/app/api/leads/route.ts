@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { buildLeadWebhookPayload, recordLeadWebhookResult, sendLeadWebhookForBusiness } from "@/lib/leadWebhook";
+import { sendLeadEmailNotification } from "@/lib/leadEmailNotification";
 
 export const dynamic = "force-dynamic";
 
@@ -119,6 +120,19 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: error?.message || "Lead could not be saved" },
       { status: 500, headers: corsHeaders() }
+    );
+  }
+
+  // Email notifications are intentionally non-blocking for lead creation.
+  try {
+    const emailResult = await sendLeadEmailNotification({ supabase, lead });
+    if (!emailResult.sent && !emailResult.skipped) {
+      console.error("Lead email notification failed", emailResult.error);
+    }
+  } catch (emailError) {
+    console.error(
+      "Lead email notification failed",
+      emailError instanceof Error ? emailError.message : emailError,
     );
   }
 
