@@ -9,6 +9,7 @@ export const metadata = {
 
 const plans = [
   {
+    key: "starter",
     name: "Starter",
     price: "$49/mo",
     badge: "Best for one website",
@@ -25,6 +26,7 @@ const plans = [
     ],
   },
   {
+    key: "pro",
     name: "Pro",
     price: "$99/mo",
     badge: "Best for multiple sites",
@@ -69,15 +71,15 @@ export default function PricingPage() {
               <ul className="mt-6 space-y-3 text-sm text-slate-600">
                 {plan.features.map((feature) => <li key={feature}>✓ {feature}</li>)}
               </ul>
-              <Link href="/contact" className="mt-8 inline-flex rounded-full bg-gold px-6 py-3 font-black text-navy">
-                Request Access
+              <Link href={`/checkout?plan=${plan.key}`} className="mt-8 inline-flex rounded-full bg-gold px-6 py-3 font-black text-navy">
+                Choose {plan.name}
               </Link>
             </div>
           ))}
         </div>
 
         <div className="mt-10 rounded-[2rem] bg-slate-50 p-6 text-sm leading-6 text-slate-600 ring-1 ring-slate-200">
-          <strong className="text-navy">Note:</strong> Billing automation is not active yet. These are early-access packages for customer conversations and manual setup.
+          <strong className="text-navy">Note:</strong> Stripe billing is not active yet. Choose a plan and enter your email so we can set up your account manually.
         </div>
       </section>
       <PublicSiteFooter />
