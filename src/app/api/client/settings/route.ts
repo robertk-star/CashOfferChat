@@ -66,6 +66,7 @@ export async function POST(request: Request) {
   const primaryMarket = value(formData, "primary_market");
   const widgetTitle = value(formData, "widget_title") || "Seller Intake Assistant";
   const widgetSubtitle = value(formData, "widget_subtitle") || "Answers questions and collects property basics";
+  const widgetWelcomeMessage = value(formData, "widget_welcome_message") || "Hi! I can answer questions about selling a house as-is for cash. If you want a property review, use the quote button and enter the house details.";
   const widgetQuoteButtonText = value(formData, "widget_quote_button_text") || "Enter House Info for a Quote";
   const widgetCallButtonText = value(formData, "widget_call_button_text") || "Call Now";
   const widgetShowCallButton = isChecked(formData, "widget_show_call_button");
@@ -106,6 +107,7 @@ export async function POST(request: Request) {
     primary_market: primaryMarket,
     widget_title: widgetTitle,
     widget_subtitle: widgetSubtitle,
+    widget_welcome_message: widgetWelcomeMessage,
     widget_quote_button_text: widgetQuoteButtonText,
     widget_header_color: widgetHeaderColor,
     widget_header_text_color: widgetHeaderTextColor,
@@ -116,8 +118,6 @@ export async function POST(request: Request) {
     updated_at: now,
   };
 
-  // Do not use maybeSingle here. Some older builds created duplicate settings rows.
-  // Selecting a list lets the route save cleanly even if duplicates exist.
   const existingSettings = await supabase
     .from("business_settings")
     .select("id")
@@ -133,7 +133,6 @@ export async function POST(request: Request) {
   }
 
   if ((existingSettings.data || []).length > 0) {
-    // Update every row for this business so the widget API cannot read a stale duplicate row.
     const settingsUpdate = await supabase
       .from("business_settings")
       .update(settingsPayload)
@@ -147,7 +146,6 @@ export async function POST(request: Request) {
       );
     }
   } else {
-    // Include singleton_key for older databases that still have the original not-null singleton column.
     const settingsInsert = await supabase
       .from("business_settings")
       .insert({
