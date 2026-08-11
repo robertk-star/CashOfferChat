@@ -1,4 +1,4 @@
-export const WIDGET_SCRIPT_VERSION = "send-green-canonical-api-20260607a";
+export const WIDGET_SCRIPT_VERSION = "welcome-message-canonical-api-20260811a";
 export const CANONICAL_WIDGET_ORIGIN = "https://www.cashofferchat.com";
 
 export function getWidgetScriptOrigin() {
