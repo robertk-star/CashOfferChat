@@ -12,6 +12,9 @@ type ClientSettingsSearchParams = {
   error?: string;
 };
 
+const defaultWelcomeMessage =
+  "Hi! I can answer questions about selling a house as-is for cash. If you want a property review, use the quote button and enter the house details.";
+
 function displayMessage(value?: string) {
   if (!value) return null;
   if (value === "1") return "Settings saved.";
@@ -98,6 +101,11 @@ export default async function ClientSettingsPage({ searchParams }: { searchParam
               <label className="block text-sm font-semibold text-slate-700">
                 Widget Subtitle
                 <input name="widget_subtitle" defaultValue={settings.widget_subtitle || "Answers questions and collects property basics"} className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3" />
+              </label>
+              <label className="block text-sm font-semibold text-slate-700 md:col-span-2">
+                Widget Welcome Message
+                <textarea name="widget_welcome_message" defaultValue={settings.widget_welcome_message || defaultWelcomeMessage} className="mt-1 min-h-28 w-full rounded-xl border border-slate-300 px-4 py-3" />
+                <span className="mt-1 block text-xs text-slate-500">This controls the first message shown inside the chat body when the widget opens.</span>
               </label>
               <label className="block text-sm font-semibold text-slate-700">
                 Quote Button Text
