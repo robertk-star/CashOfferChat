@@ -63,6 +63,7 @@ export async function POST(request: Request) {
     description: value(formData, "description"),
     widget_title: value(formData, "widget_title"),
     widget_subtitle: value(formData, "widget_subtitle"),
+    widget_welcome_message: value(formData, "widget_welcome_message") || "Hi! I can answer questions about selling a house as-is for cash. If you want a property review, use the quote button and enter the house details.",
     widget_quote_button_text: value(formData, "widget_quote_button_text"),
     widget_header_color: cleanHexColor(value(formData, "widget_header_color"), "#0f172a"),
     widget_header_text_color: cleanHexColor(value(formData, "widget_header_text_color"), "#ffffff"),
@@ -85,7 +86,6 @@ export async function POST(request: Request) {
   const willNotBuy = parseLines(value(formData, "will_not_buy")).map((label) => ({ business_id: businessId, type: "will_not_buy", label }));
   if (willBuy.length || willNotBuy.length) await supabase.from("property_buying_criteria").insert([...willBuy, ...willNotBuy]);
 
-  const faqIds = formData.getAll("faq_id").map((item) => String(item || ""));
   const faqQuestions = formData.getAll("faq_question").map((item) => String(item || "").trim());
   const faqAnswers = formData.getAll("faq_answer").map((item) => String(item || "").trim());
   const removeIndexes = new Set(formData.getAll("faq_remove").map((item) => Number(item)));
